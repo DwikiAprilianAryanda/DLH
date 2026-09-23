@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"background":"#f8f9ff","on-surface":"#0b1c30","error-container":"#ffdad6","error":"#ba1a1a","surface-container-high":"#dce9ff","surface-container-lowest":"#ffffff","surface-tint":"#006e2d","on-primary-fixed-variant":"#005320","on-secondary-fixed":"#002114","on-secondary-fixed-variant":"#005137","on-surface-variant":"#3e4a3d","secondary-fixed":"#85f8c4","on-background":"#0b1c30","on-error-container":"#93000a","secondary":"#006c4a","tertiary-container":"#c05400","surface-container":"#e5eeff","surface-dim":"#cbdbf5","primary-container":"#00873a","primary":"#006b2c","on-secondary-container":"#00714e","primary-fixed-dim":"#62df7d","tertiary":"#994100","outline-variant":"#bdcaba","tertiary-fixed-dim":"#ffb690","inverse-primary":"#62df7d","secondary-fixed-dim":"#68dba9","outline":"#6e7b6c","on-secondary":"#ffffff","on-tertiary-container":"#fffbff","secondary-container":"#82f5c1","on-tertiary-fixed":"#341100","surface":"#f8f9ff","on-primary":"#ffffff","on-primary-fixed":"#002109","on-error":"#ffffff","on-primary-container":"#f7fff2","on-tertiary":"#ffffff","primary-fixed":"#7ffc97","surface-container-low":"#eff4ff","surface-bright":"#f8f9ff","on-tertiary-fixed-variant":"#783200","tertiary-fixed":"#ffdbca","inverse-on-surface":"#eaf1ff","inverse-surface":"#213145","surface-container-highest":"#d3e4fe","surface-variant":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"sm":"8px","xs":"4px","base":"4px","gutter":"16px","md":"16px","xl":"32px","margin-desktop":"48px","lg":"24px","margin-mobile":"16px"},"fontFamily":{"body-md":["Inter"],"headline-lg":["Inter"],"display-lg":["Inter"],"headline-md":["Inter"],"label-sm":["Inter"],"headline-lg-mobile":["Inter"],"label-md":["Inter"],"body-lg":["Inter"]},"fontSize":{"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-background"><aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low z-50 flex flex-col border-r border-outline-variant"><div class="p-lg flex items-center gap-md border-b border-outline-variant mb-md"><img alt="EcoMap Samarinda Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHUTJz6fyCSiB1Q376xlLQGX0hzN-9vpUKgGzDh2eYU0YIR0Ffwg5ry6x5plpjql7wdXG2O_buirjAZt_4MEnKkHLMnhSRr_O9JWAqQ7HSKqcBz4ho3a9zG6Eg4nZxY7N9PsLLyzBALHuRUf4eulACuKdvFH7n2xuzvynmRVjv0OuDPTDys4WpmXHhzrozWQNwJ3yjVIlxT2zQ79GfHoWp7FrRtRj7InNHth7RiV4ysJeEzDJVk06Y"/><span class="font-headline-md text-headline-md text-primary tracking-tight">EcoMap</span></div><nav class="flex-1 px-sm space-y-xs" data-active-classes="bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary"><a aria-current="page" class="flex items-center px-md py-3 rounded-lg transition-all group bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary" data-path="overview" href="#"><span class="material-symbols-outlined mr-3">dashboard</span>Ringkasan</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="map-analysis" href="#"><span class="material-symbols-outlined mr-3">map</span>Analisis Peta</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="report-management" href="#"><span class="material-symbols-outlined mr-3">assignment</span>Laporan</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="fleet-dispatch" href="#"><span class="material-symbols-outlined mr-3">local_shipping</span>Manajemen Armada</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="analytics" href="#"><span class="material-symbols-outlined mr-3">analytics</span>Analitik</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined mr-3">settings</span>Pengaturan</a></nav><div class="p-md border-t border-outline-variant"><button class="flex items-center w-full px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all" onclick="document.documentElement.classList.toggle('dark')"><span class="material-symbols-outlined mr-3">dark_mode</span><span>Tampilan</span></button></div></aside><div class="pl-[280px]"><header class="fixed top-0 left-[280px] right-0 h-16 bg-surface/80 backdrop-blur-md z-40 flex items-center justify-between px-xl border-b border-outline-variant"><div class="flex items-center gap-xl flex-1"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span><input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-full text-label-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Cari catatan atau kendaraan..." type="text"/></div></div><div class="flex items-center gap-lg"><button class="p-xs text-on-surface-variant hover:bg-surface-container-high rounded-full relative"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-md pl-lg border-l border-outline-variant"><div class="text-right hidden lg:block"><div class="font-label-md text-on-surface">Admin User</div><div class="text-label-sm text-on-surface-variant">Samarinda Central</div></div><img alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsciGsBNAwjdVGVg_yailb2kqPuSx17X79AyVHX49gXZpSoZQV8asXkeua9IW-wBbruB78ALPPUKMi9J2PVmyyl1uz7uzs2jNkKqfNBg7_e_zVjmN5GVs4TJYprS9kdYinxaWLrDfbPH7M4Ea8x2gvgzlZS6Ues1-de1msre_9P-WSzNYKuBjY5SMN3QJjc0nWEQn4NilebuMCQIR9246nKocvbqpgfOzXhL2a_BVVFT-WaxyKEx0P"/></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full p-margin-desktop gap-xl">
+<!-- Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-sm flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Laporan</span>
+<span class="material-symbols-outlined text-primary bg-primary-container/20 p-2 rounded-full">assessment</span>
+</div>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">1,248</span>
+<span class="font-label-md text-label-md text-secondary-fixed-dim pb-1">+12% minggu ini</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-sm flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Zona Kritis</span>
+<span class="material-symbols-outlined text-error bg-error-container/20 p-2 rounded-full">warning</span>
+</div>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-display-lg text-error">15</span>
+<span class="font-label-md text-label-md text-on-surface-variant pb-1">Klaster Merah</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-primary p-lg rounded-xl shadow-md flex flex-col justify-between relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+<div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm text-on-primary uppercase tracking-wider">Armada Aktif</span>
+<span class="material-symbols-outlined text-on-primary">local_shipping</span>
+</div>
+<div class="relative z-10 flex items-end gap-2">
+<span class="font-display-lg text-display-lg text-on-primary">32/40</span>
+<span class="font-label-md text-label-md text-primary-fixed-dim pb-1">Bertugas</span>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-20 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-9xl text-on-primary">rv_hookup</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-sm flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Rata-rata Waktu Respon</span>
+<span class="material-symbols-outlined text-tertiary bg-tertiary-container/20 p-2 rounded-full">timer</span>
+</div>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">1h 45m</span>
+<span class="font-label-md text-label-md text-secondary-fixed-dim pb-1">-15m avg</span>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg h-[800px]">
+<!-- Filter Panel (Sidebar style) -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col h-full">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-2">
+<span class="material-symbols-outlined">filter_list</span> Filter
+      </h2>
+<div class="space-y-lg flex-grow overflow-y-auto pr-2">
+<!-- District Filter -->
+<div class="space-y-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Kecamatan</label>
+<div class="relative">
+<select class="w-full h-12 px-4 bg-surface-container rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50">
+<option>Semua Kecamatan</option>
+<option>Samarinda Ulu</option>
+<option>Samarinda Ilir</option>
+<option>Sungai Pinang</option>
+<option>Samarinda Utara</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Urgency Filter -->
+<div class="space-y-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tingkat Urgensi</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 p-2 rounded hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-5 h-5 rounded text-error focus:ring-error border-outline-variant accent-error" type="checkbox"/>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="font-body-md text-body-md text-on-surface">Kritis</span>
+</div>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-5 h-5 rounded text-tertiary focus:ring-tertiary border-outline-variant accent-tertiary" type="checkbox"/>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-tertiary"></span>
+<span class="font-body-md text-body-md text-on-surface">Sedang</span>
+</div>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant accent-primary" type="checkbox"/>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="font-body-md text-body-md text-on-surface">Normal</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Density Filter (Slider Mockup) -->
+<div class="space-y-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Kepadatan Sampah</label>
+<div class="px-2 pt-4">
+<div class="w-full h-1 bg-surface-variant rounded-full relative">
+<div class="absolute left-[20%] right-[30%] h-full bg-primary rounded-full"></div>
+<div class="absolute left-[20%] -top-2 w-5 h-5 bg-surface shadow-md rounded-full border-2 border-primary cursor-pointer hover:scale-110 transition-transform"></div>
+<div class="absolute right-[30%] -top-2 w-5 h-5 bg-surface shadow-md rounded-full border-2 border-primary cursor-pointer hover:scale-110 transition-transform"></div>
+</div>
+<div class="flex justify-between mt-3 font-label-sm text-label-sm text-on-surface-variant">
+<span>Rendah</span>
+<span>Tinggi</span>
+</div>
+</div>
+</div>
+<!-- Date Filter -->
+<div class="space-y-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Rentang Tanggal</label>
+<div class="flex gap-2">
+<button class="flex-1 py-2 bg-primary/10 text-primary font-label-md text-label-md rounded-lg hover:bg-primary/20 transition-colors">Hari Ini</button>
+<button class="flex-1 py-2 bg-surface-container text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors">Minggu</button>
+<button class="flex-1 py-2 bg-surface-container text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors">Bulan</button>
+</div>
+</div>
+</div>
+<div class="pt-lg border-t border-outline-variant mt-auto">
+<button class="w-full h-12 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-md hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">refresh</span> Terapkan Filter
+        </button>
+</div>
+</div>
+<!-- Map Area -->
+<div class="lg:col-span-9 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden relative flex flex-col h-full group">
+<!-- Map Header overlay -->
+<div class="absolute top-0 left-0 right-0 p-lg flex justify-between items-center z-10 pointer-events-none">
+<div class="bg-surface/90 backdrop-blur-md px-4 py-2 rounded-lg shadow-md pointer-events-auto border border-outline-variant/30 flex items-center gap-3">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
+</span>
+<span class="font-label-md text-label-md text-on-surface">Pemantauan Langsung Aktif</span>
+</div>
+<div class="flex gap-2 pointer-events-auto">
+<button class="w-10 h-10 bg-surface text-on-surface rounded-lg shadow-md hover:bg-surface-container-high flex items-center justify-center border border-outline-variant/30 transition-colors">
+<span class="material-symbols-outlined">layers</span>
+</button>
+<button class="w-10 h-10 bg-surface text-on-surface rounded-lg shadow-md hover:bg-surface-container-high flex items-center justify-center border border-outline-variant/30 transition-colors">
+<span class="material-symbols-outlined">my_location</span>
+</button>
+</div>
+</div>
+<!-- The Map -->
+<div class="w-full h-full bg-surface-variant flex-grow" data-alt="A detailed, modern clean-tech map interface of Samarinda, Indonesia. The map features a dark blue/grey technical theme with vivid green, orange, and red heat map overlays indicating waste accumulation density. Sharp geometric polygon borders outline different city districts. The visual style is high-contrast, authoritative, and data-driven, fitting a modern environmental management dashboard." data-location="Samarinda, Indonesia" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAzWgboOTyVsRifv7jlL_udmmJwabxVSHO6TNGj1_PGdR6m6BhcO9D-AC0rjAIgZdcQVuc86um1NGTDsPeXno-xeKVoHhrvOj1wH9Ch2qC9xcHji3uOnoN4v3tsaRFXW632tyOWo1TqWma4_ZNW9MPKdE7cVzx4oIwXNnMIZ-N8cTIVm_XwPTT4PyUH-SzyBwYlqCC-n6GqosbBWlacZAm52CoOLxCtbyHrlrjm0tbZmQ_OEF1XlX0g')"></div>
+<!-- Mock Interactive Map Elements (Simulating a pop-up) -->
+<div class="absolute top-[40%] left-[30%] pointer-events-auto">
+<!-- Pin -->
+<button class="relative w-12 h-12 flex items-center justify-center group/pin" onclick="document.getElementById('map-popup').classList.toggle('hidden'); document.getElementById('map-popup').classList.toggle('opacity-0');">
+<span class="absolute inset-0 bg-error rounded-full opacity-40 animate-pulse"></span>
+<div class="w-8 h-8 bg-error rounded-full border-2 border-white shadow-lg flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-white text-[16px] font-bold">warning</span>
+</div>
+</button>
+<!-- Popup Detail Card -->
+<div class="hidden opacity-0 absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-[320px] bg-surface rounded-xl shadow-xl border border-outline-variant/30 transition-opacity duration-300 transform-gpu z-20" id="map-popup">
+<div class="p-4 border-b border-outline-variant/30 flex justify-between items-start">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[18px] leading-tight">Cluster A - Sungai Pinang</h3>
+<span class="font-label-sm text-label-sm text-error flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">local_fire_department</span> Critical Density
+                         </span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface" onclick="document.getElementById('map-popup').classList.add('hidden', 'opacity-0')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Active Reports</span>
+<span class="font-headline-md text-headline-md text-on-surface">15</span>
+</div>
+<div class="bg-error-container/30 p-3 rounded-lg border border-error/20">
+<span class="font-label-sm text-label-sm text-on-error-container block mb-1">AI Recommendation</span>
+<span class="font-body-md text-body-md text-on-surface text-[14px] leading-snug">Dispatch <strong>2 Heavy Trucks</strong> immediately to clear accumulated overflow before evening rain.</span>
+</div>
+<div class="flex gap-2 pt-2">
+<button class="flex-1 h-10 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">send</span> Dispatch
+                         </button>
+<button class="flex-1 h-10 bg-surface-container-highest text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center">
+                             Details
+                         </button>
+</div>
+</div>
+<!-- Tail pointer -->
+<div class="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-surface border-b border-r border-outline-variant/30 transform rotate-45 -mt-2"></div>
+</div>
+</div>
+<!-- Legend -->
+<div class="absolute bottom-6 right-6 bg-surface/95 backdrop-blur p-4 rounded-xl shadow-lg border border-outline-variant/30 pointer-events-auto">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">Legenda Kepadatan</h4>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-error border border-white"></div>
+<span class="font-body-md text-body-md text-on-surface text-[14px]">Kritis (Butuh Penugasan)</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-tertiary border border-white"></div>
+<span class="font-body-md text-body-md text-on-surface text-[14px]">Sedang (Pantau)</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-primary border border-white"></div>
+<span class="font-body-md text-body-md text-on-surface text-[14px]">Normal (Terjadwal)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "background": "#f8f9ff", "on-surface": "#0b1c30", "error-container": "#ffdad6", "error": "#ba1a1a", "surface-container-high": "#dce9ff", "surface-container-lowest": "#ffffff", "surface-tint": "#006e2d", "on-primary-fixed-variant": "#005320", "on-secondary-fixed": "#002114", "on-secondary-fixed-variant": "#005137", "on-surface-variant": "#3e4a3d", "secondary-fixed": "#85f8c4", "on-background": "#0b1c30", "on-error-container": "#93000a", "secondary": "#006c4a", "tertiary-container": "#c05400", "surface-container": "#e5eeff", "surface-dim": "#cbdbf5", "primary-container": "#00873a", "primary": "#006b2c", "on-secondary-container": "#00714e", "primary-fixed-dim": "#62df7d", "tertiary": "#994100", "outline-variant": "#bdcaba", "tertiary-fixed-dim": "#ffb690", "inverse-primary": "#62df7d", "secondary-fixed-dim": "#68dba9", "outline": "#6e7b6c", "on-secondary": "#ffffff", "on-tertiary-container": "#fffbff", "secondary-container": "#82f5c1", "on-tertiary-fixed": "#341100", "surface": "#f8f9ff", "on-primary": "#ffffff", "on-primary-fixed": "#002109", "on-error": "#ffffff", "on-primary-container": "#f7fff2", "on-tertiary": "#ffffff", "primary-fixed": "#7ffc97", "surface-container-low": "#eff4ff", "surface-bright": "#f8f9ff", "on-tertiary-fixed-variant": "#783200", "tertiary-fixed": "#ffdbca", "inverse-on-surface": "#eaf1ff", "inverse-surface": "#213145", "surface-container-highest": "#d3e4fe", "surface-variant": "#d3e4fe" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "sm": "8px", "xs": "4px", "base": "4px", "gutter": "16px", "md": "16px", "xl": "32px", "margin-desktop": "48px", "lg": "24px", "margin-mobile": "16px" }, "fontFamily": { "body-md": ["Inter"], "headline-lg": ["Inter"], "display-lg": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "headline-lg-mobile": ["Inter"], "label-md": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }] } } } }</script><style>@layer base { body { -webkit-tap-highlight-color: transparent; } .pt-safe { padding-top: env(safe-area-inset-top); } }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-background font-body-md text-on-surface"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin-mobile flex items-center gap-md"><button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-on-surface">arrow_back</span></button><span class="font-headline-md text-headline-md text-on-surface truncate">Report Waste</span></div></header><main class="relative pt-16 bg-background min-h-screen"><div class="flex flex-col w-full h-full pb-20">
+<div class="px-margin-mobile py-md flex justify-between items-center sticky top-16 bg-background/90 backdrop-blur z-40">
+<h1 class="font-headline-md text-headline-md text-on-surface">Notifikasi</h1>
+<button class="font-label-md text-label-md text-primary flex items-center gap-xs px-3 py-1.5 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+            Tandai Semua Dibaca
+        </button>
+</div>
+<div class="flex flex-col px-margin-mobile gap-lg">
+<section class="flex flex-col gap-sm">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Terbaru</h2>
+<div class="bg-surface-container-lowest rounded-xl p-md flex gap-md items-start shadow-sm relative group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div aria-label="Unread" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-primary"></div>
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Tugas Baru: Jl. Cipto Mangunkusumo</span>
+<span class="font-body-md text-body-md text-on-surface-variant mt-xs line-clamp-2">Laporan penumpukan sampah liar mendesak. Harap segera ditindaklanjuti.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-sm">2 menit yang lalu</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-md flex gap-md items-start shadow-sm relative group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div aria-label="Unread" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-primary"></div>
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Laporan Selesai</span>
+<span class="font-body-md text-body-md text-on-surface-variant mt-xs line-clamp-2">Pasar Segiri telah dibersihkan oleh tim Armada #3.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-sm">1 jam yang lalu</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-sm">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Sebelumnya</h2>
+<div class="bg-surface-container-lowest rounded-xl p-md flex gap-md items-start shadow-sm group hover:bg-surface-container-low transition-colors cursor-pointer opacity-80">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">route</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Perubahan Rute</span>
+<span class="font-body-md text-body-md text-on-surface-variant mt-xs line-clamp-2">Armada #4092 dialihkan karena penutupan jalan di Jl. Pahlawan.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-sm">Kemarin, 14:30</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-md flex gap-md items-start shadow-sm group hover:bg-surface-container-low transition-colors cursor-pointer opacity-80">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">new_releases</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Pembaruan Sistem</span>
+<span class="font-body-md text-body-md text-on-surface-variant mt-xs line-clamp-2">Fitur heatmap baru tersedia untuk area TPS. Ketuk untuk melihat panduan.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-sm">2 hari yang lalu</span>
+</div>
+</div>
+</section>
+</div>
+</div></main></body></html>

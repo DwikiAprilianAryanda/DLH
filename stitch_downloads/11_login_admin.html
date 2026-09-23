@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EcoMap Samarinda - Admin Login</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-primary-container": "#f7fff2",
+                    "on-primary-fixed": "#002109",
+                    "outline-variant": "#bdcaba",
+                    "surface": "#f8f9ff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#85f8c4",
+                    "surface-container-low": "#eff4ff",
+                    "on-primary-fixed-variant": "#005320",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#002114",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-secondary-fixed-variant": "#005137",
+                    "tertiary-fixed-dim": "#ffb690",
+                    "on-surface-variant": "#3e4a3d",
+                    "on-surface": "#0b1c30",
+                    "on-secondary-container": "#00714e",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#62df7d",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6e7b6c",
+                    "secondary": "#006c4a",
+                    "secondary-container": "#82f5c1",
+                    "primary-fixed-dim": "#62df7d",
+                    "surface-container-high": "#dce9ff",
+                    "on-background": "#0b1c30",
+                    "tertiary": "#994100",
+                    "on-tertiary-fixed-variant": "#783200",
+                    "primary": "#006b2c",
+                    "inverse-surface": "#213145",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#341100",
+                    "background": "#f8f9ff",
+                    "surface-dim": "#cbdbf5",
+                    "primary-fixed": "#7ffc97",
+                    "surface-variant": "#d3e4fe",
+                    "tertiary-fixed": "#ffdbca",
+                    "tertiary-container": "#c05400",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#006e2d",
+                    "primary-container": "#00873a",
+                    "secondary-fixed-dim": "#68dba9",
+                    "surface-container": "#e5eeff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "gutter": "16px",
+                    "margin-desktop": "48px",
+                    "xs": "4px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Input Focus Halo */
+        .input-glow:focus {
+            box-shadow: 0 0 0 4px rgba(130, 245, 193, 0.4); /* secondary-container with opacity */
+            border-color: #006b2c; /* primary */
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- Left Panel: Brand & Illustration (Hidden on Mobile) -->
+<div class="hidden md:flex flex-col w-1/2 lg:w-7/12 relative bg-surface-container-low overflow-hidden">
+<!-- Abstract Dashboard/Map Visual -->
+<div class="absolute inset-0 z-0">
+<div class="bg-cover bg-center w-full h-full opacity-90 mix-blend-multiply" data-alt="A highly detailed, modern corporate dashboard and stylized map interface showing environmental data of Samarinda city. The design is sleek, high-tech, and clinical, utilizing a light mode aesthetic with crisp whites, soft grays, and precise forest green data visualizations. The layout features floating glassmorphism panels, intricate data charts, and a subtle isometric city grid in the background, conveying authority, transparency, and vital urban management." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtAg3I3tHQ3UWx-SSNIpBQcDrINqT7W0xtbm2IaSe7B1WE_9xfNEkL_gdLIPZhzsa2LU3ESzcmOEVExaZrI8r9c5cTavB5N3Fk-FqWixGJe1wqDXVuuZFxBFG8C6HK0wuSs9bhnnqfFAQSkWp0-UxZi1SJjrUnkkAJmdyOskYtY_EMzfCMwUKPOCil4ey1buu8RRg0M01HQTu6pA_2tr2YdGaRC8vYThX-2V0paO0oNWzD9_6Uk-e-')"></div>
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 z-10 bg-gradient-to-b from-surface-container-lowest/80 via-transparent to-surface-container-lowest"></div>
+<!-- Brand Content -->
+<div class="relative z-20 p-margin-desktop flex flex-col justify-between h-full">
+<div class="flex items-center gap-sm">
+<img alt="EcoMap Samarinda Logo" class="w-10 h-10 object-contain" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">EcoMap Samarinda</span>
+</div>
+<div class="max-w-md">
+<h1 class="font-display-lg text-display-lg text-on-surface mb-md">Sistem Manajemen Lingkungan Terpadu</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Portal administratif eksklusif untuk petugas Dinas Lingkungan Hidup Kota Samarinda. Pantau, validasi, dan kelola pelaporan warga secara real-time dengan presisi tinggi.</p>
+</div>
+</div>
+</div>
+<!-- Right Panel: Login Form -->
+<div class="w-full md:w-1/2 lg:w-5/12 bg-surface flex flex-col justify-center p-margin-mobile md:p-margin-desktop relative z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)]">
+<!-- Mobile Logo (Visible only on small screens) -->
+<div class="md:hidden flex items-center gap-sm mb-xl justify-center">
+<img alt="EcoMap Samarinda Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw7KROg_IL2jTfrGPjOTg1JO7cFo3-MAD-gdCqLX1Xwf2JV8xHWCDTbByCB6l2sFHPoMKSid-KE6rsN2Ei6mnfFMaahjPvtLZ8lO-2ExURlxNjQCcZCtKHB4MCHcMM-td1Jmq0Qb5Ykc8SvwI-jv2jEeYoZ_MiY0FQRozRllRKIiCEpFCGtTvuVbMZR9VGlubr-WD5FOFrabWxNXHvUNwK9Z7aanRRqfVmTrLHMDqQZUeiKSQycQTAlSzacAA6DWmb966C_OgDRMFY-A"/>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">EcoMap</span>
+</div>
+<div class="w-full max-w-sm mx-auto">
+<div class="mb-xl">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-xs">Konsol Admin</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Silakan masuk menggunakan kredensial resmi Anda.</p>
+</div>
+<!-- Security Instruction Banner -->
+<div class="bg-surface-container rounded-lg p-md mb-lg border border-outline-variant/30 flex items-start gap-md">
+<span class="material-symbols-outlined text-secondary mt-0.5">security</span>
+<div class="flex-1">
+<h3 class="font-label-md text-label-md text-on-surface">Protokol Keamanan Aktif</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-xs">Akses sistem ini dipantau ketat. Gunakan NIP terdaftar atau Email institusi DLH Samarinda.</p>
+</div>
+</div>
+<!-- Login Form -->
+<form action="#" class="flex flex-col gap-lg" method="POST">
+<!-- NIP / Email Field -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface" for="nip">NIP / Email Institusi</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">badge</span>
+<input class="w-full h-[48px] pl-[44px] pr-md rounded bg-surface-bright border border-outline-variant text-on-surface font-body-md input-glow outline-none transition-all placeholder:text-outline" id="nip" name="nip" placeholder="Masukkan NIP atau Email" required="" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-end">
+<label class="font-label-md text-label-md text-on-surface" for="password">Kata Sandi</label>
+<a class="font-label-sm text-label-sm text-primary hover:text-primary-fixed-variant transition-colors" href="#">Lupa sandi?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">lock</span>
+<input class="w-full h-[48px] pl-[44px] pr-md rounded bg-surface-bright border border-outline-variant text-on-surface font-body-md input-glow outline-none transition-all placeholder:text-outline" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="mt-sm h-[48px] w-full bg-primary text-on-primary rounded flex items-center justify-center gap-sm font-label-md text-label-md hover:bg-on-primary-fixed-variant active:scale-[0.98] transition-all shadow-sm" type="submit">
+<span class="">Otentikasi Masuk</span>
+<span class="material-symbols-outlined text-[20px]">login</span>
+</button>
+</form>
+<div class="mt-xl text-center">
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                    © 2024 Dinas Lingkungan Hidup Kota Samarinda.<br/>Sistem Internal Terbatas.
+                </p>
+</div>
+</div>
+</div>
+</body></html>

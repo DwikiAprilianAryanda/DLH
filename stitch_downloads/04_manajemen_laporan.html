@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"background":"#f8f9ff","on-surface":"#0b1c30","error-container":"#ffdad6","error":"#ba1a1a","surface-container-high":"#dce9ff","surface-container-lowest":"#ffffff","surface-tint":"#006e2d","on-primary-fixed-variant":"#005320","on-secondary-fixed":"#002114","on-secondary-fixed-variant":"#005137","on-surface-variant":"#3e4a3d","secondary-fixed":"#85f8c4","on-background":"#0b1c30","on-error-container":"#93000a","secondary":"#006c4a","tertiary-container":"#c05400","surface-container":"#e5eeff","surface-dim":"#cbdbf5","primary-container":"#00873a","primary":"#006b2c","on-secondary-container":"#00714e","primary-fixed-dim":"#62df7d","tertiary":"#994100","outline-variant":"#bdcaba","tertiary-fixed-dim":"#ffb690","inverse-primary":"#62df7d","secondary-fixed-dim":"#68dba9","outline":"#6e7b6c","on-secondary":"#ffffff","on-tertiary-container":"#fffbff","secondary-container":"#82f5c1","on-tertiary-fixed":"#341100","surface":"#f8f9ff","on-primary":"#ffffff","on-primary-fixed":"#002109","on-error":"#ffffff","on-primary-container":"#f7fff2","on-tertiary":"#ffffff","primary-fixed":"#7ffc97","surface-container-low":"#eff4ff","surface-bright":"#f8f9ff","on-tertiary-fixed-variant":"#783200","tertiary-fixed":"#ffdbca","inverse-on-surface":"#eaf1ff","inverse-surface":"#213145","surface-container-highest":"#d3e4fe","surface-variant":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"sm":"8px","xs":"4px","base":"4px","gutter":"16px","md":"16px","xl":"32px","margin-desktop":"48px","lg":"24px","margin-mobile":"16px"},"fontFamily":{"body-md":["Inter"],"headline-lg":["Inter"],"display-lg":["Inter"],"headline-md":["Inter"],"label-sm":["Inter"],"headline-lg-mobile":["Inter"],"label-md":["Inter"],"body-lg":["Inter"]},"fontSize":{"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-background"><aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low z-50 flex flex-col border-r border-outline-variant"><div class="p-lg flex items-center gap-md border-b border-outline-variant mb-md"><img alt="EcoMap Samarinda Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHUTJz6fyCSiB1Q376xlLQGX0hzN-9vpUKgGzDh2eYU0YIR0Ffwg5ry6x5plpjql7wdXG2O_buirjAZt_4MEnKkHLMnhSRr_O9JWAqQ7HSKqcBz4ho3a9zG6Eg4nZxY7N9PsLLyzBALHuRUf4eulACuKdvFH7n2xuzvynmRVjv0OuDPTDys4WpmXHhzrozWQNwJ3yjVIlxT2zQ79GfHoWp7FrRtRj7InNHth7RiV4ysJeEzDJVk06Y"/><span class="font-headline-md text-headline-md text-primary tracking-tight">EcoMap</span></div><nav class="flex-1 px-sm space-y-xs" data-active-classes="bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary"><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="overview" href="#"><span class="material-symbols-outlined mr-3">dashboard</span>Ringkasan</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="map-analysis" href="#"><span class="material-symbols-outlined mr-3">map</span>Analisis Peta</a><a aria-current="page" class="flex items-center px-md py-3 rounded-lg transition-all bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary" data-path="report-management" href="#"><span class="material-symbols-outlined mr-3">assignment</span>Laporan</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="fleet-dispatch" href="#"><span class="material-symbols-outlined mr-3">local_shipping</span>Penugasan Armada</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="analytics" href="#"><span class="material-symbols-outlined mr-3">analytics</span>Analitik</a><a class="flex items-center px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined mr-3">settings</span>Pengaturan</a></nav><div class="p-md border-t border-outline-variant"><button class="flex items-center w-full px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all" onclick="document.documentElement.classList.toggle('dark')"><span class="material-symbols-outlined mr-3">dark_mode</span><span>Penampilan</span></button></div></aside><div class="pl-[280px]"><header class="fixed top-0 left-[280px] right-0 h-16 bg-surface/80 backdrop-blur-md z-40 flex items-center justify-between px-xl border-b border-outline-variant"><div class="flex items-center gap-xl flex-1"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span><input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-full text-label-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Cari catatan, laporan, atau kendaraan..." type="text"/></div></div><div class="flex items-center gap-lg"><button class="p-xs text-on-surface-variant hover:bg-surface-container-high rounded-full relative"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-md pl-lg border-l border-outline-variant"><div class="text-right hidden lg:block"><div class="font-label-md text-on-surface">Admin User</div><div class="text-label-sm text-on-surface-variant">Samarinda Central</div></div><img alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsciGsBNAwjdVGVg_yailb2kqPuSx17X79AyVHX49gXZpSoZQV8asXkeua9IW-wBbruB78ALPPUKMi9J2PVmyyl1uz7uzs2jNkKqfNBg7_e_zVjmN5GVs4TJYprS9kdYinxaWLrDfbPH7M4Ea8x2gvgzlZS6Ues1-de1msre_9P-WSzNYKuBjY5SMN3QJjc0nWEQn4NilebuMCQIR9246nKocvbqpgfOzXhL2a_BVVFT-WaxyKEx0P"/></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full h-full relative">
+<!-- Desktop Header Area (Title & Filters) -->
+<div class="px-margin-desktop py-lg flex justify-between items-end relative z-10">
+<div class="flex flex-col gap-sm relative z-10 max-w-[60%]">
+<div class="flex items-center gap-xs text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">home</span>
+<span>/</span>
+<span>Laporan</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface leading-none relative">
+        Log Insiden Lingkungan
+        <div class="absolute -z-10 -bottom-4 -left-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-xs">
+        Telemetri waktu nyata dan anomali yang dilaporkan warga di seluruh wilayah metropolitan Samarinda. Semua entri diberi skor otomatis oleh EcoMap AI untuk penugasan prioritas.
+      </p>
+</div>
+<!-- Quick Stats / Actions -->
+<div class="flex flex-col gap-sm items-end z-10">
+<div class="flex gap-sm">
+<button class="h-12 px-md bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors flex items-center justify-center gap-xs font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined">download</span>
+          Ekspor CSV
+        </button>
+<button class="h-12 px-md bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors flex items-center justify-center gap-xs font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+          Ekspor PDF
+        </button>
+</div>
+<div class="flex items-center gap-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mt-xs bg-surface/50 backdrop-blur px-md py-xs shadow-sm">
+<span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-error animate-pulse"></span> 42 Prioritas Tinggi Aktif</span>
+<span class="w-[1px] h-4 bg-outline-variant"></span>
+<span>1,024 Total Laporan Hari Ini</span>
+</div>
+</div>
+</div>
+<!-- Advanced Filters Bar (Sticks below header) -->
+<div class="px-margin-desktop pb-lg flex gap-md items-center z-20 relative">
+<div class="relative flex-grow max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-12 pl-10 pr-4 bg-surface text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm transition-all placeholder:text-on-surface-variant/50" placeholder="Cari berdasarkan ID, koordinat, atau kata kunci..." type="text"/>
+</div>
+<div class="h-12 bg-surface flex items-center px-sm shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant mr-md ml-xs uppercase">Prioritas</span>
+<div class="flex gap-xs">
+<button class="px-sm py-1 bg-error-container text-on-error-container font-label-md text-label-md shadow-sm hover:opacity-80 transition-opacity">Tinggi</button>
+<button class="px-sm py-1 bg-tertiary-container/20 text-tertiary font-label-md text-label-md shadow-sm hover:opacity-80 transition-opacity">Sedang</button>
+<button class="px-sm py-1 bg-secondary-container/20 text-secondary font-label-md text-label-md shadow-sm hover:opacity-80 transition-opacity">Rendah</button>
+</div>
+</div>
+<div class="h-12 bg-surface flex items-center px-sm shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant mr-md ml-xs uppercase">Status</span>
+<select class="bg-transparent text-on-surface font-body-md text-body-md focus:outline-none cursor-pointer">
+<option>Semua Status</option>
+<option>Belum Ditugaskan</option>
+<option>Sedang Diproses</option>
+<option>Selesai</option>
+</select>
+</div>
+<button class="h-12 w-12 bg-surface text-on-surface hover:bg-surface-variant transition-colors flex items-center justify-center shadow-sm ml-auto">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+<!-- Main Table Container -->
+<div class="px-margin-desktop pb-margin-desktop flex-grow relative z-10">
+<div class="w-full bg-surface shadow-xl relative overflow-hidden flex flex-col">
+<!-- Table Header (Simulated as Grid for alignment) -->
+<div class="grid grid-cols-[100px_1fr_1fr_120px_150px_auto] gap-md px-lg py-md bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-widest sticky top-0 z-10 shadow-sm">
+<div>ID</div>
+<div>Waktu &amp; Lokasi</div>
+<div>Detail</div>
+<div>Skor AI</div>
+<div>Status</div>
+<div class="text-right">Tindakan</div>
+</div>
+<!-- Table Body (Scrollable if needed, though relying on window scroll here) -->
+<div class="flex flex-col group/table">
+<!-- Row 1: High Priority -->
+<div class="grid grid-cols-[100px_1fr_1fr_120px_150px_auto] gap-md px-lg py-md items-center bg-surface hover:bg-surface-container-lowest transition-colors border-l-[4px] border-l-error border-b border-b-outline-variant/30 group">
+<div class="font-body-md text-body-md text-on-surface font-medium">#SMD-8492</div>
+<div class="flex gap-md items-center min-w-0">
+<div class="w-16 h-12 bg-cover bg-center shrink-0" data-alt="Satellite thermal thumbnail showing a bright red heat anomaly near a dense urban area in Samarinda, high contrast, technical interface style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCkg4Dy_oVBHSsDuPYgTmQZpiMN2m-LmY681zipwGo0rMDKEDtmdT2NqaHV0gJXAra3VBVeINJQfLGN5W8-4WXzFmXkSKbEhOOH0NTimSgG9XNs9LjMQDlIeT3K0qGiIqDrmMyZ_T8v17O86NBx165bDGDABZ_pgtnE2Gu0wryfPmBTOcaQElgVQOGfmOxKp4AHj_08pvcSUc6YnrgiNMUvqY61vKf_mrJhe8VSDHfZ80ijG7DNs-lR')"></div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">10:42 AM, Hari Ini</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">-0.5022° S, 117.1536° E</div>
+</div>
+</div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">Dugaan Pembuangan Ilegal</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">Volume besar limbah tak dikenal terdeteksi di dekat tepi sungai Mahakam.</div>
+</div>
+<div>
+<div class="inline-flex items-center justify-center px-xs py-1 bg-error-container text-on-error-container font-label-sm text-label-sm font-bold shadow-sm">
+              98/100 (TINGGI)
+            </div>
+</div>
+<div>
+<span class="flex items-center gap-xs font-label-md text-label-md text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+               Belum Ditugaskan
+             </span>
+</div>
+<div class="flex gap-xs justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="h-10 px-sm bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-colors">Tugaskan Armada</button>
+<button class="h-10 w-10 bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm hover:bg-surface-variant transition-colors" title="Detail">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+<!-- Row 2: Medium Priority -->
+<div class="grid grid-cols-[100px_1fr_1fr_120px_150px_auto] gap-md px-lg py-md items-center bg-surface hover:bg-surface-container-lowest transition-colors border-l-[4px] border-l-tertiary border-b border-b-outline-variant/30 group">
+<div class="font-body-md text-body-md text-on-surface font-medium">#SMD-8491</div>
+<div class="flex gap-md items-center min-w-0">
+<div class="w-16 h-12 bg-cover bg-center shrink-0" data-alt="Drone thumbnail view of a minor localized flood in a residential street in Samarinda, muddy water, technical overlay." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNyx3uv8jBRuJMrBtpXle2FxZNVTrT5BLa43JMDpb1E7LfPuk4Tip6UK8O0K0wSIngIXTpz3GKXc07SZ1teRGU_i8rG5bIke_fRzrr_CgXLL6XkPTWg3Qiq0oY_WlOi3Ab19Vr9EL7eTOg30DBvVKlPmmhbgEBZJw1qPBwASuCQkj1b-9r5UIliPhekGhQAg-e0gk1xA3gjQfuAByYLCjeS3-min5rffAuhnD14_jjOr1LbhAB6ZIb')"></div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">09:15 AM, Hari Ini</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">-0.4911° S, 117.1402° E</div>
+</div>
+</div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">Banjir Lokal</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">Permukaan air naik dengan cepat di sistem drainase sektor 4.</div>
+</div>
+<div>
+<div class="inline-flex items-center justify-center px-xs py-1 bg-tertiary-container/20 text-tertiary font-label-sm text-label-sm font-bold shadow-sm border border-tertiary/20">
+              65/100 (SEDANG)
+            </div>
+</div>
+<div>
+<span class="flex items-center gap-xs font-label-md text-label-md text-secondary">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+               Sedang Diproses
+             </span>
+<div class="font-body-md text-body-md text-on-surface-variant opacity-80 text-sm mt-xs">Unit Alpha-3</div>
+</div>
+<div class="flex gap-xs justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="h-10 px-sm bg-surface-container-highest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-variant transition-colors">Tandai Selesai</button>
+<button class="h-10 w-10 bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm hover:bg-surface-variant transition-colors" title="Detail">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+<!-- Row 3: Low Priority (Resolved) -->
+<div class="grid grid-cols-[100px_1fr_1fr_120px_150px_auto] gap-md px-lg py-md items-center bg-surface/50 opacity-80 hover:bg-surface hover:opacity-100 transition-colors border-l-[4px] border-l-secondary border-b border-b-outline-variant/30 group">
+<div class="font-body-md text-body-md text-on-surface font-medium line-through decoration-outline">#SMD-8490</div>
+<div class="flex gap-md items-center min-w-0">
+<div class="w-16 h-12 bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant opacity-50">image_not_supported</span>
+</div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">08:00 AM, Hari Ini</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">Laporan Warga (Aplikasi)</div>
+</div>
+</div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">Cabang Pohon Tumbang</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">Hambatan kecil di jalan sekunder, dibersihkan oleh penduduk setempat.</div>
+</div>
+<div>
+<div class="inline-flex items-center justify-center px-xs py-1 bg-secondary-container/20 text-secondary font-label-sm text-label-sm font-bold shadow-sm border border-secondary/20">
+              12/100 (RENDAH)
+            </div>
+</div>
+<div>
+<span class="flex items-center gap-xs font-label-md text-label-md text-secondary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+               Selesai
+             </span>
+</div>
+<div class="flex gap-xs justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="h-10 w-10 bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm hover:bg-surface-variant transition-colors" title="Detail">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+<!-- Row 4: High Priority -->
+<div class="grid grid-cols-[100px_1fr_1fr_120px_150px_auto] gap-md px-lg py-md items-center bg-surface hover:bg-surface-container-lowest transition-colors border-l-[4px] border-l-error border-b border-b-outline-variant/30 group">
+<div class="font-body-md text-body-md text-on-surface font-medium">#SMD-8489</div>
+<div class="flex gap-md items-center min-w-0">
+<div class="w-16 h-12 bg-cover bg-center shrink-0" data-alt="CCTV thumbnail showing thick black smoke billowing from an industrial area in Samarinda, high contrast, technical data overlay." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0w1vtrSEkwvThJGD-O8oMfaXrilkSjphCjF4G0f3IyJm58oBnOHkQGFy8rdkfsMZxEcAFWDx0MY3YGA-5PlWJukl0ZSBGtjU_ZiKqUSLHwMPTiJ7cSG_PIAVKpEIAJPz403Hhn6yS93QqOXJ7lwW1o4EJorMzPX5BcX8y04GmDcegTLrQHRidID_AY2YRUwFeYA6_zlryhT3FtRJBbjTSbSgcCSYDQEm6OnlR0H5p_jM1EwLprOgl')"></div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">07:22 AM, Hari Ini</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">-0.5110° S, 117.1488° E</div>
+</div>
+</div>
+<div class="min-w-0">
+<div class="font-label-md text-label-md text-on-surface truncate">Emisi Tidak Diatur</div>
+<div class="font-body-md text-body-md text-on-surface-variant truncate opacity-80 text-sm">Lonjakan sensor kualitas udara berkorelasi dengan konfirmasi visual asap.</div>
+</div>
+<div>
+<div class="inline-flex items-center justify-center px-xs py-1 bg-error-container text-on-error-container font-label-sm text-label-sm font-bold shadow-sm">
+              91/100 (TINGGI)
+            </div>
+</div>
+<div>
+<span class="flex items-center gap-xs font-label-md text-label-md text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+               Belum Ditugaskan
+             </span>
+</div>
+<div class="flex gap-xs justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="h-10 px-sm bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-colors">Tugaskan Armada</button>
+<button class="h-10 w-10 bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm hover:bg-surface-variant transition-colors" title="Detail">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="px-lg py-md bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant">Menampilkan 1-4 dari 1.024 catatan</span>
+<div class="flex gap-xs">
+<button class="w-10 h-10 flex items-center justify-center bg-surface hover:bg-surface-variant text-on-surface disabled:opacity-50 transition-colors shadow-sm" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary shadow-sm font-label-md">1</button>
+<button class="w-10 h-10 flex items-center justify-center bg-surface hover:bg-surface-variant text-on-surface transition-colors shadow-sm font-label-md">2</button>
+<button class="w-10 h-10 flex items-center justify-center bg-surface hover:bg-surface-variant text-on-surface transition-colors shadow-sm font-label-md">3</button>
+<span class="w-10 h-10 flex items-center justify-center text-on-surface-variant">...</span>
+<button class="w-10 h-10 flex items-center justify-center bg-surface hover:bg-surface-variant text-on-surface transition-colors shadow-sm">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative technical side element -->
+<div class="absolute right-0 top-1/4 -translate-y-1/2 opacity-10 pointer-events-none [writing-mode:vertical-rl] font-display-lg text-display-lg text-primary tracking-[0.2em] select-none mix-blend-multiply z-0">
+    ECOMAP // SAMARINDA DATALINK
+  </div>
+</div></main></div></body></html>
