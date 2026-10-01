@@ -54,16 +54,16 @@ export default function LaporSampahPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
     const defaultPhoto =
       photoPreview ||
       'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
 
     // Add report to global persistent context
-    const created = addReport({
+    const created = await addReport({
       user_name: 'Budi Santoso (Anda)',
       user_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
       title,
@@ -76,13 +76,17 @@ export default function LaporSampahPage() {
       urgensi,
     });
 
+    setIsSubmitting(false);
+
+    if (!created) {
+      alert('Gagal mengirim laporan, coba lagi.');
+      return;
+    }
+
+    setSuccessMessage(true);
     setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccessMessage(true);
-      setTimeout(() => {
-        router.push(`/laporan/${created.id}`);
-      }, 1000);
-    }, 600);
+      router.push(`/laporan/${created.id}`);
+    }, 1000);
   };
 
   return (

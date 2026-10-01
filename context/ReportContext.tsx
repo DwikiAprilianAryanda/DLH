@@ -1,9 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import {
-  INITIAL_REPORTS,
-  INITIAL_ARMADA,
   INITIAL_NOTIFIKASI,
   ReportItem,
   ArmadaItem,
@@ -14,136 +13,135 @@ interface ReportContextType {
   reports: ReportItem[];
   armada: ArmadaItem[];
   notifications: NotificationItem[];
+  loading: boolean;
   addReport: (
     newReportData: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ) => ReportItem;
-  updateReportStatus: (id: string, status: ReportItem['status'], notes?: string) => void;
+  ) => Promise<ReportItem | null>;
+  updateReportStatus: (id: string, status: ReportItem['status'], notes?: string) => Promise<void>;
   getReportById: (id: string) => ReportItem | undefined;
   markAllNotificationsRead: () => void;
 }
 
 const ReportContext = createContext<ReportContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_REPORTS_KEY = 'ecomap_samarinda_reports_v1';
-const LOCAL_STORAGE_NOTIFS_KEY = 'ecomap_samarinda_notifs_v1';
-
 export function ReportProvider({ children }: { children: ReactNode }) {
-  const [reports, setReports] = useState<ReportItem[]>(INITIAL_REPORTS);
-  const [armada] = useState<ArmadaItem[]>(INITIAL_ARMADA);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [armada, setArmada] = useState<ArmadaItem[]>([]);
+  // Notifikasi masih sementara pakai mock, karena butuh sistem login dulu
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFIKASI);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load persisted state from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedReports = localStorage.getItem(LOCAL_STORAGE_REPORTS_KEY);
-      if (savedReports) {
-        setReports(JSON.parse(savedReports));
-      }
-      const savedNotifs = localStorage.getItem(LOCAL_STORAGE_NOTIFS_KEY);
-      if (savedNotifs) {
-        setNotifications(JSON.parse(savedNotifs));
-      }
-    } catch (e) {
-      console.error('Failed to load from localStorage', e);
-    } finally {
-      setIsLoaded(true);
+  const supabase = createClient();
+
+  const fetchReports = async () => {
+    const { data, error } = await supabase
+      .from('laporan_sampah')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Gagal ambil data laporan:', error.message);
+    } else {
+      setReports(data || []);
     }
+  };
+
+  const fetchArmada = async () => {
+    const { data, error } = await supabase.from('armada').select('*');
+    if (error) {
+      console.error('Gagal ambil data armada:', error.message);
+    } else {
+      setArmada(data || []);
+    }
+  };
+
+  useEffect(() => {
+    const loadAll = async () => {
+      setLoading(true);
+      await Promise.all([fetchReports(), fetchArmada()]);
+      setLoading(false);
+    };
+    loadAll();
   }, []);
 
-  // Sync reports to localStorage when updated
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(LOCAL_STORAGE_REPORTS_KEY, JSON.stringify(reports));
-    }
-  }, [reports, isLoaded]);
-
-  // Sync notifications to localStorage when updated
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(LOCAL_STORAGE_NOTIFS_KEY, JSON.stringify(notifications));
-    }
-  }, [notifications, isLoaded]);
-
-  const addReport = (
+  const addReport = async (
     data: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ): ReportItem => {
+  ): Promise<ReportItem | null> => {
+    const { data: inserted, error } = await supabase
+      .from('laporan_sampah')
+      .insert([{ ...data, status: 'Menunggu' }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Gagal kirim laporan:', error.message);
+      return null;
+    }
+
+    setReports((prev) => [inserted, ...prev]);
+
     const now = new Date().toISOString();
-    const newId = `rep-${String(reports.length + 1).padStart(3, '0')}`;
+    setNotifications((prev) => [
+      {
+        id: `notif-${Date.now()}`,
+        user_id: 'user-current',
+        judul: 'Laporan Berhasil Dibuat',
+        pesan: `Laporan "${inserted.title}" di ${inserted.kecamatan} telah terdaftar dan menunggu verifikasi petugas DLH.`,
+        dibaca: false,
+        created_at: now,
+        tipe: 'info',
+      },
+      ...prev,
+    ]);
 
-    const createdReport: ReportItem = {
-      ...data,
-      id: newId,
-      status: 'Menunggu',
-      created_at: now,
-      updated_at: now,
-    };
-
-    setReports((prev) => [createdReport, ...prev]);
-
-    // Add automatic system notification
-    const newNotif: NotificationItem = {
-      id: `notif-${Date.now()}`,
-      user_id: 'user-current',
-      judul: 'Laporan Berhasil Dibuat',
-      pesan: `Laporan "${createdReport.title}" di ${createdReport.kecamatan} telah terdaftar dan menunggu verifikasi petugas DLH.`,
-      dibaca: false,
-      created_at: now,
-      tipe: 'info',
-    };
-    setNotifications((prev) => [newNotif, ...prev]);
-
-    return createdReport;
+    return inserted;
   };
 
-  const updateReportStatus = (id: string, status: ReportItem['status'], notes?: string) => {
-    const now = new Date().toISOString();
-
-    setReports((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          const updated = {
-            ...r,
-            status,
-            catatan_petugas: notes || r.catatan_petugas,
-            updated_at: now,
-          };
-
-          // Generate real-time update notification for user
-          const notifTitle =
-            status === 'Armada Dikirim'
-              ? 'Armada Kebersihan Dikirim!'
-              : status === 'Selesai/Dibersihkan'
-              ? 'Laporan Sampah Selesai Dibersihkan'
-              : 'Pembaruan Status Laporan';
-
-          const notifPesan =
-            notes ||
-            `Status laporan #${r.id} (${r.title}) telah diperbarui menjadi "${status}".`;
-
-          setNotifications((nPrev) => [
-            {
-              id: `notif-${Date.now()}`,
-              user_id: 'user-current',
-              judul: notifTitle,
-              pesan: notifPesan,
-              dibaca: false,
-              created_at: now,
-              tipe: 'status_update',
-            },
-            ...nPrev,
-          ]);
-
-          return updated;
-        }
-        return r;
+  const updateReportStatus = async (
+    id: string,
+    status: ReportItem['status'],
+    notes?: string
+  ) => {
+    const { data: updated, error } = await supabase
+      .from('laporan_sampah')
+      .update({
+        status,
+        catatan_petugas: notes,
+        updated_at: new Date().toISOString(),
       })
-    );
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Gagal update status laporan:', error.message);
+      return;
+    }
+
+    setReports((prev) => prev.map((r) => (r.id === id ? updated : r)));
+
+    const notifTitle =
+      status === 'Armada Dikirim'
+        ? 'Armada Kebersihan Dikirim!'
+        : status === 'Selesai/Dibersihkan'
+        ? 'Laporan Sampah Selesai Dibersihkan'
+        : 'Pembaruan Status Laporan';
+
+    setNotifications((prev) => [
+      {
+        id: `notif-${Date.now()}`,
+        user_id: 'user-current',
+        judul: notifTitle,
+        pesan: notes || `Status laporan #${id} telah diperbarui menjadi "${status}".`,
+        dibaca: false,
+        created_at: new Date().toISOString(),
+        tipe: 'status_update',
+      },
+      ...prev,
+    ]);
   };
 
-  const getReportById = (id: string) => {
-    return reports.find((r) => r.id === id);
-  };
+  const getReportById = (id: string) => reports.find((r) => r.id === id);
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, dibaca: true })));
@@ -155,6 +153,7 @@ export function ReportProvider({ children }: { children: ReactNode }) {
         reports,
         armada,
         notifications,
+        loading,
         addReport,
         updateReportStatus,
         getReportById,
