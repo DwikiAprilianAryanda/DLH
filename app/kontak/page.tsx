@@ -1,9 +1,38 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Header from '@/components/layout/Header';
-import { INITIAL_ARMADA } from '@/lib/mock-data';
+import { createClient } from '@/lib/supabase/client';
+
+interface Armada {
+  id: string;
+  nama_armada: string;
+  plat_nomor: string;
+  nama_petugas: string;
+  telepon: string;
+  kecamatan_tugas: string;
+}
 
 export default function KontakPage() {
+  const [armadaList, setArmadaList] = useState<Armada[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArmada = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase.from('armada').select('*');
+
+      if (error) {
+        console.error('Gagal ambil data armada:', error.message);
+      } else {
+        setArmadaList(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchArmada();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <Header />
@@ -18,7 +47,6 @@ export default function KontakPage() {
           </p>
         </div>
 
-        {/* Emergency Call Box */}
         <div className="bg-primary text-on-primary rounded-2xl p-4 shadow-md flex items-center justify-between">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 block">
@@ -34,13 +62,20 @@ export default function KontakPage() {
           </a>
         </div>
 
-        {/* District Officers List */}
         <div className="space-y-3">
           <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
             Petugas Armada Per Kecamatan
           </h2>
 
-          {INITIAL_ARMADA.map((arm) => (
+          {loading && (
+            <p className="text-xs text-on-surface-variant">Memuat data...</p>
+          )}
+
+          {!loading && armadaList.length === 0 && (
+            <p className="text-xs text-on-surface-variant">Belum ada data armada.</p>
+          )}
+
+          {armadaList.map((arm) => (
             <div
               key={arm.id}
               className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 flex items-center justify-between"
