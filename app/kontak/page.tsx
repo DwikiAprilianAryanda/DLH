@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Header from '@/components/layout/Header';
-import { createClient } from '@/lib/supabase/client';
 
 interface Armada {
   id: string;
@@ -19,15 +18,15 @@ export default function KontakPage() {
 
   useEffect(() => {
     const fetchArmada = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.from('armada').select('*');
-
-      if (error) {
-        console.error('Gagal ambil data armada:', error.message);
-      } else {
-        setArmadaList(data || []);
+      try {
+        const res = await fetch('/api/armada');
+        const data = await res.json();
+        setArmadaList(data);
+      } catch (error) {
+        console.error('Gagal ambil data armada:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchArmada();

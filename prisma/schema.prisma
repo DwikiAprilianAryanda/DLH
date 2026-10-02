@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id         String   @id @default(uuid())
+  full_name  String
+  email      String
+  phone      String?
+  role       String   @default("warga")
+  avatar_url String?
+  created_at DateTime @default(now())
+
+  @@map("profiles")
+}
+
+model LaporanSampah {
+  id              String   @id @default(uuid())
+  user_id         String?
+  user_name       String   @default("Warga")
+  user_avatar     String?
+  title           String
+  description     String   @db.Text
+  latitude        Float
+  longitude       Float
+  kecamatan       String
+  kelurahan       String?
+  foto_url        String?  @db.Text
+  status          String   @default("Menunggu")
+  urgensi         String   @default("Sedang")
+  catatan_petugas String?  @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now()) @updatedAt
+
+  @@map("laporan_sampah")
+}
+
+model Armada {
+  id              String   @id @default(uuid())
+  nama_armada     String
+  plat_nomor      String
+  nama_petugas    String
+  telepon         String
+  status          String   @default("Tersedia")
+  kecamatan_tugas String
+  created_at      DateTime @default(now())
+
+  @@map("armada")
+}
+
+model Notifikasi {
+  id         String   @id @default(uuid())
+  user_id    String
+  judul      String
+  pesan      String   @db.Text
+  dibaca     Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("notifikasi")
+}
