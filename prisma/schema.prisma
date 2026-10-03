@@ -13,7 +13,8 @@ datasource db {
 model Profile {
   id         String   @id @default(uuid())
   full_name  String
-  email      String
+  email      String   @unique
+  password   String
   phone      String?
   role       String   @default("warga")
   avatar_url String?

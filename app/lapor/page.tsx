@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LaporSampahPage() {
   const router = useRouter();
   const { addReport } = useReports();
+  const { user, loading: authLoading } = useAuth();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -32,7 +34,6 @@ export default function LaporSampahPage() {
           setIsDetectingGps(false);
         },
         () => {
-          // Fallback location for Samarinda Ulu
           setLatitude(-0.4912);
           setLongitude(117.1365);
           setIsDetectingGps(false);
@@ -54,18 +55,19 @@ export default function LaporSampahPage() {
     }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setIsSubmitting(true);
 
     const defaultPhoto =
       photoPreview ||
       'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
 
-    // Add report to global persistent context
     const created = await addReport({
-      user_name: 'Budi Santoso (Anda)',
-      user_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      user_id: user.id,
+      user_name: user.full_name,
       title,
       description,
       latitude: Number(latitude) || -0.5021,
@@ -89,6 +91,55 @@ const handleSubmit = async (e: React.FormEvent) => {
     }, 1000);
   };
 
+  // Masih mengecek status login
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header />
+        <main className="pt-20 px-4 max-w-lg mx-auto">
+          <p className="text-xs text-on-surface-variant text-center">Memuat...</p>
+        </main>
+      </div>
+    );
+  }
+
+  // Belum login -> kunci fitur, kasih CTA
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header />
+        <main className="pt-20 px-4 max-w-lg mx-auto">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center">
+              <span className="material-symbols-outlined text-3xl">lock</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-on-surface">Login Diperlukan</h1>
+              <p className="text-xs text-on-surface-variant mt-1">
+                Untuk membuat laporan sampah, silakan login atau daftar akun terlebih dahulu.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full py-3 bg-primary text-on-primary font-bold text-sm rounded-2xl shadow-md hover:bg-primary/90 transition-all"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => router.push('/daftar')}
+                className="w-full py-3 bg-surface-container text-on-surface font-bold text-sm rounded-2xl hover:bg-surface-container-high transition-all"
+              >
+                Daftar Akun Baru
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Sudah login -> tampilkan form seperti biasa
   return (
     <div className="min-h-screen bg-background pb-24">
       <Header />
@@ -102,9 +153,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-on-surface">
-              Formulir Lapor Sampah
-            </h1>
+            <h1 className="text-xl font-bold text-on-surface">Formulir Lapor Sampah</h1>
             <p className="text-xs text-on-surface-variant">
               Dinas Lingkungan Hidup Kota Samarinda
             </p>
@@ -116,26 +165,19 @@ const handleSubmit = async (e: React.FormEvent) => {
             <span className="material-symbols-outlined text-2xl">check_circle</span>
             <div>
               <p className="font-bold text-sm">Laporan Berhasil Terkirim!</p>
-              <p className="text-xs">
-                Petugas DLH akan segera meninjau dan menindaklanjuti laporan Anda.
-              </p>
+              <p className="text-xs">Petugas DLH akan segera meninjau dan menindaklanjuti laporan Anda.</p>
             </div>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Photo Capture / Upload Card */}
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
               Foto Bukti Sampah *
             </label>
             {photoPreview ? (
               <div className="relative w-full h-48 rounded-xl overflow-hidden group">
-                <img
-                  src={photoPreview}
-                  alt="Bukti Sampah"
-                  className="w-full h-full object-cover"
-                />
+                <img src={photoPreview} alt="Bukti Sampah" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setPhotoPreview(null)}
@@ -147,46 +189,27 @@ const handleSubmit = async (e: React.FormEvent) => {
             ) : (
               <label className="w-full h-44 rounded-xl border-2 border-dashed border-primary/40 bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer p-4 text-center">
                 <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-2xl">
-                    photo_camera
-                  </span>
+                  <span className="material-symbols-outlined text-2xl">photo_camera</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-primary">
-                    Ambil Foto / Upload Gambar
-                  </p>
-                  <p className="text-[11px] text-on-surface-variant mt-0.5">
-                    Dukung format JPG, PNG (Maks 5MB)
-                  </p>
+                  <p className="text-xs font-bold text-primary">Ambil Foto / Upload Gambar</p>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Dukung format JPG, PNG (Maks 5MB)</p>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" />
               </label>
             )}
           </div>
 
-          {/* Location & GPS Detection */}
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                Lokasi Presisi GPS *
-              </label>
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Lokasi Presisi GPS *</label>
               <button
                 type="button"
                 onClick={handleGetLocation}
                 disabled={isDetectingGps}
                 className="px-3 py-1.5 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1"
               >
-                <span
-                  className={`material-symbols-outlined text-[16px] ${
-                    isDetectingGps ? 'animate-spin' : ''
-                  }`}
-                >
+                <span className={`material-symbols-outlined text-[16px] ${isDetectingGps ? 'animate-spin' : ''}`}>
                   {isDetectingGps ? 'progress_activity' : 'my_location'}
                 </span>
                 {isDetectingGps ? 'Mendeteksi...' : 'Ambil GPS'}
@@ -195,9 +218,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-[11px] font-medium text-on-surface-variant">
-                  Latitude
-                </span>
+                <span className="text-[11px] font-medium text-on-surface-variant">Latitude</span>
                 <input
                   type="number"
                   step="any"
@@ -208,9 +229,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
               </div>
               <div>
-                <span className="text-[11px] font-medium text-on-surface-variant">
-                  Longitude
-                </span>
+                <span className="text-[11px] font-medium text-on-surface-variant">Longitude</span>
                 <input
                   type="number"
                   step="any"
@@ -222,28 +241,21 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             </div>
 
-            {/* Kecamatan & Kelurahan Picker */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div>
-                <label className="block text-[11px] font-medium text-on-surface-variant mb-1">
-                  Kecamatan *
-                </label>
+                <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Kecamatan *</label>
                 <select
                   value={kecamatan}
                   onChange={(e) => setKecamatan(e.target.value)}
                   className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
                 >
                   {KECAMATAN_SAMARINDA.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
+                    <option key={k} value={k}>{k}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-on-surface-variant mb-1">
-                  Kelurahan / RT
-                </label>
+                <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Kelurahan / RT</label>
                 <input
                   type="text"
                   placeholder="Contoh: Air Putih RT 12"
@@ -255,7 +267,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          {/* Urgensi Level Picker */}
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">
               Tingkat Urgensi Sampah *
@@ -282,12 +293,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          {/* Title & Description */}
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                Judul Laporan *
-              </label>
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Judul Laporan *</label>
               <input
                 type="text"
                 placeholder="Contoh: Tumpukan Sampah Plastik di Pinggir Jalan"
@@ -298,9 +306,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                Deskripsi Detail *
-              </label>
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Deskripsi Detail *</label>
               <textarea
                 rows={3}
                 placeholder="Jelaskan kondisi lokasi, jenis sampah, dan dampak bagi warga..."
@@ -312,7 +318,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -320,9 +325,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           >
             {isSubmitting ? (
               <>
-                <span className="material-symbols-outlined text-lg animate-spin">
-                  progress_activity
-                </span>
+                <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
                 Mengirim Laporan...
               </>
             ) : (
