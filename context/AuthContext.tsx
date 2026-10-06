@@ -7,6 +7,7 @@ interface User {
   full_name: string;
   email: string;
   phone?: string | null;
+  kecamatan?: string | null;
   role: string;
   avatar_url?: string | null;
 }
@@ -17,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<User>;
   register: (data: { full_name: string; email: string; password: string; phone?: string }) => Promise<User>;
   logout: () => Promise<void>;
+  updateProfile: (data: { full_name: string; phone?: string; kecamatan?: string }) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,8 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const updateProfile = async (payload: {
+    full_name: string;
+    phone?: string;
+    kecamatan?: string;
+  }): Promise<User> => {
+    const res = await fetch('/api/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Gagal update profil');
+    }
+    setUser(data);
+    return data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

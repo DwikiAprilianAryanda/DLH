@@ -12,10 +12,10 @@ export default function BottomNav() {
   }
 
   const navItems = [
-    { href: '/', label: 'Beranda', icon: 'map' },
+    { href: '/', label: 'Beranda', icon: 'home' },
     { href: '/riwayat', label: 'Laporan', icon: 'analytics' },
     { href: '/lapor', label: 'Lapor', icon: 'add_a_photo', isFab: true },
-    { href: '/kontak', label: 'Kontak', icon: 'phone_in_talk' },
+    { href: '/kontak', label: 'Peta TPS', icon: 'location_on' },
     { href: '/profil', label: 'Profil', icon: 'account_circle' },
   ];
 

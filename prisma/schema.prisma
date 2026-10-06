@@ -16,10 +16,10 @@ model Profile {
   email      String   @unique
   password   String
   phone      String?
+  kecamatan  String?
   role       String   @default("warga")
   avatar_url String?
   created_at DateTime @default(now())
-
   @@map("profiles")
 }
 
@@ -66,4 +66,32 @@ model Notifikasi {
   created_at DateTime @default(now())
 
   @@map("notifikasi")
+}
+
+model Tps {
+  id         String   @id @default(uuid())
+  nama       String
+  kecamatan  String
+  latitude   Float
+  longitude  Float
+  bangunan   String?
+  mobilitas  String?
+  jumlah_bak Int?
+  jenis      String?
+  jam_buka   String?
+  jam_tutup  String?
+  created_at DateTime @default(now())
+
+  @@map("tps")
+}
+
+model SurveiKepuasan {
+  id         String   @id @default(uuid())
+  laporan_id String   @unique
+  user_id    String
+  rating     Int
+  komentar   String?  @db.Text
+  created_at DateTime @default(now())
+
+  @@map("survei_kepuasan")
 }
