@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -21,4 +22,10 @@ export function verifyToken(token: string): { id: string; role: string } | null 
   } catch {
     return null;
   }
+}
+
+export function getCurrentUserFromToken(): { id: string; role: string } | null {
+  const token = cookies().get('session_token')?.value;
+  if (!token) return null;
+  return verifyToken(token);
 }

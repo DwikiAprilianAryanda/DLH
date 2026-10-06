@@ -6,14 +6,16 @@ interface User {
   id: string;
   full_name: string;
   email: string;
+  phone?: string | null;
   role: string;
+  avatar_url?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: { full_name: string; email: string; password: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: { full_name: string; email: string; password: string; phone?: string }) => Promise<User>;
   logout: () => Promise<void>;
 }
 
@@ -27,9 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/auth/me');
       const data = await res.json();
-      setUser(data.user);
+      setUser(data.user || null);
     } catch (error) {
-      console.error('Gagal cek sesi:', error);
+      console.error('Gagal ambil sesi user:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -39,45 +42,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchMe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Gagal login' };
-      }
-
-      setUser(data);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'Gagal login' };
+  const login = async (email: string, password: string): Promise<User> => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Email atau password salah');
     }
+    setUser(data);
+    return data;
   };
 
-  const register = async (data: { full_name: string; email: string; password: string; phone?: string }) => {
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        return { success: false, error: result.error || 'Gagal mendaftar' };
-      }
-
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'Gagal mendaftar' };
+  const register = async (payload: {
+    full_name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Promise<User> => {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Gagal mendaftar');
     }
+    return data;
   };
 
   const logout = async () => {

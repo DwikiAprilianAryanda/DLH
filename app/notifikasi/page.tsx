@@ -1,15 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Header from '@/components/layout/Header';
-import { INITIAL_NOTIFIKASI, NotificationItem } from '@/lib/mock-data';
+import { useReports } from '@/context/ReportContext';
 
 export default function NotifikasiPage() {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFIKASI);
-
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, dibaca: true })));
-  };
+  const { notifications, markAllNotificationsRead } = useReports();
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -24,12 +19,18 @@ export default function NotifikasiPage() {
             </p>
           </div>
           <button
-            onClick={handleMarkAllRead}
+            onClick={markAllNotificationsRead}
             className="text-xs font-semibold text-primary hover:underline"
           >
             Tandai Dibaca
           </button>
         </div>
+
+        {notifications.length === 0 && (
+          <p className="text-xs text-on-surface-variant text-center py-10">
+            Belum ada notifikasi.
+          </p>
+        )}
 
         <div className="space-y-3">
           {notifications.map((n) => {

@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const laporan = await prisma.laporanSampah.create({
       data: {
+        user_id: body.user_id,
         user_name: body.user_name,
         user_avatar: body.user_avatar,
         title: body.title,
@@ -33,6 +34,17 @@ export async function POST(request: Request) {
         status: 'Menunggu',
       },
     });
+
+    if (laporan.user_id) {
+      await prisma.notifikasi.create({
+        data: {
+          user_id: laporan.user_id,
+          judul: 'Laporan Berhasil Dibuat',
+          pesan: `Laporan "${laporan.title}" di ${laporan.kecamatan} telah terdaftar dan menunggu verifikasi petugas DLH.`,
+        },
+      });
+    }
+
     return NextResponse.json(laporan);
   } catch (error) {
     console.error('Gagal kirim laporan:', error);

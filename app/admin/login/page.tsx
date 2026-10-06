@@ -1,31 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('admin@dlh.samarindakota.go.id');
-  const [password, setPassword] = useState('admin123');
+  const { login, logout } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    try {
+      const loggedInUser = await login(email, password);
+
+      if (loggedInUser.role !== 'admin') {
+        await logout();
+        setErrorMsg('Akun ini bukan akun admin. Silakan login lewat portal warga.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      window.location.href = '/admin';
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Email atau password salah.');
       setIsSubmitting(false);
-      router.push('/admin');
-    }, 800);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-8 shadow-2xl border border-outline-variant/30 text-center space-y-6">
         <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary mx-auto flex items-center justify-center font-bold text-3xl shadow-lg">
-          <span className="material-symbols-outlined text-[36px]">
-            admin_panel_settings
-          </span>
+          <span className="material-symbols-outlined text-[36px]">admin_panel_settings</span>
         </div>
 
         <div>
@@ -34,6 +46,12 @@ export default function AdminLoginPage() {
             Dinas Lingkungan Hidup Kota Samarinda
           </p>
         </div>
+
+        {errorMsg && (
+          <div className="p-3 rounded-xl bg-error-container text-on-error-container text-xs font-semibold text-left">
+            {errorMsg}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4 text-left">
           <div>
@@ -69,9 +87,7 @@ export default function AdminLoginPage() {
           >
             {isSubmitting ? (
               <>
-                <span className="material-symbols-outlined text-lg animate-spin">
-                  progress_activity
-                </span>
+                <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
                 Memverifikasi Login...
               </>
             ) : (

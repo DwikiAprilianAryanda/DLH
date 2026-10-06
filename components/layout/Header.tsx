@@ -4,10 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useReports } from '@/context/ReportContext';
 
 export default function Header() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  const { notifications } = useReports();
+  const hasUnread = notifications.some((n) => !n.dibaca);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleConfirmLogout = async () => {
@@ -46,8 +49,12 @@ export default function Header() {
               <span className="material-symbols-outlined text-on-surface-variant">
                 notifications
               </span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full animate-ping"></span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                {hasUnread && (
+                <>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full animate-ping"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                </>
+              )}
             </Link>
 
             {!loading && !user && (

@@ -18,7 +18,7 @@ export default function DaftarPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -32,16 +32,15 @@ export default function DaftarPage() {
     }
 
     setIsSubmitting(true);
-    const result = await register({ full_name: fullName, email, password, phone });
-    setIsSubmitting(false);
-
-    if (!result.success) {
-      setError(result.error || 'Gagal mendaftar');
-      return;
+    try {
+      await register({ full_name: fullName, email, password, phone });
+      setSuccess(true);
+      setTimeout(() => router.push('/login'), 1500);
+    } catch (err: any) {
+      setError(err.message || 'Gagal mendaftar');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSuccess(true);
-    setTimeout(() => router.push('/login'), 1500);
   };
 
   return (

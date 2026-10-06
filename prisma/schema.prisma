@@ -34,7 +34,7 @@ model LaporanSampah {
   longitude       Float
   kecamatan       String
   kelurahan       String?
-  foto_url        String?  @db.Text
+  foto_url        String?  @db.LongText
   status          String   @default("Menunggu")
   urgensi         String   @default("Sedang")
   catatan_petugas String?  @db.Text

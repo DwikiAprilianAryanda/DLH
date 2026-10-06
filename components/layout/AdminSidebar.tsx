@@ -2,15 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const navItems = [
     { href: '/admin', label: 'Ringkasan Analitik', icon: 'dashboard' },
     { href: '/admin/laporan', label: 'Manajemen Laporan', icon: 'assignment' },
     { href: '/', label: 'Portal Warga (Peta)', icon: 'map' },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/admin/login';
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-[260px] bg-surface-container-low z-50 flex flex-col border-r border-outline-variant/30 shadow-sm">
@@ -66,13 +73,13 @@ export default function AdminSidebar() {
               DLH Samarinda
             </p>
           </div>
-          <Link
-            href="/admin/login"
+          <button
+            onClick={handleLogout}
             className="text-on-surface-variant hover:text-error transition-colors p-1"
             title="Keluar"
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>
-          </Link>
+          </button>
         </div>
       </div>
     </aside>

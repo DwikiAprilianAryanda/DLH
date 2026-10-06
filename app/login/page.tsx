@@ -19,15 +19,14 @@ export default function LoginPage() {
     setError('');
     setIsSubmitting(true);
 
-    const result = await login(email, password);
-    setIsSubmitting(false);
-
-    if (!result.success) {
-      setError(result.error || 'Gagal login');
-      return;
+    try {
+      await login(email, password);
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Gagal login');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.push('/');
   };
 
   return (
