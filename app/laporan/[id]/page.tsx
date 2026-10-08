@@ -32,20 +32,33 @@ export default function DetailLaporanPage({
     minute: '2-digit',
   });
 
-  // Timeline Steps logic
+  const isAwaitingApproval = report.status === 'Menunggu Persetujuan';
+  const isRejected = report.status === 'Ditolak';
+
   const steps = [
     { label: 'Laporan Diterima', status: 'done', date: formattedDate },
     {
-      label: 'Armada Dikirim',
-      status: report.status === 'Armada Dikirim' || report.status === 'Selesai/Dibersihkan' ? 'done' : 'pending',
-      date: report.status !== 'Menunggu' ? 'Status Diperbarui DLH' : '-',
+      label: 'Proses Penanganan',
+      status: report.status === 'Proses' || report.status === 'Ditangani' ? 'done' : 'pending',
+      date: report.status !== 'Belum Ditangani' ? 'Status Diperbarui DLH' : '-',
     },
     {
-      label: 'Selesai / Dibersihkan',
-      status: report.status === 'Selesai/Dibersihkan' ? 'done' : 'pending',
-      date: report.status === 'Selesai/Dibersihkan' ? 'Selesai Dilaksanakan' : '-',
+      label: 'Ditangani',
+      status: report.status === 'Ditangani' ? 'done' : 'pending',
+      date: report.status === 'Ditangani' ? 'Selesai Dilaksanakan' : '-',
     },
   ];
+
+  const statusBadgeClass =
+    report.status === 'Ditangani'
+      ? 'bg-primary-container text-on-primary-container'
+      : report.status === 'Proses'
+      ? 'bg-secondary-container text-on-secondary-container'
+      : report.status === 'Menunggu Persetujuan'
+      ? 'bg-tertiary-container text-on-tertiary-container'
+      : report.status === 'Ditolak'
+      ? 'bg-surface-container-high text-on-surface-variant'
+      : 'bg-error-container text-on-error-container';
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -61,7 +74,9 @@ export default function DetailLaporanPage({
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-lg font-bold text-on-surface">Detail Laporan</h1>
+            <h1 className="text-lg font-bold text-on-surface">
+              {report.jenis_laporan === 'Gotong Royong' ? 'Detail Permohonan' : 'Detail Laporan'}
+            </h1>
             <p className="text-xs text-on-surface-variant">ID: #{report.id}</p>
           </div>
         </div>
@@ -90,13 +105,7 @@ export default function DetailLaporanPage({
           <div className="p-4">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span
-                className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
-                  report.status === 'Selesai/Dibersihkan'
-                    ? 'bg-primary-container text-on-primary-container'
-                    : report.status === 'Armada Dikirim'
-                    ? 'bg-secondary-container text-on-secondary-container'
-                    : 'bg-error-container text-on-error-container'
-                }`}
+                className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${statusBadgeClass}`}
               >
                 {report.status}
               </span>
@@ -110,6 +119,27 @@ export default function DetailLaporanPage({
               {report.description}
             </p>
 
+            {report.jenis_laporan === 'Gotong Royong' && (
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="p-2.5 rounded-xl bg-surface-container-low text-xs">
+                  <p className="text-[10px] text-on-surface-variant font-bold uppercase">Tanggal Rencana</p>
+                  <p className="font-semibold text-on-surface mt-0.5">
+                    {report.tanggal_rencana
+                      ? new Date(report.tanggal_rencana).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : '-'}
+                  </p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low text-xs">
+                  <p className="text-[10px] text-on-surface-variant font-bold uppercase">Jumlah Peserta</p>
+                  <p className="font-semibold text-on-surface mt-0.5">{report.jumlah_peserta || '-'} orang</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface">
               <span className="material-symbols-outlined text-primary">location_on</span>
               <span className="font-semibold">
@@ -119,42 +149,75 @@ export default function DetailLaporanPage({
           </div>
         </div>
 
-        {/* Status Tracker Timeline */}
-        <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3.5">
-            Status Penanganan DLH
-          </h3>
-          <div className="space-y-4 relative pl-4 border-l-2 border-outline-variant/40 ml-2">
-            {steps.map((step, idx) => (
-              <div key={idx} className="relative pl-4">
-                <div
-                  className={`absolute -left-[25px] top-0.5 w-4 h-4 rounded-full border-2 border-surface ${
-                    step.status === 'done'
-                      ? 'bg-primary border-primary'
-                      : 'bg-surface-container-high border-outline'
-                  }`}
-                ></div>
-                <p
-                  className={`text-xs font-bold ${
-                    step.status === 'done' ? 'text-on-surface' : 'text-on-surface-variant'
-                  }`}
-                >
-                  {step.label}
-                </p>
-                <p className="text-[11px] text-on-surface-variant">{step.date}</p>
-              </div>
-            ))}
-          </div>
-
-          {report.catatan_petugas && (
-            <div className="mt-4 p-3 rounded-xl bg-secondary-container/40 text-xs border border-secondary-container">
-              <p className="font-bold text-on-secondary-container mb-0.5">
-                Catatan Petugas Kebersihan:
+        {/* Status Section */}
+        {isAwaitingApproval || isRejected ? (
+          <div
+            className={`rounded-2xl p-4 shadow-sm border flex items-start gap-3 ${
+              isRejected
+                ? 'bg-surface-container-lowest border-outline-variant/30'
+                : 'bg-tertiary-container/30 border-tertiary/20'
+            }`}
+          >
+            <span
+              className={`material-symbols-outlined text-xl ${
+                isRejected ? 'text-on-surface-variant' : 'text-tertiary'
+              }`}
+            >
+              {isRejected ? 'cancel' : 'hourglass_top'}
+            </span>
+            <div>
+              <p className="text-xs font-bold text-on-surface">
+                {isRejected ? 'Permohonan Ditolak' : 'Menunggu Persetujuan DLH'}
               </p>
-              <p className="text-on-surface">{report.catatan_petugas}</p>
+              <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
+                {isRejected
+                  ? 'Mohon maaf, permohonan gotong royong ini belum dapat disetujui petugas DLH.'
+                  : 'Petugas DLH sedang meninjau permohonan gotong royong ini sebelum dijadwalkan.'}
+              </p>
+              {report.catatan_petugas && (
+                <p className="text-[11px] text-on-surface mt-2 p-2 rounded-lg bg-surface-container-low">
+                  {report.catatan_petugas}
+                </p>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
+            <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3.5">
+              Status Penanganan DLH
+            </h3>
+            <div className="space-y-4 relative pl-4 border-l-2 border-outline-variant/40 ml-2">
+              {steps.map((step, idx) => (
+                <div key={idx} className="relative pl-4">
+                  <div
+                    className={`absolute -left-[25px] top-0.5 w-4 h-4 rounded-full border-2 border-surface ${
+                      step.status === 'done'
+                        ? 'bg-primary border-primary'
+                        : 'bg-surface-container-high border-outline'
+                    }`}
+                  ></div>
+                  <p
+                    className={`text-xs font-bold ${
+                      step.status === 'done' ? 'text-on-surface' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    {step.label}
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">{step.date}</p>
+                </div>
+              ))}
+            </div>
+
+            {report.catatan_petugas && (
+              <div className="mt-4 p-3 rounded-xl bg-secondary-container/40 text-xs border border-secondary-container">
+                <p className="font-bold text-on-secondary-container mb-0.5">
+                  Catatan Petugas Kebersihan:
+                </p>
+                <p className="text-on-surface">{report.catatan_petugas}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Map Preview */}
         <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-2">

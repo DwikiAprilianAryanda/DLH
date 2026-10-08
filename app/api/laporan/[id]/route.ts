@@ -9,6 +9,8 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
+    const existing = await prisma.laporanSampah.findUnique({ where: { id: params.id } });
+
     const updated = await prisma.laporanSampah.update({
       where: { id: params.id },
       data: {
@@ -18,16 +20,26 @@ export async function PATCH(
     });
 
     if (updated.user_id) {
-      const notifTitle =
-        body.status === 'Armada Dikirim'
-          ? 'Armada Kebersihan Dikirim!'
-          : body.status === 'Selesai/Dibersihkan'
-          ? 'Laporan Sampah Selesai Dibersihkan'
-          : 'Pembaruan Status Laporan';
-
-      const notifPesan =
+      let notifTitle = 'Pembaruan Status Laporan';
+      let notifPesan =
         body.catatan_petugas ||
         `Status laporan "${updated.title}" telah diperbarui menjadi "${body.status}".`;
+
+      if (existing?.status === 'Menunggu Persetujuan' && body.status === 'Belum Ditangani') {
+        notifTitle = 'Permohonan Gotong Royong Disetujui!';
+        notifPesan =
+          body.catatan_petugas ||
+          `Permohonan gotong royong "${updated.title}" telah disetujui DLH dan akan segera dijadwalkan.`;
+      } else if (body.status === 'Ditolak') {
+        notifTitle = 'Permohonan Gotong Royong Ditolak';
+        notifPesan =
+          body.catatan_petugas ||
+          `Mohon maaf, permohonan gotong royong "${updated.title}" belum dapat disetujui.`;
+      } else if (body.status === 'Proses') {
+        notifTitle = 'Armada Kebersihan Dikirim!';
+      } else if (body.status === 'Ditangani') {
+        notifTitle = 'Laporan Sampah Selesai Dibersihkan';
+      }
 
       await prisma.notifikasi.create({
         data: {

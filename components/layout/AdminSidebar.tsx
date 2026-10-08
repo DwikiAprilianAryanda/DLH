@@ -9,9 +9,10 @@ export default function AdminSidebar() {
   const { logout } = useAuth();
 
   const navItems = [
-    { href: '/admin', label: 'Ringkasan Analitik', icon: 'dashboard' },
-    { href: '/admin/laporan', label: 'Manajemen Laporan', icon: 'assignment' },
-    { href: '/', label: 'Portal Warga (Peta)', icon: 'map' },
+    { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
+    { href: '/admin/laporan', label: 'Laporan Pengaduan', icon: 'assignment' },
+    { href: '/admin/tps', label: 'Kelola TPS', icon: 'schedule' },
+    { href: '/', label: 'Portal Warga', icon: 'map' },
   ];
 
   const handleLogout = async () => {

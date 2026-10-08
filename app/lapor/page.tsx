@@ -12,6 +12,8 @@ export default function LaporSampahPage() {
   const { addReport } = useReports();
   const { user, loading: authLoading } = useAuth();
 
+  const [jenisLaporan, setJenisLaporan] = useState<'Pengaduan' | 'Gotong Royong'>('Pengaduan');
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [kecamatan, setKecamatan] = useState(KECAMATAN_SAMARINDA[0]);
@@ -23,6 +25,9 @@ export default function LaporSampahPage() {
   const [isDetectingGps, setIsDetectingGps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
+
+  const [tanggalRencana, setTanggalRencana] = useState('');
+  const [jumlahPeserta, setJumlahPeserta] = useState<number | ''>('');
 
   const handleGetLocation = () => {
     setIsDetectingGps(true);
@@ -68,6 +73,7 @@ export default function LaporSampahPage() {
     const created = await addReport({
       user_id: user.id,
       user_name: user.full_name,
+      jenis_laporan: jenisLaporan,
       title,
       description,
       latitude: Number(latitude) || -0.5021,
@@ -75,7 +81,9 @@ export default function LaporSampahPage() {
       kecamatan,
       kelurahan: kelurahan || 'Samarinda',
       foto_url: defaultPhoto,
-      urgensi,
+      urgensi: jenisLaporan === 'Gotong Royong' ? 'Normal' : urgensi,
+      tanggal_rencana: jenisLaporan === 'Gotong Royong' ? tanggalRencana || null : null,
+      jumlah_peserta: jenisLaporan === 'Gotong Royong' ? Number(jumlahPeserta) || null : null,
     });
 
     setIsSubmitting(false);
@@ -91,7 +99,6 @@ export default function LaporSampahPage() {
     }, 1000);
   };
 
-  // Masih mengecek status login
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background pb-24">
@@ -103,7 +110,6 @@ export default function LaporSampahPage() {
     );
   }
 
-  // Belum login -> kunci fitur, kasih CTA
   if (!user) {
     return (
       <div className="min-h-screen bg-background pb-24">
@@ -139,7 +145,6 @@ export default function LaporSampahPage() {
     );
   }
 
-  // Sudah login -> tampilkan form seperti biasa
   return (
     <div className="min-h-screen bg-background pb-24">
       <Header />
@@ -153,19 +158,64 @@ export default function LaporSampahPage() {
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-on-surface">Formulir Lapor Sampah</h1>
+            <h1 className="text-xl font-bold text-on-surface">
+              {jenisLaporan === 'Gotong Royong' ? 'Permohonan Gotong Royong' : 'Formulir Lapor Sampah'}
+            </h1>
             <p className="text-xs text-on-surface-variant">
               Dinas Lingkungan Hidup Kota Samarinda
             </p>
           </div>
         </div>
 
+        {/* Type Selector */}
+        <div className="grid grid-cols-2 gap-2 mb-5 bg-surface-container-low p-1 rounded-2xl">
+          <button
+            type="button"
+            onClick={() => setJenisLaporan('Pengaduan')}
+            className={`py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              jenisLaporan === 'Pengaduan'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">report</span>
+            Laporan Pengaduan
+          </button>
+          <button
+            type="button"
+            onClick={() => setJenisLaporan('Gotong Royong')}
+            className={`py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              jenisLaporan === 'Gotong Royong'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">groups</span>
+            Gotong Royong
+          </button>
+        </div>
+
+        {jenisLaporan === 'Gotong Royong' && (
+          <div className="mb-5 p-3.5 rounded-2xl bg-tertiary-container/40 border border-tertiary/20 flex gap-2.5">
+            <span className="material-symbols-outlined text-tertiary text-[20px] shrink-0">info</span>
+            <p className="text-[11px] text-on-surface-variant leading-relaxed">
+              Permohonan ini akan direview dulu oleh petugas DLH sebelum disetujui dan dijadwalkan.
+            </p>
+          </div>
+        )}
+
         {successMessage && (
           <div className="mb-6 p-4 rounded-2xl bg-primary-container text-on-primary-container flex items-center gap-3 shadow-md animate-fade-in">
             <span className="material-symbols-outlined text-2xl">check_circle</span>
             <div>
-              <p className="font-bold text-sm">Laporan Berhasil Terkirim!</p>
-              <p className="text-xs">Petugas DLH akan segera meninjau dan menindaklanjuti laporan Anda.</p>
+              <p className="font-bold text-sm">
+                {jenisLaporan === 'Gotong Royong' ? 'Permohonan Berhasil Diajukan!' : 'Laporan Berhasil Terkirim!'}
+              </p>
+              <p className="text-xs">
+                {jenisLaporan === 'Gotong Royong'
+                  ? 'Petugas DLH akan segera meninjau permohonan Anda.'
+                  : 'Petugas DLH akan segera meninjau dan menindaklanjuti laporan Anda.'}
+              </p>
             </div>
           </div>
         )}
@@ -173,11 +223,11 @@ export default function LaporSampahPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
-              Foto Bukti Sampah *
+              Foto {jenisLaporan === 'Gotong Royong' ? '(Opsional)' : 'Bukti Sampah *'}
             </label>
             {photoPreview ? (
               <div className="relative w-full h-48 rounded-xl overflow-hidden group">
-                <img src={photoPreview} alt="Bukti Sampah" className="w-full h-full object-cover" />
+                <img src={photoPreview} alt="Foto" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setPhotoPreview(null)}
@@ -267,38 +317,78 @@ export default function LaporSampahPage() {
             </div>
           </div>
 
-          <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
-            <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">
-              Tingkat Urgensi Sampah *
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['Normal', 'Sedang', 'Kritis'] as const).map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => setUrgensi(level)}
-                  className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
-                    urgensi === level
-                      ? level === 'Kritis'
-                        ? 'bg-error text-on-error border-error shadow-sm'
-                        : level === 'Sedang'
-                        ? 'bg-tertiary-container text-on-tertiary-container border-tertiary-container shadow-sm'
-                        : 'bg-primary text-on-primary border-primary shadow-sm'
-                      : 'bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container'
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
+          {jenisLaporan === 'Gotong Royong' && (
+            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                Detail Kegiatan
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Tanggal Rencana *</label>
+                  <input
+                    type="date"
+                    value={tanggalRencana}
+                    onChange={(e) => setTanggalRencana(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Perkiraan Jumlah Peserta *</label>
+                  <input
+                    type="number"
+                    min={1}
+                    placeholder="Contoh: 25"
+                    value={jumlahPeserta}
+                    onChange={(e) => setJumlahPeserta(e.target.value === '' ? '' : parseInt(e.target.value))}
+                    required
+                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {jenisLaporan === 'Pengaduan' && (
+            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">
+                Tingkat Urgensi Sampah *
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['Normal', 'Sedang', 'Kritis'] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setUrgensi(level)}
+                    className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                      urgensi === level
+                        ? level === 'Kritis'
+                          ? 'bg-error text-on-error border-error shadow-sm'
+                          : level === 'Sedang'
+                          ? 'bg-tertiary-container text-on-tertiary-container border-tertiary-container shadow-sm'
+                          : 'bg-primary text-on-primary border-primary shadow-sm'
+                        : 'bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container'
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Judul Laporan *</label>
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                {jenisLaporan === 'Gotong Royong' ? 'Judul Kegiatan *' : 'Judul Laporan *'}
+              </label>
               <input
                 type="text"
-                placeholder="Contoh: Tumpukan Sampah Plastik di Pinggir Jalan"
+                placeholder={
+                  jenisLaporan === 'Gotong Royong'
+                    ? 'Contoh: Kerja Bakti Bersih Sungai RT 12'
+                    : 'Contoh: Tumpukan Sampah Plastik di Pinggir Jalan'
+                }
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -306,10 +396,16 @@ export default function LaporSampahPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Deskripsi Detail *</label>
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                {jenisLaporan === 'Gotong Royong' ? 'Alasan / Tujuan Kegiatan *' : 'Deskripsi Detail *'}
+              </label>
               <textarea
                 rows={3}
-                placeholder="Jelaskan kondisi lokasi, jenis sampah, dan dampak bagi warga..."
+                placeholder={
+                  jenisLaporan === 'Gotong Royong'
+                    ? 'Jelaskan latar belakang kegiatan dan bantuan yang dibutuhkan dari DLH...'
+                    : 'Jelaskan kondisi lokasi, jenis sampah, dan dampak bagi warga...'
+                }
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
@@ -326,12 +422,12 @@ export default function LaporSampahPage() {
             {isSubmitting ? (
               <>
                 <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-                Mengirim Laporan...
+                Mengirim...
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-lg">send</span>
-                Kirim Laporan Sampah
+                {jenisLaporan === 'Gotong Royong' ? 'Ajukan Permohonan' : 'Kirim Laporan Sampah'}
               </>
             )}
           </button>

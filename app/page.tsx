@@ -55,9 +55,9 @@ export default function Home() {
   }
 
   const activeReportsCount = reports.filter(
-    (r) => r.status === 'Menunggu' || r.status === 'Armada Dikirim'
+    (r) => r.status === 'Belum Ditangani' || r.status === 'Proses'
   ).length;
-  const cleanedCount = reports.filter((r) => r.status === 'Selesai/Dibersihkan').length;
+  const cleanedCount = reports.filter((r) => r.status === 'Ditangani').length;
 
   const recentReports = reports.slice(0, 5);
 
@@ -196,10 +196,14 @@ export default function Home() {
                   />
                   <span
                     className={`absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-bold shadow-sm ${
-                      report.status === 'Selesai/Dibersihkan'
+                      report.status === 'Ditangani'
                         ? 'bg-primary-container text-on-primary-container'
-                        : report.status === 'Armada Dikirim'
+                        : report.status === 'Proses'
                         ? 'bg-secondary-container text-on-secondary-container'
+                        : report.status === 'Menunggu Persetujuan'
+                        ? 'bg-tertiary-container text-on-tertiary-container'
+                        : report.status === 'Ditolak'
+                        ? 'bg-surface-container-high text-on-surface-variant'
                         : 'bg-error-container text-on-error-container'
                     }`}
                   >

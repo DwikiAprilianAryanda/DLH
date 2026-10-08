@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (laporan.user_id !== currentUser.id) {
       return NextResponse.json({ error: 'Bukan laporan Anda' }, { status: 403 });
     }
-    if (laporan.status !== 'Selesai/Dibersihkan') {
+    if (laporan.status !== 'Ditangani') {
       return NextResponse.json({ error: 'Laporan belum selesai' }, { status: 400 });
     }
 

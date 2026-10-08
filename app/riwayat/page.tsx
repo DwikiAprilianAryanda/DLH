@@ -16,7 +16,7 @@ interface SurveiItem {
 export default function RiwayatLaporanPage() {
   const { user, loading: authLoading } = useAuth();
   const { reports } = useReports();
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Menunggu' | 'Armada Dikirim' | 'Selesai/Dibersihkan'>('Semua');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Belum Ditangani' | 'Proses' | 'Ditangani'>('Semua');
 
   const [surveiList, setSurveiList] = useState<SurveiItem[]>([]);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; title: string } | null>(null);
@@ -129,7 +129,7 @@ export default function RiwayatLaporanPage() {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-none">
-          {(['Semua', 'Menunggu', 'Armada Dikirim', 'Selesai/Dibersihkan'] as const).map((tab) => {
+          {(['Semua', 'Belum Ditangani', 'Proses', 'Ditangani'] as const).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
@@ -171,7 +171,7 @@ export default function RiwayatLaporanPage() {
                 year: 'numeric',
               });
               const survei = getSurveiFor(report.id);
-              const isSelesai = report.status === 'Selesai/Dibersihkan';
+              const isSelesai = report.status === 'Ditangani';
 
               return (
                 <div
@@ -207,10 +207,14 @@ export default function RiwayatLaporanPage() {
                             </span>
                             <span
                               className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                                report.status === 'Selesai/Dibersihkan'
+                                report.status === 'Ditangani'
                                   ? 'bg-primary-container text-on-primary-container'
-                                  : report.status === 'Armada Dikirim'
+                                  : report.status === 'Proses'
                                   ? 'bg-secondary-container text-on-secondary-container'
+                                  : report.status === 'Menunggu Persetujuan'
+                                  ? 'bg-tertiary-container text-on-tertiary-container'
+                                  : report.status === 'Ditolak'
+                                  ? 'bg-surface-container-high text-on-surface-variant'
                                   : 'bg-error-container text-on-error-container'
                               }`}
                             >

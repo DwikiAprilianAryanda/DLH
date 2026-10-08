@@ -28,6 +28,7 @@ model LaporanSampah {
   user_id         String?
   user_name       String   @default("Warga")
   user_avatar     String?
+  jenis_laporan   String   @default("Pengaduan")
   title           String
   description     String   @db.Text
   latitude        Float
@@ -38,6 +39,8 @@ model LaporanSampah {
   status          String   @default("Menunggu")
   urgensi         String   @default("Sedang")
   catatan_petugas String?  @db.Text
+  tanggal_rencana DateTime?
+  jumlah_peserta  Int?
   created_at      DateTime @default(now())
   updated_at      DateTime @default(now()) @updatedAt
 
