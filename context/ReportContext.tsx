@@ -12,7 +12,12 @@ interface ReportContextType {
   addReport: (
     newReportData: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
   ) => Promise<ReportItem | null>;
-  updateReportStatus: (id: string, status: ReportItem['status'], notes?: string) => Promise<void>;
+  updateReportStatus: (
+    id: string,
+    status: ReportItem['status'],
+    notes?: string,
+    fotoBukti?: string
+  ) => Promise<boolean>;
   getReportById: (id: string) => ReportItem | undefined;
   markAllNotificationsRead: () => void;
 }
@@ -95,22 +100,32 @@ export function ReportProvider({ children }: { children: ReactNode }) {
   const updateReportStatus = async (
     id: string,
     status: ReportItem['status'],
-    notes?: string
-  ) => {
+    notes?: string,
+    fotoBukti?: string
+  ): Promise<boolean> => {
     try {
       const res = await fetch(`/api/laporan/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, catatan_petugas: notes }),
+        body: JSON.stringify({
+          status,
+          catatan_petugas: notes,
+          foto_bukti_petugas: fotoBukti,
+        }),
       });
 
-      if (!res.ok) throw new Error('Gagal update status laporan');
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || 'Gagal update status laporan');
+      }
 
       const updated = await res.json();
       setReports((prev) => prev.map((r) => (r.id === id ? updated : r)));
       fetchNotifications();
+      return true;
     } catch (error) {
       console.error('Gagal update status laporan:', error);
+      return false;
     }
   };
 

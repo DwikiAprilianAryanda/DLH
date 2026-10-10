@@ -36,11 +36,15 @@ model LaporanSampah {
   kecamatan       String
   kelurahan       String?
   foto_url        String?  @db.LongText
-  status          String   @default("Menunggu")
+  status          String   @default("Belum Ditangani")
   urgensi         String   @default("Sedang")
   catatan_petugas String?  @db.Text
+  foto_bukti_petugas String? @db.LongText
   tanggal_rencana DateTime?
   jumlah_peserta  Int?
+  nama_pemohon    String?
+  institusi       String?
+  surat_permohonan_url String? @db.LongText
   created_at      DateTime @default(now())
   updated_at      DateTime @default(now()) @updatedAt
 

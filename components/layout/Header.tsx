@@ -30,10 +30,10 @@ export default function Header() {
             </div>
             <div>
               <span className="font-bold text-xl tracking-tight text-on-surface">
-                EcoMap
+                TROPIS 
               </span>
               <span className="text-xs text-primary font-semibold block -mt-1">
-                Samarinda
+                Transformasi Rantai Persampahan
               </span>
             </div>
           </Link>
@@ -99,7 +99,7 @@ export default function Header() {
               <span className="material-symbols-outlined text-2xl">logout</span>
             </div>
             <div>
-              <h3 className="text-base font-bold text-on-surface">Logout dari EcoMap?</h3>
+              <h3 className="text-base font-bold text-on-surface">Logout dari TROPIS?</h3>
               <p className="text-xs text-on-surface-variant mt-1">
                 Anda perlu login kembali untuk mengakses fitur pelaporan sampah.
               </p>

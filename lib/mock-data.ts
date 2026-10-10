@@ -15,9 +15,13 @@ export interface ReportItem {
   urgensi: 'Kritis' | 'Sedang' | 'Normal';
   tanggal_rencana?: string | null;
   jumlah_peserta?: number | null;
+  nama_pemohon?: string | null;
+  institusi?: string | null;
+  surat_permohonan_url?: string | null;
   created_at: string;
   updated_at: string;
   catatan_petugas?: string;
+  foto_bukti_petugas?: string | null;
 }
 
 export interface ArmadaItem {

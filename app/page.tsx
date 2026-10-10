@@ -44,14 +44,14 @@ export default function Home() {
     );
   };
 
-  let nearestTps: (TpsItem & { distance: number }) | null = null;
+  let nearestTpsList: (TpsItem & { distance: number })[] = [];
   if (userLocation && tpsList.length > 0) {
     const withDistance = tpsList.map((t) => ({
       ...t,
       distance: haversineDistance(userLocation[0], userLocation[1], t.latitude, t.longitude),
     }));
     withDistance.sort((a, b) => a.distance - b.distance);
-    nearestTps = withDistance[0] || null;
+    nearestTpsList = withDistance.slice(0, 5);
   }
 
   const activeReportsCount = reports.filter(
@@ -120,26 +120,42 @@ export default function Home() {
                 {gpsStatus === 'loading' ? 'Mencari...' : 'Aktifkan GPS'}
               </button>
             </div>
-          ) : nearestTps ? (
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
+          ) : nearestTpsList.length > 0 ? (
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
                 <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 block">
-                  TPS Terdekat Dari Lokasi Kamu
+                  5 TPS Terdekat Dari Lokasi Kamu
                 </span>
-                <p className="text-base font-bold mt-0.5 truncate">{nearestTps.nama}</p>
-                <p className="text-xs opacity-90">
-                  {nearestTps.kecamatan} &middot; sekitar{' '}
-                  {nearestTps.distance < 1
-                    ? `${Math.round(nearestTps.distance * 1000)} m`
-                    : `${nearestTps.distance.toFixed(1)} km`}
-                </p>
+                <Link
+                  href="/kontak"
+                  className="shrink-0 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-[11px] font-bold transition-colors"
+                >
+                  Lihat Peta
+                </Link>
               </div>
-              <Link
-                href="/kontak"
-                className="shrink-0 px-3 py-2 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold transition-colors"
-              >
-                Lihat Peta
-              </Link>
+              <div className="space-y-1.5">
+                {nearestTpsList.map((tps, idx) => (
+                  <div
+                    key={tps.id}
+                    className="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate">{tps.nama}</p>
+                        <p className="text-[10px] opacity-90 truncate">{tps.kecamatan}</p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-semibold opacity-90">
+                      {tps.distance < 1
+                        ? `${Math.round(tps.distance * 1000)} m`
+                        : `${tps.distance.toFixed(1)} km`}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <p className="text-xs">Nggak nemu titik TPS.</p>

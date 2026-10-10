@@ -20,6 +20,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const isGotongRoyong = body.jenis_laporan === 'Gotong Royong';
 
+    if (isGotongRoyong && (!body.nama_pemohon || !body.institusi || !body.surat_permohonan_url)) {
+      return NextResponse.json(
+        { error: 'Nama Pemohon, Institusi/Lembaga, dan Surat Permohonan wajib diisi untuk Gotong Royong' },
+        { status: 400 }
+      );
+    }
+
     const laporan = await prisma.laporanSampah.create({
       data: {
         user_id: body.user_id,
@@ -36,6 +43,9 @@ export async function POST(request: Request) {
         urgensi: body.urgensi,
         tanggal_rencana: body.tanggal_rencana ? new Date(body.tanggal_rencana) : null,
         jumlah_peserta: body.jumlah_peserta || null,
+        nama_pemohon: body.nama_pemohon || null,
+        institusi: body.institusi || null,
+        surat_permohonan_url: body.surat_permohonan_url || null,
         status: isGotongRoyong ? 'Menunggu Persetujuan' : 'Belum Ditangani',
       },
     });

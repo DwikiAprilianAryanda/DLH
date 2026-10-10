@@ -48,6 +48,23 @@ const nearestIcon = L.divIcon({
   popupAnchor: [0, -36],
 });
 
+// Untuk 4 TPS terdekat lainnya (peringkat 2-5), beda dari TPS terdekat #1
+// dan dari TPS biasa, supaya kelihatan sebagai "kandidat terdekat" di peta.
+const nearbyIcon = L.divIcon({
+  html: `
+    <div class="relative flex items-center justify-center cursor-pointer drop-shadow-md hover:scale-110 transition-transform">
+      <div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center border-2 border-white shadow-md z-10">
+        <span class="material-symbols-outlined text-[17px]">delete</span>
+      </div>
+      <div class="absolute w-2.5 h-2.5 bg-secondary rotate-45 -bottom-1 z-0 shadow-sm border border-white"></div>
+    </div>
+  `,
+  className: 'custom-leaflet-marker',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
 const userIcon = L.divIcon({
   html: `<div class="w-5 h-5 rounded-full bg-error border-[3px] border-white shadow-lg"></div>`,
   className: 'custom-leaflet-marker',
@@ -66,7 +83,10 @@ function MapRecenter({ center }: { center: [number, number] }) {
 interface TpsMapProps {
   tpsList: TpsItem[];
   userLocation?: [number, number] | null;
+  /** @deprecated pakai nearestTpsIds (array terurut, item pertama = paling dekat) */
   nearestTpsId?: string | null;
+  /** Daftar id TPS terdekat terurut dari yang paling dekat. Item [0] = TPS terdekat #1, [1..4] = 4 TPS terdekat lainnya. */
+  nearestTpsIds?: string[];
   center?: [number, number];
 }
 
@@ -74,8 +94,10 @@ export default function TpsMap({
   tpsList,
   userLocation,
   nearestTpsId,
+  nearestTpsIds,
   center = [-0.5021, 117.1536],
 }: TpsMapProps) {
+  const nearIds = nearestTpsIds ?? (nearestTpsId ? [nearestTpsId] : []);
   const mapCenter = userLocation || center;
 
   return (
@@ -98,11 +120,14 @@ export default function TpsMap({
           </Marker>
         )}
 
-        {tpsList.map((tps) => (
+        {tpsList.map((tps) => {
+          const rank = nearIds.indexOf(tps.id);
+          const icon = rank === 0 ? nearestIcon : rank > 0 ? nearbyIcon : tpsIcon;
+          return (
           <Marker
             key={tps.id}
             position={[tps.latitude, tps.longitude]}
-            icon={tps.id === nearestTpsId ? nearestIcon : tpsIcon}
+            icon={icon}
           >
             <Popup>
               <div className="p-1 min-w-[180px] font-sans">
@@ -128,7 +153,8 @@ export default function TpsMap({
               </div>
             </Popup>
           </Marker>
-        ))}
+          );
+        })}
       </MapContainer>
     </div>
   );

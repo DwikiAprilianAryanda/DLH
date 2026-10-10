@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
+import RekapTabs from '@/components/admin/RekapTabs';
+import type { SurveiItem } from '@/components/admin/SurveyRecapChart';
 
 const EcoMap = dynamic(() => import('@/components/map/EcoMap'), { ssr: false });
 
@@ -11,6 +13,21 @@ export default function AdminDashboardPage() {
   const { reports, armada } = useReports();
   const [selectedKecamatan, setSelectedKecamatan] = useState('Semua Kecamatan');
   const [showHeatmap, setShowHeatmap] = useState(true);
+  const [surveiList, setSurveiList] = useState<SurveiItem[]>([]);
+
+  useEffect(() => {
+    const fetchSurvei = async () => {
+      try {
+        const res = await fetch('/api/admin/survei');
+        if (res.ok) {
+          setSurveiList(await res.json());
+        }
+      } catch (error) {
+        console.error('Gagal ambil data survei:', error);
+      }
+    };
+    fetchSurvei();
+  }, []);
 
   const filteredReports = reports.filter((r) => {
     if (selectedKecamatan !== 'Semua Kecamatan' && r.kecamatan !== selectedKecamatan) {
@@ -99,6 +116,9 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Rekap Laporan & Survey Kepuasan */}
+      <RekapTabs reports={reports} surveiList={surveiList} />
 
       {/* Main Analytics Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[700px]">

@@ -20,9 +20,40 @@ export default function DetailLaporanPage({
   params: { id: string };
 }) {
   const router = useRouter();
-  const { getReportById, reports } = useReports();
+  const { getReportById, loading } = useReports();
 
-  const report = getReportById(params.id) || reports[0];
+  const report = getReportById(params.id);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header />
+        <main className="pt-20 px-4 max-w-lg mx-auto">
+          <p className="text-xs text-on-surface-variant text-center py-10">Memuat laporan...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (!report) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header />
+        <main className="pt-20 px-4 max-w-lg mx-auto">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 text-center space-y-3">
+            <span className="material-symbols-outlined text-3xl text-on-surface-variant">search_off</span>
+            <p className="text-sm font-bold text-on-surface">Laporan tidak ditemukan</p>
+            <button
+              onClick={() => router.push('/')}
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              Kembali ke Beranda
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const formattedDate = new Date(report.created_at).toLocaleDateString('id-ID', {
     day: 'numeric',

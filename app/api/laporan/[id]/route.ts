@@ -11,11 +11,22 @@ export async function PATCH(
     const body = await request.json();
     const existing = await prisma.laporanSampah.findUnique({ where: { id: params.id } });
 
+    // Update status ke "Proses" (armada dikirim) atau "Ditangani" (selesai) adalah
+    // tindakan pengawasan — wajib disertai foto bukti & deskripsi dari petugas.
+    const requiresBukti = body.status === 'Proses' || body.status === 'Ditangani';
+    if (requiresBukti && (!body.catatan_petugas || !body.foto_bukti_petugas)) {
+      return NextResponse.json(
+        { error: 'Foto bukti dan deskripsi wajib diisi untuk memperbarui status ini' },
+        { status: 400 }
+      );
+    }
+
     const updated = await prisma.laporanSampah.update({
       where: { id: params.id },
       data: {
         status: body.status,
         catatan_petugas: body.catatan_petugas,
+        foto_bukti_petugas: body.foto_bukti_petugas || null,
       },
     });
 
@@ -38,7 +49,11 @@ export async function PATCH(
       } else if (body.status === 'Proses') {
         notifTitle = 'Armada Kebersihan Dikirim!';
       } else if (body.status === 'Ditangani') {
-        notifTitle = 'Laporan Sampah Selesai Dibersihkan';
+        notifTitle = 'Laporan Selesai — Yuk Kasih Penilaian!';
+        notifPesan =
+          body.catatan_petugas
+            ? `${body.catatan_petugas} Laporan "${updated.title}" sudah selesai ditangani. Yuk isi survei kepuasan di halaman Riwayat Laporan — masukan kamu membantu DLH meningkatkan layanan.`
+            : `Laporan "${updated.title}" sudah selesai ditangani. Yuk isi survei kepuasan di halaman Riwayat Laporan — masukan kamu membantu DLH meningkatkan layanan.`;
       }
 
       await prisma.notifikasi.create({

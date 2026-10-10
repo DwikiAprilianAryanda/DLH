@@ -28,6 +28,11 @@ export default function LaporSampahPage() {
 
   const [tanggalRencana, setTanggalRencana] = useState('');
   const [jumlahPeserta, setJumlahPeserta] = useState<number | ''>('');
+  const [namaPemohon, setNamaPemohon] = useState('');
+  const [institusi, setInstitusi] = useState('');
+  const [suratPermohonan, setSuratPermohonan] = useState<string | null>(null);
+  const [suratPermohonanName, setSuratPermohonanName] = useState<string | null>(null);
+  const [suratError, setSuratError] = useState<string | null>(null);
 
   const handleGetLocation = () => {
     setIsDetectingGps(true);
@@ -60,9 +65,39 @@ export default function LaporSampahPage() {
     }
   };
 
+  const handleSuratUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setSuratError(null);
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setSuratError('File harus berformat PDF.');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setSuratError('Ukuran file maksimal 5MB.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSuratPermohonan(reader.result as string);
+      setSuratPermohonanName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    if (jenisLaporan === 'Gotong Royong' && (!namaPemohon || !institusi || !suratPermohonan)) {
+      setSuratError(!suratPermohonan ? 'Surat Permohonan (PDF) wajib diupload.' : null);
+      alert('Nama Pemohon, Institusi/Lembaga, dan Surat Permohonan wajib diisi.');
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -84,6 +119,9 @@ export default function LaporSampahPage() {
       urgensi: jenisLaporan === 'Gotong Royong' ? 'Normal' : urgensi,
       tanggal_rencana: jenisLaporan === 'Gotong Royong' ? tanggalRencana || null : null,
       jumlah_peserta: jenisLaporan === 'Gotong Royong' ? Number(jumlahPeserta) || null : null,
+      nama_pemohon: jenisLaporan === 'Gotong Royong' ? namaPemohon || null : null,
+      institusi: jenisLaporan === 'Gotong Royong' ? institusi || null : null,
+      surat_permohonan_url: jenisLaporan === 'Gotong Royong' ? suratPermohonan || null : null,
     });
 
     setIsSubmitting(false);
@@ -345,6 +383,63 @@ export default function LaporSampahPage() {
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Nama Pemohon *</label>
+                  <input
+                    type="text"
+                    placeholder="Nama lengkap penanggung jawab"
+                    value={namaPemohon}
+                    onChange={(e) => setNamaPemohon(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Institusi / Lembaga / Organisasi *</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Karang Taruna RT 12"
+                    value={institusi}
+                    onChange={(e) => setInstitusi(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Surat Permohonan (PDF) *</label>
+                {suratPermohonanName ? (
+                  <div className="flex items-center justify-between gap-2 px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="material-symbols-outlined text-primary text-[18px] shrink-0">picture_as_pdf</span>
+                      <span className="text-xs font-medium text-on-surface truncate">{suratPermohonanName}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSuratPermohonan(null);
+                        setSuratPermohonanName(null);
+                      }}
+                      className="w-7 h-7 rounded-full bg-error/10 text-error flex items-center justify-center shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">close</span>
+                    </button>
+                  </div>
+                ) : (
+                  <label className="w-full py-4 rounded-xl border-2 border-dashed border-primary/40 bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1.5 cursor-pointer text-center">
+                    <span className="material-symbols-outlined text-primary text-xl">upload_file</span>
+                    <p className="text-xs font-bold text-primary">Upload Surat Permohonan</p>
+                    <p className="text-[10px] text-on-surface-variant">Format PDF, maks 5MB</p>
+                    <input type="file" accept="application/pdf" onChange={handleSuratUpload} className="hidden" />
+                  </label>
+                )}
+                {suratError && (
+                  <p className="text-[11px] text-error mt-1.5">{suratError}</p>
+                )}
               </div>
             </div>
           )}

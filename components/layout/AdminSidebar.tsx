@@ -32,7 +32,7 @@ export default function AdminSidebar() {
             DLH Admin
           </span>
           <span className="text-[11px] font-semibold text-on-surface-variant block -mt-1">
-            EcoMap Samarinda
+            TROPIS : Transformasi Rantai Persampahan
           </span>
         </div>
       </div>

@@ -53,15 +53,16 @@ export default function PetaTpsPage() {
   const filteredTps =
     selectedKecamatan === 'Semua' ? tpsList : tpsList.filter((t) => t.kecamatan === selectedKecamatan);
 
-  let nearestTps: (TpsItem & { distance: number }) | null = null;
+  let nearestTpsList: (TpsItem & { distance: number })[] = [];
   if (userLocation) {
     const withDistance = tpsList.map((t) => ({
       ...t,
       distance: haversineDistance(userLocation[0], userLocation[1], t.latitude, t.longitude),
     }));
     withDistance.sort((a, b) => a.distance - b.distance);
-    nearestTps = withDistance[0] || null;
+    nearestTpsList = withDistance.slice(0, 5);
   }
+  const nearestTpsIds = nearestTpsList.map((t) => t.id);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -97,19 +98,38 @@ export default function PetaTpsPage() {
                 {gpsStatus === 'loading' ? 'Mencari...' : 'Aktifkan GPS'}
               </button>
             </div>
-          ) : nearestTps ? (
-            <div>
+          ) : nearestTpsList.length > 0 ? (
+            <div className="space-y-2.5">
               <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 block">
-                TPS Terdekat Dari Lokasi Kamu
+                5 TPS Terdekat Dari Lokasi Kamu
               </span>
-              <p className="text-base font-bold mt-0.5">{nearestTps.nama}</p>
-              <p className="text-xs opacity-90">
-                {nearestTps.kecamatan} &middot; sekitar{' '}
-                {nearestTps.distance < 1
-                  ? `${Math.round(nearestTps.distance * 1000)} m`
-                  : `${nearestTps.distance.toFixed(1)} km`}{' '}
-                dari kamu
-              </p>
+              <div className="space-y-1.5">
+                {nearestTpsList.map((tps, idx) => (
+                  <div
+                    key={tps.id}
+                    className="flex items-center justify-between gap-3 bg-white/10 rounded-xl px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                          idx === 0 ? 'bg-white text-primary' : 'bg-white/20'
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate">{tps.nama}</p>
+                        <p className="text-[10px] opacity-90 truncate">{tps.kecamatan}</p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-semibold opacity-90">
+                      {tps.distance < 1
+                        ? `${Math.round(tps.distance * 1000)} m`
+                        : `${tps.distance.toFixed(1)} km`}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <p className="text-xs">Nggak nemu titik TPS.</p>
@@ -138,7 +158,20 @@ export default function PetaTpsPage() {
           </div>
         ) : (
           <div className="h-[400px] rounded-2xl overflow-hidden shadow-sm border border-outline-variant/30">
-            <TpsMap tpsList={filteredTps} userLocation={userLocation} nearestTpsId={nearestTps?.id} />
+            <TpsMap tpsList={filteredTps} userLocation={userLocation} nearestTpsIds={nearestTpsIds} />
+          </div>
+        )}
+
+        {nearestTpsIds.length > 0 && (
+          <div className="flex items-center justify-center gap-4 text-[10px] text-on-surface-variant">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />
+              TPS terdekat #1
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-secondary inline-block" />
+              4 TPS terdekat lainnya
+            </span>
           </div>
         )}
 

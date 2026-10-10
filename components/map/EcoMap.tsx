@@ -10,7 +10,7 @@ const createCustomMarker = (status: ReportItem['status'], urgensi: ReportItem['u
   let colorClass = 'bg-primary text-on-primary';
   let iconName = 'check_circle';
 
-  if (status === 'Menunggu') {
+  if (status === 'Belum Ditangani') {
     if (urgensi === 'Kritis') {
       colorClass = 'bg-error text-on-error';
       iconName = 'warning';
@@ -18,7 +18,7 @@ const createCustomMarker = (status: ReportItem['status'], urgensi: ReportItem['u
       colorClass = 'bg-tertiary-container text-on-tertiary-container';
       iconName = 'delete';
     }
-  } else if (status === 'Armada Dikirim') {
+  } else if (status === 'Proses') {
     colorClass = 'bg-secondary text-on-secondary';
     iconName = 'local_shipping';
   }

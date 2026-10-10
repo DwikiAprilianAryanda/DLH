@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { useReports } from '@/context/ReportContext';
 
@@ -39,25 +40,32 @@ export default function NotifikasiPage() {
               minute: '2-digit',
             });
 
+            const isSurveyInvite = n.pesan.toLowerCase().includes('survei');
+            const CardTag = isSurveyInvite ? Link : 'div';
+            const cardProps = isSurveyInvite ? { href: '/riwayat' } : {};
+
             return (
-              <div
+              <CardTag
                 key={n.id}
-                className={`p-4 rounded-2xl border transition-all ${
+                {...(cardProps as any)}
+                className={`block p-4 rounded-2xl border transition-all ${
                   n.dibaca
                     ? 'bg-surface-container-lowest border-outline-variant/30 opacity-75'
                     : 'bg-primary-container/10 border-primary/30 shadow-xs'
-                }`}
+                } ${isSurveyInvite ? 'hover:bg-primary-container/20 active:scale-[0.99]' : ''}`}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                      n.tipe === 'status_update'
+                      isSurveyInvite
+                        ? 'bg-tertiary/10 text-tertiary'
+                        : n.tipe === 'status_update'
                         ? 'bg-primary/10 text-primary'
                         : 'bg-tertiary/10 text-tertiary'
                     }`}
                   >
                     <span className="material-symbols-outlined text-[20px]">
-                      {n.tipe === 'status_update' ? 'local_shipping' : 'info'}
+                      {isSurveyInvite ? 'rate_review' : n.tipe === 'status_update' ? 'local_shipping' : 'info'}
                     </span>
                   </div>
 
@@ -69,9 +77,15 @@ export default function NotifikasiPage() {
                     <p className="text-xs text-on-surface-variant leading-relaxed">
                       {n.pesan}
                     </p>
+                    {isSurveyInvite && (
+                      <span className="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-primary">
+                        Isi Survei Sekarang
+                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </span>
+                    )}
                   </div>
                 </div>
-              </div>
+              </CardTag>
             );
           })}
         </div>

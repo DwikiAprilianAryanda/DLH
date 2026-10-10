@@ -49,9 +49,9 @@ export default function ProfilPage() {
 
   const myReports = reports.filter((r) => r.user_id === user.id);
   const totalLaporan = myReports.length;
-  const selesaiCount = myReports.filter((r) => r.status === 'Selesai/Dibersihkan').length;
+  const selesaiCount = myReports.filter((r) => r.status === 'Ditangani').length;
   const aktifCount = myReports.filter(
-    (r) => r.status === 'Menunggu' || r.status === 'Armada Dikirim'
+    (r) => r.status === 'Belum Ditangani' || r.status === 'Proses'
   ).length;
 
   const initials = user.full_name
@@ -134,6 +134,24 @@ export default function ProfilPage() {
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </Link>
         </div>
+
+        <a
+          href="https://dlh.samarindakota.go.id"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between p-3 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-primary text-[20px]">public</span>
+            <div>
+              <p className="text-xs font-semibold text-on-surface">Website Resmi DLH Kota Samarinda</p>
+              <p className="text-[10px] text-on-surface-variant mt-0.5">
+                Info layanan, kebijakan, dan kegiatan DLH selengkapnya
+              </p>
+            </div>
+          </div>
+          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
+        </a>
       </main>
     </div>
   );
