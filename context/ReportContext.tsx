@@ -1,165 +1,148 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import {
-  INITIAL_REPORTS,
-  INITIAL_ARMADA,
-  INITIAL_NOTIFIKASI,
-  ReportItem,
-  ArmadaItem,
-  NotificationItem,
-} from '@/lib/mock-data';
+import { ReportItem, ArmadaItem, NotificationItem } from '@/lib/mock-data';
+import { useAuth } from '@/context/AuthContext';
 
 interface ReportContextType {
   reports: ReportItem[];
   armada: ArmadaItem[];
   notifications: NotificationItem[];
+  loading: boolean;
   addReport: (
     newReportData: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ) => ReportItem;
-  updateReportStatus: (id: string, status: ReportItem['status'], notes?: string) => void;
+  ) => Promise<ReportItem | null>;
+  updateReportStatus: (
+    id: string,
+    status: ReportItem['status'],
+    notes?: string,
+    fotoBukti?: string
+  ) => Promise<boolean>;
   getReportById: (id: string) => ReportItem | undefined;
   markAllNotificationsRead: () => void;
 }
 
 const ReportContext = createContext<ReportContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_REPORTS_KEY = 'ecomap_samarinda_reports_v1';
-const LOCAL_STORAGE_NOTIFS_KEY = 'ecomap_samarinda_notifs_v1';
-
 export function ReportProvider({ children }: { children: ReactNode }) {
-  const [reports, setReports] = useState<ReportItem[]>(INITIAL_REPORTS);
-  const [armada] = useState<ArmadaItem[]>(INITIAL_ARMADA);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFIKASI);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { user } = useAuth();
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [armada, setArmada] = useState<ArmadaItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load persisted state from localStorage on mount
-  useEffect(() => {
+  const fetchReports = async () => {
     try {
-      const savedReports = localStorage.getItem(LOCAL_STORAGE_REPORTS_KEY);
-      if (savedReports) {
-        setReports(JSON.parse(savedReports));
-      }
-      const savedNotifs = localStorage.getItem(LOCAL_STORAGE_NOTIFS_KEY);
-      if (savedNotifs) {
-        setNotifications(JSON.parse(savedNotifs));
-      }
-    } catch (e) {
-      console.error('Failed to load from localStorage', e);
-    } finally {
-      setIsLoaded(true);
+      const res = await fetch('/api/laporan');
+      const data = await res.json();
+      setReports(data);
+    } catch (error) {
+      console.error('Gagal ambil data laporan:', error);
     }
-  }, []);
+  };
 
-  // Sync reports to localStorage when updated
+  const fetchArmada = async () => {
+    try {
+      const res = await fetch('/api/armada');
+      const data = await res.json();
+      setArmada(data);
+    } catch (error) {
+      console.error('Gagal ambil data armada:', error);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+    try {
+      const res = await fetch('/api/notifikasi');
+      const data = await res.json();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Gagal ambil notifikasi:', error);
+    }
+  };
+
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(LOCAL_STORAGE_REPORTS_KEY, JSON.stringify(reports));
-    }
-  }, [reports, isLoaded]);
+    const loadAll = async () => {
+      setLoading(true);
+      await Promise.all([fetchReports(), fetchArmada(), fetchNotifications()]);
+      setLoading(false);
+    };
+    loadAll();
+  }, [user]);
 
-  // Sync notifications to localStorage when updated
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(LOCAL_STORAGE_NOTIFS_KEY, JSON.stringify(notifications));
-    }
-  }, [notifications, isLoaded]);
-
-  const addReport = (
+  const addReport = async (
     data: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ): ReportItem => {
-    const now = new Date().toISOString();
-    const newId = `rep-${String(reports.length + 1).padStart(3, '0')}`;
+  ): Promise<ReportItem | null> => {
+    try {
+      const res = await fetch('/api/laporan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    const createdReport: ReportItem = {
-      ...data,
-      id: newId,
-      status: 'Menunggu',
-      created_at: now,
-      updated_at: now,
-    };
+      if (!res.ok) throw new Error('Gagal kirim laporan');
 
-    setReports((prev) => [createdReport, ...prev]);
+      const created = await res.json();
+      setReports((prev) => [created, ...prev]);
+      fetchNotifications();
 
-    // Add automatic system notification
-    const newNotif: NotificationItem = {
-      id: `notif-${Date.now()}`,
-      user_id: 'user-current',
-      judul: 'Laporan Berhasil Dibuat',
-      pesan: `Laporan "${createdReport.title}" di ${createdReport.kecamatan} telah terdaftar dan menunggu verifikasi petugas DLH.`,
-      dibaca: false,
-      created_at: now,
-      tipe: 'info',
-    };
-    setNotifications((prev) => [newNotif, ...prev]);
-
-    return createdReport;
+      return created;
+    } catch (error) {
+      console.error('Gagal kirim laporan:', error);
+      return null;
+    }
   };
 
-  const updateReportStatus = (id: string, status: ReportItem['status'], notes?: string) => {
-    const now = new Date().toISOString();
+  const updateReportStatus = async (
+    id: string,
+    status: ReportItem['status'],
+    notes?: string,
+    fotoBukti?: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/laporan/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status,
+          catatan_petugas: notes,
+          foto_bukti_petugas: fotoBukti,
+        }),
+      });
 
-    setReports((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          const updated = {
-            ...r,
-            status,
-            catatan_petugas: notes || r.catatan_petugas,
-            updated_at: now,
-          };
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || 'Gagal update status laporan');
+      }
 
-          // Generate real-time update notification for user
-          const notifTitle =
-            status === 'Armada Dikirim'
-              ? 'Armada Kebersihan Dikirim!'
-              : status === 'Selesai/Dibersihkan'
-              ? 'Laporan Sampah Selesai Dibersihkan'
-              : 'Pembaruan Status Laporan';
-
-          const notifPesan =
-            notes ||
-            `Status laporan #${r.id} (${r.title}) telah diperbarui menjadi "${status}".`;
-
-          setNotifications((nPrev) => [
-            {
-              id: `notif-${Date.now()}`,
-              user_id: 'user-current',
-              judul: notifTitle,
-              pesan: notifPesan,
-              dibaca: false,
-              created_at: now,
-              tipe: 'status_update',
-            },
-            ...nPrev,
-          ]);
-
-          return updated;
-        }
-        return r;
-      })
-    );
+      const updated = await res.json();
+      setReports((prev) => prev.map((r) => (r.id === id ? updated : r)));
+      fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error('Gagal update status laporan:', error);
+      return false;
+    }
   };
 
-  const getReportById = (id: string) => {
-    return reports.find((r) => r.id === id);
-  };
+  const getReportById = (id: string) => reports.find((r) => r.id === id);
 
-  const markAllNotificationsRead = () => {
+  const markAllNotificationsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, dibaca: true })));
+    try {
+      await fetch('/api/notifikasi/mark-read', { method: 'PATCH' });
+    } catch (error) {
+      console.error('Gagal update status baca notifikasi:', error);
+    }
   };
 
   return (
     <ReportContext.Provider
-      value={{
-        reports,
-        armada,
-        notifications,
-        addReport,
-        updateReportStatus,
-        getReportById,
-        markAllNotificationsRead,
-      }}
+      value={{ reports, armada, notifications, loading, addReport, updateReportStatus, getReportById, markAllNotificationsRead }}
     >
       {children}
     </ReportContext.Provider>

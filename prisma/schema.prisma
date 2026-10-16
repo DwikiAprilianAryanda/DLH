@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id         String   @id @default(uuid())
+  full_name  String
+  email      String   @unique
+  password   String
+  phone      String?
+  kecamatan  String?
+  role       String   @default("warga")
+  avatar_url String?
+  created_at DateTime @default(now())
+  @@map("profiles")
+}
+
+model LaporanSampah {
+  id              String   @id @default(uuid())
+  user_id         String?
+  user_name       String   @default("Warga")
+  user_avatar     String?
+  jenis_laporan   String   @default("Pengaduan")
+  title           String
+  description     String   @db.Text
+  latitude        Float
+  longitude       Float
+  kecamatan       String
+  kelurahan       String?
+  foto_url        String?  @db.LongText
+  status          String   @default("Belum Ditangani")
+  urgensi         String   @default("Sedang")
+  catatan_petugas String?  @db.Text
+  foto_bukti_petugas String? @db.LongText
+  tanggal_rencana DateTime?
+  jumlah_peserta  Int?
+  nama_pemohon    String?
+  institusi       String?
+  surat_permohonan_url String? @db.LongText
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now()) @updatedAt
+
+  @@map("laporan_sampah")
+}
+
+model Armada {
+  id              String   @id @default(uuid())
+  nama_armada     String
+  plat_nomor      String
+  nama_petugas    String
+  telepon         String
+  status          String   @default("Tersedia")
+  kecamatan_tugas String
+  created_at      DateTime @default(now())
+
+  @@map("armada")
+}
+
+model Notifikasi {
+  id         String   @id @default(uuid())
+  user_id    String
+  judul      String
+  pesan      String   @db.Text
+  dibaca     Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("notifikasi")
+}
+
+model Tps {
+  id         String   @id @default(uuid())
+  nama       String
+  kecamatan  String
+  latitude   Float
+  longitude  Float
+  bangunan   String?
+  mobilitas  String?
+  jumlah_bak Int?
+  jenis      String?
+  jam_buka   String?
+  jam_tutup  String?
+  created_at DateTime @default(now())
+
+  @@map("tps")
+}
+
+model SurveiKepuasan {
+  id         String   @id @default(uuid())
+  laporan_id String   @unique
+  user_id    String
+  rating     Int
+  komentar   String?  @db.Text
+  created_at DateTime @default(now())
+
+  @@map("survei_kepuasan")
+}

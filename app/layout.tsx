@@ -3,9 +3,10 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import { ReportProvider } from '@/context/ReportContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'EcoMap Samarinda - Sistem Pelaporan Sampah & Analitik DLH',
+  title: 'TROPIS Transformasi Rantai Persampahan',
   description:
     'Platform Pelaporan Sampah Warga & Dashboard Analitik Dinas Lingkungan Hidup Kota Samarinda',
 };
@@ -34,10 +35,12 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-on-surface antialiased min-h-screen selection:bg-primary-container selection:text-on-primary-container">
-        <ReportProvider>
-          {children}
-          <BottomNav />
-        </ReportProvider>
+        <AuthProvider>
+          <ReportProvider>
+            {children}
+            <BottomNav />
+          </ReportProvider>
+        </AuthProvider>
       </body>
     </html>
   );

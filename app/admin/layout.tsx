@@ -1,19 +1,45 @@
-import AdminSidebar from '@/components/layout/AdminSidebar';
+'use client';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import AdminSidebar from '@/components/layout/AdminSidebar';
+import { useAuth } from '@/context/AuthContext';
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const isLoginPage = pathname === '/admin/login';
+
+  useEffect(() => {
+    if (loading) return;
+    if (isLoginPage) return;
+    if (!user || user.role !== 'admin') {
+      router.replace('/admin/login');
+    }
+  }, [loading, user, isLoginPage, router]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (loading || !user || user.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="material-symbols-outlined text-primary text-4xl animate-spin">
+          progress_activity
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       <div className="pl-[260px] flex-1 min-w-0">
         <header className="h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 px-8 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-2xl">
-              shield_person
-            </span>
+            <span className="material-symbols-outlined text-primary text-2xl">shield_person</span>
             <span className="font-bold text-sm text-on-surface">
               Dashboard Analitik DLH Kota Samarinda
             </span>
