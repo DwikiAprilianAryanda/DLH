@@ -21,7 +21,9 @@ export default function Home() {
       try {
         const res = await fetch('/api/tps');
         const data = await res.json();
-        setTpsList(data);
+        if (Array.isArray(data)) {
+          setTpsList(data);
+        }
       } catch (error) {
         console.error('Gagal ambil data TPS:', error);
       }
@@ -127,7 +129,7 @@ export default function Home() {
                   5 TPS Terdekat Dari Lokasi Kamu
                 </span>
                 <Link
-                  href="/kontak"
+                  href="/peta"
                   className="shrink-0 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-[11px] font-bold transition-colors"
                 >
                   Lihat Peta

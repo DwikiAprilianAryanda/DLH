@@ -114,7 +114,7 @@ export default function ProfilPage() {
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </Link>
           <Link
-            href="/kontak"
+            href="/peta"
             className="flex items-center justify-between p-3 hover:bg-surface-container-low rounded-xl transition-colors text-xs font-semibold text-on-surface"
           >
             <div className="flex items-center gap-2.5">
@@ -135,23 +135,54 @@ export default function ProfilPage() {
           </Link>
         </div>
 
-        <a
-          href="https://dlh.samarindakota.go.id"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between p-3 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-primary text-[20px]">public</span>
-            <div>
-              <p className="text-xs font-semibold text-on-surface">Website Resmi DLH Kota Samarinda</p>
-              <p className="text-[10px] text-on-surface-variant mt-0.5">
-                Info layanan, kebijakan, dan kegiatan DLH selengkapnya
-              </p>
+        <div className="space-y-2">
+          {/* Link Web Resmi DLH */}
+          <a
+            href="https://dlh.samarindakota.go.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-3.5 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">public</span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-on-surface">Website Resmi DLH Kota Samarinda</p>
+                <p className="text-[10px] text-on-surface-variant mt-0.5">
+                  Portal informasi publik, regulasi, profil dinas, dan layanan lingkungan hidup
+                </p>
+              </div>
             </div>
-          </div>
-          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
-        </a>
+            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
+          </a>
+
+          {/* Link Web Pelacakan Realtime Cartrack */}
+          <a
+            href="https://fleet.cartrack.co.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-3.5 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-on-surface">Web Cartrack Armada DLH</p>
+                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container">
+                    30 Unit Realtime
+                  </span>
+                </div>
+                <p className="text-[10px] text-on-surface-variant mt-0.5">
+                  Sistem monitoring GPS pelacakan 30 unit truk sampah & compactor secara langsung
+                </p>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
+          </a>
+        </div>
       </main>
     </div>
   );

@@ -1,6 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ========================================================
+# Git Ignore Configuration - DLH Kota Samarinda (TROPIS)
+# Mencegah file kredensial, cache, build, dan artefak lokal
+# terunggah ke repositori publik/pribadi GitHub.
+# ========================================================
 
-# dependencies
+# 1. Dependensi & Package Managers
 node_modules/
 web-app/
 /.pnp
@@ -11,34 +15,84 @@ web-app/
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
+# 2. Lingkungan, Rahasia & Kredensial (SANGAT KRUSIAL)
+# Semua file .env diabaikan demi keamanan (kecuali .env.example)
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+*.env
+*.env.*
+!.env.example
 *.pem
+*.key
+*.cert
+*.crt
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+# 3. Output Build & Cache Next.js
+.next/
+out/
+build/
+dist/
 *.tsbuildinfo
 next-env.d.ts
 
+# 4. Testing & Code Coverage
+/coverage
+*.lcov
+.nyc_output/
+
+# 5. Debugging & Log Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+
+# 6. Database Lokal / Cache SQLite (jika ada)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
+# 7. Prisma Generated Client (jika dikonfigurasi ke folder custom)
 /lib/generated/prisma
+
+# 8. Konfigurasi IDE & Text Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# 9. Sistem Operasi (Windows, macOS, Linux)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# 10. File Sementara & Backup
+*.tmp
+*.temp
+*.bak
+*.swp
+.cache/
+.parcel-cache/
+
+# 11. Platform Deployment & Cloud CLI
+.vercel

@@ -15,8 +15,8 @@ export async function GET() {
     });
     return NextResponse.json(surveiList);
   } catch (error) {
-    console.error('Gagal ambil data survei:', error);
-    return NextResponse.json({ error: 'Gagal ambil data survei' }, { status: 500 });
+    console.error('Gagal ambil data survei (database offline):', error);
+    return NextResponse.json([]);
   }
 }
 

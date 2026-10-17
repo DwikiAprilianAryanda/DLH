@@ -43,7 +43,9 @@ export default function AdminTpsPage() {
     try {
       const res = await fetch('/api/tps');
       const data = await res.json();
-      setTpsList(data);
+      if (Array.isArray(data)) {
+        setTpsList(data);
+      }
     } catch (error) {
       console.error('Gagal ambil data TPS:', error);
     } finally {

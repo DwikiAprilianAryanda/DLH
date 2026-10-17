@@ -35,7 +35,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/laporan');
       const data = await res.json();
-      setReports(data);
+      if (Array.isArray(data)) {
+        setReports(data);
+      }
     } catch (error) {
       console.error('Gagal ambil data laporan:', error);
     }
@@ -45,7 +47,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/armada');
       const data = await res.json();
-      setArmada(data);
+      if (Array.isArray(data)) {
+        setArmada(data);
+      }
     } catch (error) {
       console.error('Gagal ambil data armada:', error);
     }
@@ -59,7 +63,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/notifikasi');
       const data = await res.json();
-      setNotifications(data);
+      if (Array.isArray(data)) {
+        setNotifications(data);
+      }
     } catch (error) {
       console.error('Gagal ambil notifikasi:', error);
     }

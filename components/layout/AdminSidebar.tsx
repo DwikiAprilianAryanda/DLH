@@ -12,6 +12,7 @@ export default function AdminSidebar() {
     { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
     { href: '/admin/laporan', label: 'Laporan Pengaduan', icon: 'assignment' },
     { href: '/admin/tps', label: 'Kelola TPS', icon: 'schedule' },
+    { href: '/admin/armada', label: 'Armada & BBM', icon: 'local_shipping' },
     { href: '/', label: 'Portal Warga', icon: 'map' },
   ];
 
@@ -21,7 +22,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[260px] bg-surface-container-low z-50 flex flex-col border-r border-outline-variant/30 shadow-sm">
+    <aside className="sticky top-0 h-screen w-[260px] shrink-0 bg-surface-container-low z-40 flex flex-col border-r border-outline-variant/30 shadow-sm">
       {/* Brand Header */}
       <div className="p-5 flex items-center gap-3 border-b border-outline-variant/30">
         <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-xl shadow-sm">
@@ -38,7 +39,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1.5">
+      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (

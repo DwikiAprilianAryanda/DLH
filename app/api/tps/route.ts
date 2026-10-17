@@ -1,18 +1,34 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUserFromToken } from '@/lib/auth';
+import { TPS_SEED_DATA } from '@/lib/tps-seed-data';
 
 const prisma = new PrismaClient();
+
+const FALLBACK_TPS = TPS_SEED_DATA.map((t, idx) => ({
+  id: `tps-${idx + 1}`,
+  nama: t.nama,
+  kecamatan: t.kecamatan,
+  latitude: t.latitude,
+  longitude: t.longitude,
+  bangunan: t.bangunan,
+  mobilitas: t.mobilitas,
+  jumlah_bak: t.jumlah_bak,
+  jenis: t.jenis,
+  jam_buka: '06:00',
+  jam_tutup: '18:00',
+  created_at: new Date().toISOString(),
+}));
 
 export async function GET() {
   try {
     const tps = await prisma.tps.findMany({
       orderBy: { nama: 'asc' },
     });
-    return NextResponse.json(tps);
+    return NextResponse.json(tps && tps.length > 0 ? tps : FALLBACK_TPS);
   } catch (error) {
-    console.error('Gagal ambil data TPS:', error);
-    return NextResponse.json({ error: 'Gagal ambil data TPS' }, { status: 500 });
+    console.error('Gagal ambil data TPS (database offline), fallback ke seed data:', error);
+    return NextResponse.json(FALLBACK_TPS);
   }
 }
 

@@ -15,7 +15,7 @@ export default function BottomNav() {
     { href: '/', label: 'Beranda', icon: 'home' },
     { href: '/riwayat', label: 'Laporan', icon: 'analytics' },
     { href: '/lapor', label: 'Lapor', icon: 'add_a_photo', isFab: true },
-    { href: '/kontak', label: 'Peta TPS', icon: 'location_on' },
+    { href: '/peta', label: 'Peta TPS', icon: 'location_on' },
     { href: '/profil', label: 'Profil', icon: 'account_circle' },
   ];
 

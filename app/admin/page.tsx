@@ -1,19 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
 import RekapTabs from '@/components/admin/RekapTabs';
+import { computeCriticalTps } from '@/components/admin/CriticalTpsList';
 import type { SurveiItem } from '@/components/admin/SurveyRecapChart';
+import type { TpsItem } from '@/components/map/TpsMap';
 
 const EcoMap = dynamic(() => import('@/components/map/EcoMap'), { ssr: false });
 
 export default function AdminDashboardPage() {
   const { reports, armada } = useReports();
   const [selectedKecamatan, setSelectedKecamatan] = useState('Semua Kecamatan');
-  const [showHeatmap, setShowHeatmap] = useState(true);
   const [surveiList, setSurveiList] = useState<SurveiItem[]>([]);
+  const [tpsList, setTpsList] = useState<TpsItem[]>([]);
 
   useEffect(() => {
     const fetchSurvei = async () => {
@@ -26,7 +28,21 @@ export default function AdminDashboardPage() {
         console.error('Gagal ambil data survei:', error);
       }
     };
+
+    const fetchTps = async () => {
+      try {
+        const res = await fetch('/api/tps');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) setTpsList(data);
+        }
+      } catch (error) {
+        console.error('Gagal ambil data TPS:', error);
+      }
+    };
+
     fetchSurvei();
+    fetchTps();
   }, []);
 
   const filteredReports = reports.filter((r) => {
@@ -35,6 +51,13 @@ export default function AdminDashboardPage() {
     }
     return true;
   });
+
+  // Kalkulasi TPS Kritis bulan berjalan (reset otomatis setiap awal bulan)
+  const criticalTpsList = useMemo(
+    () => computeCriticalTps(reports, tpsList, selectedKecamatan),
+    [reports, tpsList, selectedKecamatan]
+  );
+  const topCritical = criticalTpsList[0];
 
   return (
     <div className="space-y-6">
@@ -58,22 +81,32 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Zona Kritis */}
+        {/* TPS Kritis (Sesuai catatan: per bulan direset & dihitung dari TPS terbanyak dilaporkan) */}
         <div className="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/30 hover:-translate-y-0.5 transition-transform">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-              Zona Kritis (Heatmap)
+              TPS Kritis
             </span>
             <span className="material-symbols-outlined text-error bg-error-container/20 p-2 rounded-xl">
-              local_fire_department
+              warning
             </span>
           </div>
           <div className="flex items-end justify-between">
-            <span className="text-3xl font-bold text-error">
-              {reports.filter((r) => r.urgensi === 'Kritis').length}
-            </span>
-            <span className="text-xs font-bold text-error bg-error-container/20 px-2 py-0.5 rounded-full">
-              Klaster Merah
+            <div className="min-w-0 pr-2">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold text-error">
+                  {topCritical ? topCritical.reportCount : 0}
+                </span>
+                <span className="text-[11px] font-semibold text-on-surface-variant">
+                  Laporan Bln Ini
+                </span>
+              </div>
+              <p className="text-xs font-bold text-on-surface truncate mt-0.5" title={topCritical?.tps.nama}>
+                {topCritical ? topCritical.tps.nama : 'Semua Terkendali'}
+              </p>
+            </div>
+            <span className="text-[10px] font-bold text-error bg-error-container/20 px-2 py-0.5 rounded-full shrink-0">
+              Reset Bulanan
             </span>
           </div>
         </div>
@@ -117,101 +150,34 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Rekap Laporan & Survey Kepuasan */}
-      <RekapTabs reports={reports} surveiList={surveiList} />
+      {/* Rekapitulasi: Volume & Segmen Sampah, TPS Kritis, Armada Cartrack, Kalkulator BBM, Laporan Bulanan, Survey Kepuasan */}
+      <RekapTabs
+        reports={reports}
+        surveiList={surveiList}
+        tpsList={tpsList}
+        armadaList={armada}
+        selectedKecamatan={selectedKecamatan}
+      />
 
-      {/* Main Analytics Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[700px]">
-        {/* Left Filter & Controls Panel */}
-        <div className="lg:col-span-3 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
-              <h2 className="text-sm font-bold text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-xl">
-                  filter_alt
-                </span>
-                Filter Analitik
-              </h2>
-            </div>
-
-            {/* Kecamatan Filter */}
+      {/* Peta Sebaran Laporan Sampah - Full Width */}
+      <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-4 space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-xl">map</span>
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                Kecamatan Samarinda
-              </label>
-              <select
-                value={selectedKecamatan}
-                onChange={(e) => setSelectedKecamatan(e.target.value)}
-                className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="Semua Kecamatan">Semua Kecamatan</option>
-                {KECAMATAN_SAMARINDA.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Heatmap Layer Toggle */}
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-on-surface">
-                  Visualisasi Heatmap
-                </span>
-                <button
-                  onClick={() => setShowHeatmap(!showHeatmap)}
-                  className={`w-11 h-6 rounded-full transition-colors relative ${
-                    showHeatmap ? 'bg-primary' : 'bg-outline-variant'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                      showHeatmap ? 'translate-x-5' : ''
-                    }`}
-                  ></span>
-                </button>
-              </div>
+              <h2 className="text-sm font-bold text-on-surface">
+                Peta Sebaran Laporan Sampah & Heatmap Kepadatan Samarinda
+              </h2>
               <p className="text-[11px] text-on-surface-variant">
-                Menampilkan kepadatan titik laporan sampah di wilayah Samarinda.
+                Visualisasi geospasial sebaran titik pengaduan masyarakat se-Kota Samarinda
               </p>
             </div>
-
-            {/* Fleet Status Summary */}
-            <div className="pt-2">
-              <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
-                Armada Siaga DLH
-              </span>
-              <div className="space-y-2">
-                {armada.slice(0, 3).map((arm) => (
-                  <div
-                    key={arm.id}
-                    className="p-2.5 rounded-xl bg-surface-container-low text-xs flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="font-bold text-on-surface">{arm.nama_armada}</p>
-                      <p className="text-[10px] text-on-surface-variant">
-                        {arm.kecamatan_tugas}
-                      </p>
-                    </div>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                        arm.status === 'Bertugas'
-                          ? 'bg-secondary-container text-on-secondary-container'
-                          : 'bg-primary-container text-on-primary-container'
-                      }`}
-                    >
-                      {arm.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
+          <span className="text-xs font-semibold text-primary bg-primary-container/20 px-3 py-1 rounded-full">
+            {filteredReports.length} Titik Laporan Terpantau
+          </span>
         </div>
-
-        {/* Right Interactive Leaflet Map Container */}
-        <div className="lg:col-span-9 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-2 relative overflow-hidden">
+        <div className="h-[600px] rounded-xl overflow-hidden relative">
           <EcoMap reports={filteredReports} />
         </div>
       </div>

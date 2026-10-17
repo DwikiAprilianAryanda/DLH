@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { INITIAL_REPORTS } from '@/lib/mock-data';
 
 const prisma = new PrismaClient();
 
@@ -8,10 +9,10 @@ export async function GET() {
     const laporan = await prisma.laporanSampah.findMany({
       orderBy: { created_at: 'desc' },
     });
-    return NextResponse.json(laporan);
+    return NextResponse.json(laporan && laporan.length > 0 ? laporan : INITIAL_REPORTS);
   } catch (error) {
-    console.error('Gagal ambil data laporan:', error);
-    return NextResponse.json({ error: 'Gagal ambil data laporan' }, { status: 500 });
+    console.error('Gagal ambil data laporan (database offline), fallback ke INITIAL_REPORTS:', error);
+    return NextResponse.json(INITIAL_REPORTS);
   }
 }
 
