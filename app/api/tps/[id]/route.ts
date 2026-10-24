@@ -16,6 +16,17 @@ export async function PATCH(
 
     const body = await request.json();
 
+    if (body.jumlah_bak !== undefined && body.jumlah_bak !== null && body.jumlah_bak !== '') {
+      const bak = Number(body.jumlah_bak);
+      if (isNaN(bak) || bak < 1 || bak > 30) {
+        return NextResponse.json({ error: 'Jumlah bak harus berupa angka wajar antara 1 hingga 30 unit' }, { status: 400 });
+      }
+    }
+
+    if (body.jam_buka && body.jam_tutup && body.jam_buka === body.jam_tutup) {
+      return NextResponse.json({ error: 'Jam buka dan jam tutup operasional TPS tidak boleh sama' }, { status: 400 });
+    }
+
     const data: any = {};
     if (body.nama !== undefined) data.nama = body.nama;
     if (body.kecamatan !== undefined) data.kecamatan = body.kecamatan;

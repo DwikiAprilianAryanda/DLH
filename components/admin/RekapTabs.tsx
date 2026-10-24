@@ -8,7 +8,6 @@ import SurveyRecapChart, { type SurveiItem } from './SurveyRecapChart';
 import WasteCompositionChart from './WasteCompositionChart';
 import CriticalTpsList from './CriticalTpsList';
 import CartrackFleetMonitoring from './CartrackFleetMonitoring';
-import FuelConsumptionCalculator from './FuelConsumptionCalculator';
 
 interface RekapTabsProps {
   reports: ReportItem[];
@@ -18,7 +17,7 @@ interface RekapTabsProps {
   selectedKecamatan?: string;
 }
 
-type TabKey = 'volume' | 'tps_kritis' | 'cartrack' | 'bbm' | 'laporan' | 'survey';
+type TabKey = 'volume' | 'tps_kritis' | 'cartrack' | 'laporan' | 'survey';
 
 export default function RekapTabs({
   reports,
@@ -33,7 +32,6 @@ export default function RekapTabs({
     { key: 'volume', label: 'Volume & Segmen Sampah', icon: 'pie_chart' },
     { key: 'tps_kritis', label: 'TPS Kritis', icon: 'warning' },
     { key: 'cartrack', label: 'Monitoring Armada Cartrack (30 Unit)', icon: 'satellite_alt' },
-    { key: 'bbm', label: 'Kalkulator BBM Armada', icon: 'local_gas_station' },
     { key: 'laporan', label: 'Rekap Laporan Bulanan', icon: 'bar_chart' },
     { key: 'survey', label: 'Rekap Survey Kepuasan', icon: 'reviews' },
   ];
@@ -71,13 +69,6 @@ export default function RekapTabs({
 
       {tab === 'cartrack' && (
         <CartrackFleetMonitoring
-          armadaList={armadaList}
-          selectedKecamatan={selectedKecamatan}
-        />
-      )}
-
-      {tab === 'bbm' && (
-        <FuelConsumptionCalculator
           armadaList={armadaList}
           selectedKecamatan={selectedKecamatan}
         />

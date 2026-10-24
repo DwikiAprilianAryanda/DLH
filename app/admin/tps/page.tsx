@@ -1,8 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import type { TpsItem } from '@/components/map/TpsMap';
+
+const LocationPickerMap = dynamic(() => import('@/components/map/LocationPickerMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[240px] rounded-2xl bg-surface-container flex items-center justify-center text-xs text-on-surface-variant font-medium">
+      <span className="material-symbols-outlined text-primary text-xl animate-spin mr-2">progress_activity</span>
+      Memuat peta penunjuk koordinat...
+    </div>
+  ),
+});
 
 const emptyForm = {
   nama: '',
@@ -99,6 +110,19 @@ export default function AdminTpsPage() {
       return;
     }
 
+    if (form.jumlah_bak !== '' && form.jumlah_bak !== null) {
+      const bak = Number(form.jumlah_bak);
+      if (isNaN(bak) || bak < 1 || bak > 30) {
+        setFormError('Jumlah bak harus bernilai wajar antara 1 hingga 30 unit.');
+        return;
+      }
+    }
+
+    if (form.jam_buka && form.jam_tutup && form.jam_buka === form.jam_tutup) {
+      setFormError('Jam buka dan jam tutup operasional TPS tidak boleh sama.');
+      return;
+    }
+
     setIsSaving(true);
     setFormError('');
 
@@ -163,6 +187,11 @@ export default function AdminTpsPage() {
   };
 
   const handleBulkSave = async () => {
+    if (bulkJamBuka === bulkJamTutup) {
+      alert('Jam buka dan jam tutup massal tidak boleh sama.');
+      return;
+    }
+
     setIsBulkSaving(true);
     try {
       const res = await fetch('/api/tps/bulk-update', {
@@ -320,22 +349,28 @@ export default function AdminTpsPage() {
 
       {/* Create/Edit Modal */}
       {formMode && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 shadow-2xl space-y-4 border border-outline-variant/30 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 border border-outline-variant/30 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">
-                {formMode === 'create' ? 'Tambah TPS Baru' : 'Edit Data TPS'}
-              </h3>
+              <div>
+                <h3 className="text-base font-bold text-on-surface">
+                  {formMode === 'create' ? 'Tambah Titik TPS Baru' : 'Edit Data TPS'}
+                </h3>
+                <p className="text-[11px] text-on-surface-variant">
+                  Gunakan peta interaktif atau masukkan koordinat secara langsung
+                </p>
+              </div>
               <button
                 onClick={() => setFormMode(null)}
-                className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high"
+                className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
               </button>
             </div>
 
             {formError && (
-              <p className="text-xs text-error font-semibold bg-error-container/30 p-2.5 rounded-xl">
+              <p className="text-xs text-error font-semibold bg-error-container/30 p-2.5 rounded-xl flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]">error</span>
                 {formError}
               </p>
             )}
@@ -346,6 +381,7 @@ export default function AdminTpsPage() {
               </label>
               <input
                 type="text"
+                placeholder="Contoh: TPS Gg. 10 Jelawat"
                 value={form.nama}
                 onChange={(e) => setForm({ ...form, nama: e.target.value })}
                 className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -369,30 +405,48 @@ export default function AdminTpsPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Latitude *
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={form.latitude}
-                  onChange={(e) => setForm({ ...form, latitude: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Longitude *
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={form.longitude}
-                  onChange={(e) => setForm({ ...form, longitude: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
+            {/* Interactive Location Picker Map */}
+            <div className="bg-surface-container-low/50 p-3.5 rounded-2xl border border-outline-variant/30 space-y-3">
+              <LocationPickerMap
+                latitude={form.latitude !== '' ? Number(form.latitude) : null}
+                longitude={form.longitude !== '' ? Number(form.longitude) : null}
+                kecamatan={form.kecamatan}
+                onChange={(lat, lng) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    latitude: String(lat),
+                    longitude: String(lng),
+                  }));
+                }}
+              />
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                    Latitude *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="-0.502100"
+                    value={form.latitude}
+                    onChange={(e) => setForm({ ...form, latitude: e.target.value })}
+                    className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                    Longitude *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="117.153600"
+                    value={form.longitude}
+                    onChange={(e) => setForm({ ...form, longitude: e.target.value })}
+                    className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
               </div>
             </div>
 
@@ -430,14 +484,23 @@ export default function AdminTpsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Jumlah Bak
+                  Jumlah Bak (1 - 30)
                 </label>
                 <input
                   type="number"
+                  min="1"
+                  max="30"
+                  placeholder="Contoh: 2"
                   value={form.jumlah_bak}
-                  onChange={(e) => setForm({ ...form, jumlah_bak: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || (Number(val) >= 0 && Number(val) <= 99)) {
+                      setForm({ ...form, jumlah_bak: val });
+                    }
+                  }}
                   className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
+                <span className="text-[10px] text-on-surface-variant mt-0.5 block">Wajar: 1 - 30 unit</span>
               </div>
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
@@ -453,29 +516,37 @@ export default function AdminTpsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Jam Buka
-                </label>
-                <input
-                  type="time"
-                  value={form.jam_buka}
-                  onChange={(e) => setForm({ ...form, jam_buka: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
+            <div className="space-y-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                    Jam Buka
+                  </label>
+                  <input
+                    type="time"
+                    value={form.jam_buka}
+                    onChange={(e) => setForm({ ...form, jam_buka: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                    Jam Tutup
+                  </label>
+                  <input
+                    type="time"
+                    value={form.jam_tutup}
+                    onChange={(e) => setForm({ ...form, jam_tutup: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Jam Tutup
-                </label>
-                <input
-                  type="time"
-                  value={form.jam_tutup}
-                  onChange={(e) => setForm({ ...form, jam_tutup: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
+              {form.jam_buka && form.jam_tutup && form.jam_buka === form.jam_tutup && (
+                <p className="text-[11px] text-error font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px]">warning</span>
+                  Jam buka dan jam tutup tidak boleh sama!
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -544,29 +615,37 @@ export default function AdminTpsPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Jam Buka
-                </label>
-                <input
-                  type="time"
-                  value={bulkJamBuka}
-                  onChange={(e) => setBulkJamBuka(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
+            <div className="space-y-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                    Jam Buka
+                  </label>
+                  <input
+                    type="time"
+                    value={bulkJamBuka}
+                    onChange={(e) => setBulkJamBuka(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                    Jam Tutup
+                  </label>
+                  <input
+                    type="time"
+                    value={bulkJamTutup}
+                    onChange={(e) => setBulkJamTutup(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                  Jam Tutup
-                </label>
-                <input
-                  type="time"
-                  value={bulkJamTutup}
-                  onChange={(e) => setBulkJamTutup(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
+              {bulkJamBuka === bulkJamTutup && (
+                <p className="text-[11px] text-error font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px]">warning</span>
+                  Jam buka dan tutup tidak boleh sama!
+                </p>
+              )}
             </div>
 
             <div>

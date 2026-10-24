@@ -4,11 +4,9 @@ import { useState } from 'react';
 import { useReports } from '@/context/ReportContext';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import CartrackFleetMonitoring from '@/components/admin/CartrackFleetMonitoring';
-import FuelConsumptionCalculator from '@/components/admin/FuelConsumptionCalculator';
 
 export default function AdminArmadaPage() {
   const { armada } = useReports();
-  const [activeTab, setActiveTab] = useState<'cartrack' | 'bbm'>('cartrack');
   const [selectedKecamatan, setSelectedKecamatan] = useState<string>('Semua Kecamatan');
 
   return (
@@ -19,11 +17,11 @@ export default function AdminArmadaPage() {
           <div className="flex items-center gap-2 mb-1">
             <span className="material-symbols-outlined text-primary text-[24px]">local_shipping</span>
             <h1 className="text-xl font-bold text-on-surface">
-              Armada Kebersihan & Manajemen BBM
+              Armada Kebersihan Kota Samarinda
             </h1>
           </div>
           <p className="text-xs text-on-surface-variant">
-            Integrasi 30 unit armada sampah DLH Samarinda dengan Cartrack IoT dan simulator estimasi bahan bakar operasional.
+            Monitoring real-time 30 unit armada sampah DLH Samarinda dengan integrasi Cartrack IoT telematics.
           </p>
         </div>
 
@@ -47,47 +45,11 @@ export default function AdminArmadaPage() {
         </div>
       </div>
 
-      {/* Main Tab Controls */}
-      <div className="flex items-center gap-2 border-b border-outline-variant/30 pb-1">
-        <button
-          onClick={() => setActiveTab('cartrack')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-b-2 ${
-            activeTab === 'cartrack'
-              ? 'border-primary text-primary bg-primary/5'
-              : 'border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">satellite_alt</span>
-          Monitoring Cartrack (30 Unit)
-        </button>
-
-        <button
-          onClick={() => setActiveTab('bbm')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-b-2 ${
-            activeTab === 'bbm'
-              ? 'border-primary text-primary bg-primary/5'
-              : 'border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">local_gas_station</span>
-          Kalkulator & Proyeksi BBM
-        </button>
-      </div>
-
-      {/* Tab Panels */}
-      {activeTab === 'cartrack' && (
-        <CartrackFleetMonitoring
-          armadaList={armada}
-          selectedKecamatan={selectedKecamatan}
-        />
-      )}
-
-      {activeTab === 'bbm' && (
-        <FuelConsumptionCalculator
-          armadaList={armada}
-          selectedKecamatan={selectedKecamatan}
-        />
-      )}
+      {/* Cartrack Fleet Monitoring */}
+      <CartrackFleetMonitoring
+        armadaList={armada}
+        selectedKecamatan={selectedKecamatan}
+      />
     </div>
   );
 }

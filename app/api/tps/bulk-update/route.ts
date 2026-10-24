@@ -14,6 +14,10 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { jam_buka, jam_tutup, kecamatan, onlyEmpty } = body;
 
+    if (jam_buka && jam_tutup && jam_buka === jam_tutup) {
+      return NextResponse.json({ error: 'Jam buka dan jam tutup massal tidak boleh sama' }, { status: 400 });
+    }
+
     const where: any = {};
     if (kecamatan && kecamatan !== 'Semua') {
       where.kecamatan = kecamatan;

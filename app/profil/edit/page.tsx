@@ -36,9 +36,26 @@ export default function EditProfilPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 3) {
+      setError('Nama lengkap minimal 3 karakter');
+      return;
+    }
+    if (trimmedName.length > 50) {
+      setError('Nama lengkap maksimal 50 karakter');
+      return;
+    }
+
+    const cleanPhone = phone.trim();
+    if (cleanPhone && (cleanPhone.length < 10 || cleanPhone.length > 15)) {
+      setError('Nomor telepon harus berupa angka 10 - 15 digit (contoh: 081234567890)');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await updateProfile({ full_name: name, phone, kecamatan });
+      await updateProfile({ full_name: trimmedName, phone: cleanPhone, kecamatan });
       setIsSaved(true);
       setTimeout(() => {
         router.push('/profil');
@@ -86,14 +103,19 @@ export default function EditProfilPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                Nama Lengkap *
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                  Nama Lengkap *
+                </label>
+                <span className="text-[10px] text-on-surface-variant font-medium">{name.length}/50</span>
+              </div>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value.slice(0, 50))}
                 required
+                minLength={3}
+                maxLength={50}
                 className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
@@ -112,13 +134,19 @@ export default function EditProfilPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                Nomor Telepon / WhatsApp
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                  Nomor Telepon / WhatsApp
+                </label>
+                <span className="text-[10px] text-on-surface-variant font-medium">{phone.length}/15</span>
+              </div>
               <input
                 type="tel"
+                inputMode="numeric"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                placeholder="Contoh: 081234567890"
+                maxLength={15}
                 className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>

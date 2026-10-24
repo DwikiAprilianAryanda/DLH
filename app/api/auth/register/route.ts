@@ -8,11 +8,25 @@ export async function POST(request: Request) {
   try {
     const { full_name, email, password, phone } = await request.json();
 
-    if (!full_name || !email || !password) {
+    const trimmedName = typeof full_name === 'string' ? full_name.trim() : '';
+    if (!trimmedName || !email || !password) {
       return NextResponse.json({ error: 'Nama, email, dan password wajib diisi' }, { status: 400 });
     }
 
-    const existing = await prisma.profile.findUnique({ where: { email } });
+    if (trimmedName.length < 3 || trimmedName.length > 50) {
+      return NextResponse.json({ error: 'Nama lengkap harus antara 3 - 50 karakter' }, { status: 400 });
+    }
+
+    const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+    if (cleanPhone && !/^[0-9]{10,15}$/.test(cleanPhone)) {
+      return NextResponse.json({ error: 'Nomor HP harus berupa 10-15 digit angka' }, { status: 400 });
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json({ error: 'Password minimal 6 karakter' }, { status: 400 });
+    }
+
+    const existing = await prisma.profile.findUnique({ where: { email: email.trim().toLowerCase() } });
     if (existing) {
       return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
     }
@@ -21,10 +35,10 @@ export async function POST(request: Request) {
 
     const user = await prisma.profile.create({
       data: {
-        full_name,
-        email,
+        full_name: trimmedName,
+        email: email.trim().toLowerCase(),
         password: hashed,
-        phone,
+        phone: cleanPhone || null,
         role: 'warga',
       },
     });

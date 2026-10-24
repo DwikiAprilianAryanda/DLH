@@ -22,6 +22,7 @@ export default function LaporSampahPage() {
   const [latitude, setLatitude] = useState<number | ''>(-0.5021);
   const [longitude, setLongitude] = useState<number | ''>(117.1536);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [isDetectingGps, setIsDetectingGps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
@@ -56,13 +57,26 @@ export default function LaporSampahPage() {
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    setPhotoError(null);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('File harus berupa gambar (JPG, PNG, atau WEBP). Format dokumen atau arsip tidak diperbolehkan.');
+      e.target.value = '';
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Ukuran gambar maksimal 5MB.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSuratUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +105,14 @@ export default function LaporSampahPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!user) return;
+
+    if (jenisLaporan === 'Pengaduan' && !photoPreview) {
+      setPhotoError('Foto bukti sampah wajib diunggah.');
+      alert('Foto bukti sampah wajib diunggah.');
+      return;
+    }
 
     if (jenisLaporan === 'Gotong Royong' && (!namaPemohon || !institusi || !suratPermohonan)) {
       setSuratError(!suratPermohonan ? 'Surat Permohonan (PDF) wajib diupload.' : null);
@@ -281,10 +302,16 @@ export default function LaporSampahPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-primary">Ambil Foto / Upload Gambar</p>
-                  <p className="text-[11px] text-on-surface-variant mt-0.5">Dukung format JPG, PNG (Maks 5MB)</p>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Dukung format JPG, PNG, WEBP (Maks 5MB)</p>
                 </div>
-                <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" />
+                <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" capture="environment" onChange={handlePhotoUpload} className="hidden" />
               </label>
+            )}
+            {photoError && (
+              <p className="mt-2 text-xs font-semibold text-error bg-error-container/20 p-2 rounded-xl flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm">warning</span>
+                {photoError}
+              </p>
             )}
           </div>
 
@@ -512,7 +539,7 @@ export default function LaporSampahPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3.5 bg-primary text-on-primary font-bold text-sm rounded-2xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+            className="w-full py-3.5 bg-primary text-on-primary font-bold text-sm rounded-2xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

@@ -68,6 +68,17 @@ export default function Header() {
 
             {!loading && user && (
               <>
+                {user.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700 hover:scale-105 active:scale-95 transition-all"
+                    title="Kembali ke Dashboard Admin DLH"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">admin_panel_settings</span>
+                    <span className="hidden sm:inline">Panel Admin</span>
+                  </Link>
+                )}
+
                 <Link
                   href="/profil"
                   className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-85 transition-opacity text-on-primary shadow-xs"
@@ -90,6 +101,19 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Floating Kembali ke Admin button if user is Admin on citizen pages */}
+      {!loading && user?.role === 'admin' && (
+        <aside className="fixed bottom-20 right-4 z-40">
+          <Link
+            href="/admin"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xl border-2 border-white transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+            <span>Kembali ke Admin</span>
+          </Link>
+        </aside>
+      )}
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (

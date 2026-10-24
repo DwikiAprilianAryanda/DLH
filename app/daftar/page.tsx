@@ -18,9 +18,24 @@ export default function DaftarPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const trimmedName = fullName.trim();
+    if (trimmedName.length < 3) {
+      setError('Nama lengkap minimal 3 karakter');
+      return;
+    }
+    if (trimmedName.length > 50) {
+      setError('Nama lengkap maksimal 50 karakter');
+      return;
+    }
+
+    if (phone.trim() && (phone.trim().length < 10 || phone.trim().length > 15)) {
+      setError('Nomor HP harus berupa angka 10 - 15 digit (contoh: 081234567890)');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Password dan konfirmasi password tidak sama');
@@ -33,7 +48,7 @@ export default function DaftarPage() {
 
     setIsSubmitting(true);
     try {
-      await register({ full_name: fullName, email, password, phone });
+      await register({ full_name: trimmedName, email: email.trim(), password, phone: phone.trim() });
       setSuccess(true);
       setTimeout(() => router.push('/login'), 1500);
     } catch (err: any) {
@@ -69,20 +84,30 @@ export default function DaftarPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Nama Lengkap *</label>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nama Lengkap *</label>
+              <span className="text-[10px] text-on-surface-variant font-medium">{fullName.length}/50</span>
+            </div>
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value.slice(0, 50))} required
+              minLength={3} maxLength={50} placeholder="Contoh: Budi Santoso"
               className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email *</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              placeholder="nama@email.com"
               className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">No. HP</label>
-            <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">No. HP (WhatsApp)</label>
+              <span className="text-[10px] text-on-surface-variant font-medium">{phone.length}/15</span>
+            </div>
+            <input type="tel" inputMode="numeric" value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 15))}
+              placeholder="Contoh: 081234567890" maxLength={15}
               className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
 

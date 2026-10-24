@@ -28,6 +28,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!isGotongRoyong && body.foto_url && body.foto_url.startsWith('data:') && !body.foto_url.startsWith('data:image/')) {
+      return NextResponse.json(
+        { error: 'Foto bukti sampah harus berformat gambar valid (JPG, PNG, WEBP)' },
+        { status: 400 }
+      );
+    }
+
     const laporan = await prisma.laporanSampah.create({
       data: {
         user_id: body.user_id,

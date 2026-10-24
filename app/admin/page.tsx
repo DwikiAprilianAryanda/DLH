@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Rekapitulasi: Volume & Segmen Sampah, TPS Kritis, Armada Cartrack, Kalkulator BBM, Laporan Bulanan, Survey Kepuasan */}
+      {/* Rekapitulasi: Volume & Segmen Sampah, TPS Kritis, Armada Cartrack, Laporan Bulanan, Survey Kepuasan */}
       <RekapTabs
         reports={reports}
         surveiList={surveiList}

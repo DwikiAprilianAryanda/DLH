@@ -123,16 +123,18 @@ export default function ProfilPage() {
             </div>
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </Link>
-          <Link
-            href="/admin/login"
-            className="flex items-center justify-between p-3 hover:bg-surface-container-low rounded-xl transition-colors text-xs font-semibold text-primary"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-              Portal Staf Admin DLH
-            </div>
-            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-          </Link>
+          {user?.role === 'admin' && (
+            <Link
+              href="/admin"
+              className="flex items-center justify-between p-3 hover:bg-surface-container-low rounded-xl transition-colors text-xs font-semibold text-emerald-700 bg-emerald-50"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                Dashboard Admin DLH
+              </div>
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </Link>
+          )}
         </div>
 
         <div className="space-y-2">
