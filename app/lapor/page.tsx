@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
 import { useAuth } from '@/context/AuthContext';
+import { LIMITS, validateLaporan } from '@/lib/laporan-validation';
 
 export default function LaporSampahPage() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function LaporSampahPage() {
   const [isDetectingGps, setIsDetectingGps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [tanggalRencana, setTanggalRencana] = useState('');
   const [jumlahPeserta, setJumlahPeserta] = useState<number | ''>('');
@@ -108,47 +111,52 @@ export default function LaporSampahPage() {
     if (isSubmitting) return;
     if (!user) return;
 
-    if (jenisLaporan === 'Pengaduan' && !photoPreview) {
-      setPhotoError('Foto bukti sampah wajib diunggah.');
-      alert('Foto bukti sampah wajib diunggah.');
-      return;
-    }
-
-    if (jenisLaporan === 'Gotong Royong' && (!namaPemohon || !institusi || !suratPermohonan)) {
-      setSuratError(!suratPermohonan ? 'Surat Permohonan (PDF) wajib diupload.' : null);
-      alert('Nama Pemohon, Institusi/Lembaga, dan Surat Permohonan wajib diisi.');
-      return;
-    }
-
-    setIsSubmitting(true);
+    setFormError(null);
 
     const defaultPhoto =
       photoPreview ||
       'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
 
-    const created = await addReport({
+    const payload = {
       user_id: user.id,
       user_name: user.full_name,
       jenis_laporan: jenisLaporan,
       title,
       description,
-      latitude: Number(latitude) || -0.5021,
-      longitude: Number(longitude) || 117.1536,
+      latitude: Number(latitude),
+      longitude: Number(longitude),
       kecamatan,
       kelurahan: kelurahan || 'Samarinda',
       foto_url: defaultPhoto,
-      urgensi: jenisLaporan === 'Gotong Royong' ? 'Normal' : urgensi,
+      urgensi: jenisLaporan === 'Gotong Royong' ? ('Normal' as const) : urgensi,
       tanggal_rencana: jenisLaporan === 'Gotong Royong' ? tanggalRencana || null : null,
-      jumlah_peserta: jenisLaporan === 'Gotong Royong' ? Number(jumlahPeserta) || null : null,
-      nama_pemohon: jenisLaporan === 'Gotong Royong' ? namaPemohon || null : null,
-      institusi: jenisLaporan === 'Gotong Royong' ? institusi || null : null,
-      surat_permohonan_url: jenisLaporan === 'Gotong Royong' ? suratPermohonan || null : null,
-    });
+      jumlah_peserta: jenisLaporan === 'Gotong Royong' && jumlahPeserta !== '' ? Number(jumlahPeserta) : null,
+      nama_pemohon: jenisLaporan === 'Gotong Royong' ? namaPemohon : null,
+      institusi: jenisLaporan === 'Gotong Royong' ? institusi : null,
+      surat_permohonan_url: jenisLaporan === 'Gotong Royong' ? suratPermohonan : null,
+    };
 
+    // Foto wajib hanya untuk Pengaduan (Gotong Royong pakai foto bawaan)
+    const check = validateLaporan({
+      ...payload,
+      foto_url: jenisLaporan === 'Pengaduan' ? photoPreview : defaultPhoto,
+    });
+    if (!check.ok) {
+      setFieldErrors(check.errors);
+      setFormError(Object.values(check.errors)[0]);
+      if (check.errors.foto_url) setPhotoError(check.errors.foto_url);
+      if (check.errors.surat_permohonan_url) setSuratError(check.errors.surat_permohonan_url);
+      return;
+    }
+    setFieldErrors({});
+
+    setIsSubmitting(true);
+    const { report: created, error, fields } = await addReport(payload as any);
     setIsSubmitting(false);
 
     if (!created) {
-      alert('Gagal mengirim laporan, coba lagi.');
+      if (fields) setFieldErrors(fields);
+      setFormError(error || 'Gagal mengirim laporan, coba lagi.');
       return;
     }
 
@@ -339,6 +347,8 @@ export default function LaporSampahPage() {
                   step="any"
                   value={latitude}
                   onChange={(e) => setLatitude(parseFloat(e.target.value))}
+                  min={LIMITS.latitude.min}
+                  max={LIMITS.latitude.max}
                   required
                   className="w-full mt-1 px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
@@ -350,6 +360,8 @@ export default function LaporSampahPage() {
                   step="any"
                   value={longitude}
                   onChange={(e) => setLongitude(parseFloat(e.target.value))}
+                  min={LIMITS.longitude.min}
+                  max={LIMITS.longitude.max}
                   required
                   className="w-full mt-1 px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
@@ -376,6 +388,7 @@ export default function LaporSampahPage() {
                   placeholder="Contoh: Air Putih RT 12"
                   value={kelurahan}
                   onChange={(e) => setKelurahan(e.target.value)}
+                  maxLength={LIMITS.kelurahan.max}
                   className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
@@ -393,6 +406,7 @@ export default function LaporSampahPage() {
                   <input
                     type="date"
                     value={tanggalRencana}
+                    min={new Date().toISOString().slice(0, 10)}
                     onChange={(e) => setTanggalRencana(e.target.value)}
                     required
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -402,10 +416,18 @@ export default function LaporSampahPage() {
                   <label className="block text-[11px] font-medium text-on-surface-variant mb-1">Perkiraan Jumlah Peserta *</label>
                   <input
                     type="number"
-                    min={1}
+                    min={LIMITS.jumlahPeserta.min}
+                    max={LIMITS.jumlahPeserta.max}
+                    step={1}
                     placeholder="Contoh: 25"
                     value={jumlahPeserta}
-                    onChange={(e) => setJumlahPeserta(e.target.value === '' ? '' : parseInt(e.target.value))}
+                    onChange={(e) =>
+                      setJumlahPeserta(
+                        e.target.value === ''
+                          ? ''
+                          : Math.min(parseInt(e.target.value) || 0, LIMITS.jumlahPeserta.max)
+                      )
+                    }
                     required
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
@@ -419,6 +441,7 @@ export default function LaporSampahPage() {
                     type="text"
                     placeholder="Nama lengkap penanggung jawab"
                     value={namaPemohon}
+                    maxLength={LIMITS.namaPemohon.max}
                     onChange={(e) => setNamaPemohon(e.target.value)}
                     required
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -430,6 +453,7 @@ export default function LaporSampahPage() {
                     type="text"
                     placeholder="Contoh: Karang Taruna RT 12"
                     value={institusi}
+                    maxLength={LIMITS.institusi.max}
                     onChange={(e) => setInstitusi(e.target.value)}
                     required
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -514,8 +538,11 @@ export default function LaporSampahPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
+                minLength={LIMITS.title.min}
+                maxLength={LIMITS.title.max}
                 className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
+              <FieldHint error={fieldErrors.title} length={title.length} max={LIMITS.title.max} />
             </div>
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
@@ -531,10 +558,20 @@ export default function LaporSampahPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
+                minLength={LIMITS.description.min}
+                maxLength={LIMITS.description.max}
                 className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
               ></textarea>
+              <FieldHint error={fieldErrors.description} length={description.length} max={LIMITS.description.max} />
             </div>
           </div>
+
+          {formError && (
+            <div role="alert" className="text-xs font-semibold text-error bg-error-container/30 border border-error/30 p-3 rounded-xl flex items-start gap-2">
+              <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+              <span>{formError}</span>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -555,6 +592,17 @@ export default function LaporSampahPage() {
           </button>
         </form>
       </main>
+    </div>
+  );
+}
+
+function FieldHint({ error, length, max }: { error?: string; length: number; max: number }) {
+  return (
+    <div className="mt-1 flex items-start justify-between gap-2">
+      <p className="text-[11px] text-error min-h-[14px]">{error || ''}</p>
+      <p className={`text-[11px] shrink-0 ${length >= max ? 'text-error font-semibold' : 'text-on-surface-variant'}`}>
+        {length}/{max}
+      </p>
     </div>
   );
 }

@@ -11,7 +11,7 @@ interface ReportContextType {
   loading: boolean;
   addReport: (
     newReportData: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ) => Promise<ReportItem | null>;
+  ) => Promise<{ report: ReportItem | null; error?: string; fields?: Record<string, string> }>;
   updateReportStatus: (
     id: string,
     status: ReportItem['status'],
@@ -82,7 +82,7 @@ export function ReportProvider({ children }: { children: ReactNode }) {
 
   const addReport = async (
     data: Omit<ReportItem, 'id' | 'created_at' | 'updated_at' | 'status'>
-  ): Promise<ReportItem | null> => {
+  ): Promise<{ report: ReportItem | null; error?: string; fields?: Record<string, string> }> => {
     try {
       const res = await fetch('/api/laporan', {
         method: 'POST',
@@ -90,16 +90,23 @@ export function ReportProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error('Gagal kirim laporan');
+      const json = await res.json().catch(() => null);
 
-      const created = await res.json();
-      setReports((prev) => [created, ...prev]);
+      if (!res.ok) {
+        return {
+          report: null,
+          error: json?.error || 'Gagal mengirim laporan, coba lagi.',
+          fields: json?.fields,
+        };
+      }
+
+      setReports((prev) => [json, ...prev]);
       fetchNotifications();
 
-      return created;
+      return { report: json };
     } catch (error) {
       console.error('Gagal kirim laporan:', error);
-      return null;
+      return { report: null, error: 'Tidak bisa terhubung ke server. Periksa koneksi internet kamu.' };
     }
   };
 

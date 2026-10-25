@@ -33,6 +33,8 @@
     color: var(--color-on-surface);
     -webkit-tap-highlight-color: transparent;
     font-family: 'Inter', sans-serif;
+    /* Teks tanpa spasi (judul/deskripsi panjang) dipotong ke baris baru, tidak meluber dari kartu/modal */
+    overflow-wrap: anywhere;
   }
 
   .pb-safe {
