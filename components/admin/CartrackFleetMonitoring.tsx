@@ -79,11 +79,11 @@ export default function CartrackFleetMonitoring({
 
     if (unit.nama_armada.toLowerCase().includes('dump')) {
       type = 'Dump Truck';
-      icon = 'dumpster';
+      icon = 'delivery_truck_speed';
       badgeColor = 'bg-amber-500/10 text-amber-700 border-amber-500/20';
     } else if (unit.nama_armada.toLowerCase().includes('pick-up')) {
       type = 'Pick-up Reaksi Cepat';
-      icon = 'minor_crash';
+      icon = 'airport_shuttle';
       badgeColor = 'bg-blue-500/10 text-blue-700 border-blue-500/20';
     }
 
@@ -242,7 +242,7 @@ export default function CartrackFleetMonitoring({
               {/* Unit Header */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0 overflow-hidden">
                     <span className="material-symbols-outlined text-[20px]">
                       {telemetry.icon}
                     </span>
