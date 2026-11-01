@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
+import { TPS_SEED_DATA } from '@/lib/tps-seed-data';
 import { useReports } from '@/context/ReportContext';
 import { useAuth } from '@/context/AuthContext';
 import { LIMITS, validateLaporan } from '@/lib/laporan-validation';
@@ -25,6 +26,7 @@ export default function LaporSampahPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isDetectingGps, setIsDetectingGps] = useState(false);
+  const [gpsDetected, setGpsDetected] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -38,25 +40,51 @@ export default function LaporSampahPage() {
   const [suratPermohonanName, setSuratPermohonanName] = useState<string | null>(null);
   const [suratError, setSuratError] = useState<string | null>(null);
 
-  const handleGetLocation = () => {
+  const detectLocation = useCallback((silent = false) => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      if (!silent) setIsDetectingGps(false);
+      return;
+    }
+
     setIsDetectingGps(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLatitude(parseFloat(pos.coords.latitude.toFixed(6)));
-          setLongitude(parseFloat(pos.coords.longitude.toFixed(6)));
-          setIsDetectingGps(false);
-        },
-        () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(6));
+        const lng = parseFloat(pos.coords.longitude.toFixed(6));
+        setLatitude(lat);
+        setLongitude(lng);
+        setIsDetectingGps(false);
+        setGpsDetected(true);
+
+        // Cari kecamatan terdekat dari koordinat jika berada di Samarinda
+        let nearestKec: string | null = null;
+        let minDistance = Infinity;
+        for (const tps of TPS_SEED_DATA) {
+          const dist = Math.hypot(lat - tps.latitude, lng - tps.longitude);
+          if (dist < minDistance) {
+            minDistance = dist;
+            nearestKec = tps.kecamatan;
+          }
+        }
+        if (nearestKec && KECAMATAN_SAMARINDA.includes(nearestKec)) {
+          setKecamatan(nearestKec);
+        }
+      },
+      (err) => {
+        if (!silent) {
           setLatitude(-0.4912);
           setLongitude(117.1365);
-          setIsDetectingGps(false);
         }
-      );
-    } else {
-      setIsDetectingGps(false);
-    }
-  };
+        setIsDetectingGps(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+    );
+  }, []);
+
+  useEffect(() => {
+    // Otomatis deteksi koordinat GPS saat form dibuka tanpa perlu menekan tombol
+    detectLocation(true);
+  }, [detectLocation]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -325,17 +353,37 @@ export default function LaporSampahPage() {
 
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Lokasi Presisi GPS *</label>
+              <div>
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">
+                  Lokasi Presisi GPS *
+                </label>
+                {gpsDetected ? (
+                  <span className="text-[10px] font-semibold text-primary flex items-center gap-1 mt-0.5">
+                    <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                    GPS Aktif & Terhubung Otomatis
+                  </span>
+                ) : isDetectingGps ? (
+                  <span className="text-[10px] font-semibold text-secondary flex items-center gap-1 mt-0.5">
+                    <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                    Mendeteksi lokasi otomatis...
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+                    <span className="material-symbols-outlined text-[13px]">location_on</span>
+                    Titik koordinat Kota Samarinda
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
-                onClick={handleGetLocation}
+                onClick={() => detectLocation(false)}
                 disabled={isDetectingGps}
-                className="px-3 py-1.5 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1"
+                className="px-3 py-1.5 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1 shadow-xs"
               >
                 <span className={`material-symbols-outlined text-[16px] ${isDetectingGps ? 'animate-spin' : ''}`}>
                   {isDetectingGps ? 'progress_activity' : 'my_location'}
                 </span>
-                {isDetectingGps ? 'Mendeteksi...' : 'Ambil GPS'}
+                {isDetectingGps ? 'Mendeteksi...' : gpsDetected ? 'Perbarui GPS' : 'Ambil GPS'}
               </button>
             </div>
 
