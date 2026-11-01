@@ -18,6 +18,7 @@ interface ReportContextType {
     notes?: string,
     fotoBukti?: string
   ) => Promise<boolean>;
+  deleteReport: (id: string) => Promise<{ success: boolean; error?: string }>;
   getReportById: (id: string) => ReportItem | undefined;
   markAllNotificationsRead: () => void;
 }
@@ -142,6 +143,29 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteReport = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch(`/api/laporan/${id}`, {
+        method: 'DELETE',
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        return {
+          success: false,
+          error: json?.error || 'Gagal menghapus laporan dari server.',
+        };
+      }
+
+      setReports((prev) => prev.filter((r) => r.id !== id));
+      return { success: true };
+    } catch (error) {
+      console.error('Gagal menghapus laporan:', error);
+      return { success: false, error: 'Tidak dapat terhubung ke server.' };
+    }
+  };
+
   const getReportById = (id: string) => reports.find((r) => r.id === id);
 
   const markAllNotificationsRead = async () => {
@@ -155,7 +179,17 @@ export function ReportProvider({ children }: { children: ReactNode }) {
 
   return (
     <ReportContext.Provider
-      value={{ reports, armada, notifications, loading, addReport, updateReportStatus, getReportById, markAllNotificationsRead }}
+      value={{
+        reports,
+        armada,
+        notifications,
+        loading,
+        addReport,
+        updateReportStatus,
+        deleteReport,
+        getReportById,
+        markAllNotificationsRead,
+      }}
     >
       {children}
     </ReportContext.Provider>

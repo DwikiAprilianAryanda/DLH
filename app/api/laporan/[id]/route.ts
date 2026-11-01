@@ -115,3 +115,53 @@ export async function PATCH(
     return NextResponse.json({ error: 'Gagal update laporan' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // 1. Verifikasi Keamanan: Hanya admin yang berhak menghapus laporan
+    const currentUser = getCurrentUserFromToken();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Akses ditolak. Tindakan ini hanya dapat dilakukan oleh staf admin DLH.' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = params;
+    if (!id || typeof id !== 'string') {
+      return NextResponse.json({ error: 'ID laporan tidak valid.' }, { status: 400 });
+    }
+
+    const existing = await prisma.laporanSampah.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: 'Laporan tidak ditemukan.' }, { status: 404 });
+    }
+
+    // 2. Hapus data relasi (survei kepuasan) dan laporan secara atomik
+    await prisma.$transaction(async (tx) => {
+      // Hapus survei kepuasan terkait jika ada
+      await tx.surveiKepuasan.deleteMany({
+        where: { laporan_id: id },
+      });
+
+      // Hapus data laporan sampah
+      await tx.laporanSampah.delete({
+        where: { id },
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Laporan "${existing.title}" berhasil dihapus.`,
+    });
+  } catch (error) {
+    console.error('Gagal menghapus laporan:', error);
+    return NextResponse.json(
+      { error: 'Gagal menghapus laporan dari database.' },
+      { status: 500 }
+    );
+  }
+}

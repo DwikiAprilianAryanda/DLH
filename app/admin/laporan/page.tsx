@@ -5,7 +5,7 @@ import { KECAMATAN_SAMARINDA, ReportItem } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
 
 export default function ManajemenLaporanAdminPage() {
-  const { reports, armada, updateReportStatus } = useReports();
+  const { reports, armada, updateReportStatus, deleteReport } = useReports();
   const [selectedKecamatan, setSelectedKecamatan] = useState('Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
   const [selectedJenis, setSelectedJenis] = useState('Semua');
@@ -25,6 +25,11 @@ export default function ManajemenLaporanAdminPage() {
 
   const [rejectTarget, setRejectTarget] = useState<ReportItem | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+
+  const [deleteTarget, setDeleteTarget] = useState<ReportItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleFotoBuktiUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -115,6 +120,25 @@ export default function ManajemenLaporanAdminPage() {
     updateReportStatus(rejectTarget.id, 'Ditolak', rejectReason || undefined);
     setRejectTarget(null);
     setRejectReason('');
+  };
+
+  const handleDeleteReport = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const result = await deleteReport(deleteTarget.id);
+    setIsDeleting(false);
+
+    if (!result.success) {
+      setDeleteError(result.error || 'Gagal menghapus laporan.');
+      return;
+    }
+
+    const title = deleteTarget.title;
+    setDeleteTarget(null);
+    setToastMessage(`Laporan "${title}" berhasil dihapus.`);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
   const statusBadgeClass = (status: ReportItem['status']) => {
@@ -289,45 +313,60 @@ export default function ManajemenLaporanAdminPage() {
                     </td>
 
                     <td className="py-4 px-4 text-right">
-                      {isPending ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setRejectTarget(report)}
-                            className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all"
-                          >
-                            Tolak
-                          </button>
-                          <button
-                            onClick={() => handleApprove(report)}
-                            className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all shadow-xs"
-                          >
-                            Setujui
-                          </button>
-                        </div>
-                      ) : report.status === 'Ditolak' ? (
-                        <span className="text-[11px] text-on-surface-variant italic">Ditolak</span>
-                      ) : (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setActiveReport(report)}
-                            className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">
-                              local_shipping
-                            </span>
-                            Disposisi Armada
-                          </button>
-
-                          {report.status !== 'Ditangani' && (
+                      <div className="flex items-center justify-end gap-1.5">
+                        {isPending ? (
+                          <>
                             <button
-                              onClick={() => setCompletingReport(report)}
-                              className="px-3 py-1.5 bg-primary-container text-on-primary-container font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                              onClick={() => setRejectTarget(report)}
+                              className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all"
                             >
-                              Selesaikan
+                              Tolak
                             </button>
-                          )}
-                        </div>
-                      )}
+                            <button
+                              onClick={() => handleApprove(report)}
+                              className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all shadow-xs"
+                            >
+                              Setujui
+                            </button>
+                          </>
+                        ) : report.status === 'Ditolak' ? (
+                          <span className="text-[11px] text-on-surface-variant italic mr-2">Ditolak</span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setActiveReport(report)}
+                              className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">
+                                local_shipping
+                              </span>
+                              Disposisi Armada
+                            </button>
+
+                            {report.status !== 'Ditangani' && (
+                              <button
+                                onClick={() => setCompletingReport(report)}
+                                className="px-3 py-1.5 bg-primary-container text-on-primary-container font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                              >
+                                Selesaikan
+                              </button>
+                            )}
+                          </>
+                        )}
+
+                        {/* Tombol Hapus Laporan untuk Admin */}
+                        <button
+                          onClick={() => {
+                            setDeleteTarget(report);
+                            setDeleteError(null);
+                          }}
+                          className="w-8 h-8 rounded-xl bg-error/10 text-error hover:bg-error hover:text-on-error transition-all flex items-center justify-center shrink-0 ml-1"
+                          title="Hapus Laporan"
+                          aria-label="Hapus Laporan"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -593,6 +632,114 @@ export default function ManajemenLaporanAdminPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 shadow-2xl space-y-4 border border-outline-variant/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 text-error">
+                <div className="w-9 h-9 rounded-xl bg-error/10 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[22px]">delete_forever</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-on-surface">Hapus Laporan</h3>
+                  <p className="text-[11px] text-on-surface-variant">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isDeleting) {
+                    setDeleteTarget(null);
+                    setDeleteError(null);
+                  }
+                }}
+                disabled={isDeleting}
+                className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl bg-error-container text-on-error-container text-xs font-semibold flex items-center gap-2">
+                <span className="material-symbols-outlined text-base shrink-0">error</span>
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            {/* Detail Laporan yang akan dihapus */}
+            <div className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-2">
+              <div className="flex items-start gap-3">
+                {deleteTarget.foto_url && (
+                  <img
+                    src={deleteTarget.foto_url}
+                    alt={deleteTarget.title}
+                    className="w-14 h-14 rounded-xl object-cover shrink-0 bg-surface-container"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant inline-block mb-1">
+                    {deleteTarget.jenis_laporan}
+                  </span>
+                  <p className="font-bold text-xs text-on-surface line-clamp-1">{deleteTarget.title}</p>
+                  <p className="text-[11px] text-on-surface-variant line-clamp-1">
+                    Pelapor: {deleteTarget.user_name}
+                  </p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">
+                    Wilayah: {deleteTarget.kecamatan} ({deleteTarget.kelurahan || '-'})
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-error-container/20 border border-error/20 flex gap-2">
+              <span className="material-symbols-outlined text-error text-[18px] shrink-0">warning</span>
+              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                Apakah Anda yakin ingin menghapus laporan ini? Seluruh data laporan dan survei terkait akan dihapus secara permanen dari basis data DLH Samarinda.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError(null);
+                }}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high transition-colors disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteReport}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 bg-error text-on-error font-bold text-xs rounded-xl hover:bg-error/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Ya, Hapus Permanen
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Success Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-on-surface text-surface shadow-2xl border border-outline-variant/30 text-xs font-bold animate-fade-in">
+          <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>
