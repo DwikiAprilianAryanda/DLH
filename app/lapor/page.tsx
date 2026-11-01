@@ -69,8 +69,8 @@ export default function LaporSampahPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setPhotoError('Ukuran gambar maksimal 5MB.');
+    if (file.size > LIMITS.fileMaxBytes) {
+      setPhotoError('Ukuran gambar maksimal 3MB.');
       e.target.value = '';
       return;
     }
@@ -92,8 +92,8 @@ export default function LaporSampahPage() {
       e.target.value = '';
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setSuratError('Ukuran file maksimal 5MB.');
+    if (file.size > LIMITS.fileMaxBytes) {
+      setSuratError('Ukuran file maksimal 3MB.');
       e.target.value = '';
       return;
     }

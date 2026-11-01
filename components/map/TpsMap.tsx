@@ -100,6 +100,18 @@ export default function TpsMap({
   const nearIds = nearestTpsIds ?? (nearestTpsId ? [nearestTpsId] : []);
   const mapCenter = userLocation || center;
 
+  const validTpsList = (tpsList || []).filter(
+    (t) =>
+      typeof t?.latitude === 'number' &&
+      typeof t?.longitude === 'number' &&
+      !isNaN(t.latitude) &&
+      !isNaN(t.longitude) &&
+      t.latitude >= -90 &&
+      t.latitude <= 90 &&
+      t.longitude >= -180 &&
+      t.longitude <= 180
+  );
+
   return (
     <div className="relative w-full h-full min-h-[400px]">
       <MapContainer
@@ -120,7 +132,7 @@ export default function TpsMap({
           </Marker>
         )}
 
-        {tpsList.map((tps) => {
+        {validTpsList.map((tps) => {
           const rank = nearIds.indexOf(tps.id);
           const icon = rank === 0 ? nearestIcon : rank > 0 ? nearbyIcon : tpsIcon;
           return (

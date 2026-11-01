@@ -78,6 +78,18 @@ export default function EcoMap({
     }
   };
 
+  const validReports = (reports || []).filter(
+    (r) =>
+      typeof r?.latitude === 'number' &&
+      typeof r?.longitude === 'number' &&
+      !isNaN(r.latitude) &&
+      !isNaN(r.longitude) &&
+      r.latitude >= -90 &&
+      r.latitude <= 90 &&
+      r.longitude >= -180 &&
+      r.longitude <= 180
+  );
+
   return (
     <div className="relative w-full h-full min-h-[400px]">
       <MapContainer
@@ -93,7 +105,7 @@ export default function EcoMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {reports.map((report) => (
+        {validReports.map((report) => (
           <Marker
             key={report.id}
             position={[report.latitude, report.longitude]}

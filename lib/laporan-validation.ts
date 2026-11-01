@@ -17,9 +17,9 @@ export const LIMITS = {
   latitude: { min: -2.5, max: 2.5 },
   longitude: { min: 113.5, max: 119 },
   tanggalMaxHariKeDepan: 365,
-  fileMaxBytes: 5 * 1024 * 1024,
-  // base64 ~ 4/3 ukuran file, kasih sedikit ruang
-  dataUrlMaxLength: 7_300_000,
+  fileMaxBytes: 3 * 1024 * 1024,
+  // base64 ~ 4/3 ukuran file, batas aman 4.2 MB agar tidak membebani database
+  dataUrlMaxLength: 4_200_000,
 } as const;
 
 export const URGENSI_VALUES = ['Kritis', 'Sedang', 'Normal'] as const;

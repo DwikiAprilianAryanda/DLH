@@ -30,9 +30,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { laporan_id, rating, komentar } = body;
 
-    if (!laporan_id || !rating) {
-      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
+    if (!laporan_id || typeof laporan_id !== 'string') {
+      return NextResponse.json({ error: 'ID laporan tidak valid' }, { status: 400 });
     }
+
+    const numericRating = Number(rating);
+    if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+      return NextResponse.json({ error: 'Rating harus berupa angka 1 sampai 5' }, { status: 400 });
+    }
+
+    const cleanKomentar = typeof komentar === 'string' ? komentar.trim().slice(0, 500) : null;
 
     const laporan = await prisma.laporanSampah.findUnique({ where: { id: laporan_id } });
     if (!laporan) {
@@ -54,8 +61,8 @@ export async function POST(request: Request) {
       data: {
         laporan_id,
         user_id: currentUser.id,
-        rating,
-        komentar: komentar || null,
+        rating: numericRating,
+        komentar: cleanKomentar,
       },
     });
 

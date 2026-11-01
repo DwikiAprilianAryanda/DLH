@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUserFromToken } from '@/lib/auth';
 import { TPS_SEED_DATA } from '@/lib/tps-seed-data';
+import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 
 const prisma = new PrismaClient();
+const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const FALLBACK_TPS = TPS_SEED_DATA.map((t, idx) => ({
   id: `tps-${idx + 1}`,
@@ -45,6 +47,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
 
+    if (!(KECAMATAN_SAMARINDA as readonly string[]).includes(body.kecamatan)) {
+      return NextResponse.json({ error: 'Pilihan kecamatan TPS tidak valid' }, { status: 400 });
+    }
+
+    const lat = Number(body.latitude);
+    const lng = Number(body.longitude);
+    if (isNaN(lat) || isNaN(lng) || lat < -2.5 || lat > 2.5 || lng < 113.5 || lng > 119.0) {
+      return NextResponse.json(
+        { error: 'Koordinat di luar batas wilayah Samarinda/Kaltim (lat: -2.5 s/d 2.5, lng: 113.5 s/d 119.0)' },
+        { status: 400 }
+      );
+    }
+
+    if (body.jam_buka && !TIME_REGEX.test(body.jam_buka)) {
+      return NextResponse.json({ error: 'Format jam buka harus HH:mm (contoh: 06:00)' }, { status: 400 });
+    }
+    if (body.jam_tutup && !TIME_REGEX.test(body.jam_tutup)) {
+      return NextResponse.json({ error: 'Format jam tutup harus HH:mm (contoh: 18:00)' }, { status: 400 });
+    }
+
     if (body.jumlah_bak !== undefined && body.jumlah_bak !== null && body.jumlah_bak !== '') {
       const bak = Number(body.jumlah_bak);
       if (isNaN(bak) || bak < 1 || bak > 30) {
@@ -60,8 +82,8 @@ export async function POST(request: Request) {
       data: {
         nama: body.nama,
         kecamatan: body.kecamatan,
-        latitude: Number(body.latitude),
-        longitude: Number(body.longitude),
+        latitude: lat,
+        longitude: lng,
         bangunan: body.bangunan || null,
         mobilitas: body.mobilitas || null,
         jumlah_bak: body.jumlah_bak ? Number(body.jumlah_bak) : null,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUserFromToken } from '@/lib/auth';
+import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 
 const prisma = new PrismaClient();
 
@@ -32,7 +33,11 @@ export async function PATCH(request: Request) {
     }
 
     if (body.kecamatan !== undefined) {
-      data.kecamatan = body.kecamatan;
+      const kec = typeof body.kecamatan === 'string' ? body.kecamatan.trim() : '';
+      if (kec && !(KECAMATAN_SAMARINDA as readonly string[]).includes(kec)) {
+        return NextResponse.json({ error: 'Pilihan kecamatan tidak valid' }, { status: 400 });
+      }
+      data.kecamatan = kec || null;
     }
 
     const updated = await prisma.profile.update({

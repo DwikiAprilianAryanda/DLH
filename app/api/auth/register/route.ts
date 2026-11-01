@@ -4,8 +4,35 @@ import { hashPassword } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
+// Proteksi Anti-Spam: Batasi registrasi per IP (maksimal 3 registrasi per menit)
+const registerAttempts = new Map<string, { count: number; resetTime: number }>();
+
+function checkRegisterRateLimit(ip: string, maxAttempts = 3, windowMs = 60 * 1000): boolean {
+  const now = Date.now();
+  const record = registerAttempts.get(ip);
+  if (!record || now > record.resetTime) {
+    registerAttempts.set(ip, { count: 1, resetTime: now + windowMs });
+    return false;
+  }
+  if (record.count >= maxAttempts) {
+    return true;
+  }
+  record.count += 1;
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : 'local';
+
+    if (checkRegisterRateLimit(clientIp)) {
+      return NextResponse.json(
+        { error: 'Terlalu banyak permintaan pendaftaran dari jaringan Anda. Mohon tunggu 1 menit.' },
+        { status: 429 }
+      );
+    }
+
     const { full_name, email, password, phone } = await request.json();
 
     const trimmedName = typeof full_name === 'string' ? full_name.trim() : '';

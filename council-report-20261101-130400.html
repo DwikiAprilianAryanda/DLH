@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Council Report - TROPIS DLH Kota Samarinda</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card-bg: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --primary: #2563eb;
+      --primary-bg: #eff6ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .header {
+      padding: 32px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, #ffffff, #f8fafc);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+    .badge-primary { background: var(--primary-bg); color: var(--primary); }
+    h1 { font-size: 26px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+    .meta { font-size: 13px; color: var(--text-muted); }
+    .question-box {
+      margin: 24px 32px;
+      padding: 20px;
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 8px 8px 0;
+    }
+    .question-box h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .question-box p { font-size: 15px; color: #334155; font-style: italic; }
+
+    .verdict-section {
+      padding: 32px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    .verdict-banner {
+      padding: 20px 24px;
+      background: var(--danger-bg);
+      border: 1px solid #fca5a5;
+      border-radius: 12px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .verdict-banner-icon { font-size: 32px; }
+    .verdict-banner h2 { font-size: 18px; font-weight: 800; color: #991b1b; }
+    .verdict-banner p { font-size: 14px; color: #b91c1c; }
+
+    .content-block { margin-bottom: 28px; }
+    .content-block h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .content-block ul { padding-left: 20px; color: #334155; }
+    .content-block li { margin-bottom: 8px; font-size: 14px; }
+
+    /* Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px 0;
+      font-size: 13px;
+    }
+    .matrix-table th, .matrix-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .matrix-table th { background: #f8fafc; font-weight: 700; color: #475569; }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-fatal { background: #fee2e2; color: #991b1b; }
+    .status-clash { background: #fef3c7; color: #92400e; }
+
+    /* Action Plan Cards */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .action-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .action-card h4 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .action-card p { font-size: 13px; color: #475569; }
+    .action-card code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+    /* Collapsibles */
+    .collapsible-container { padding: 32px; background: #f8fafc; }
+    details {
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+    summary {
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #334155;
+      background: #ffffff;
+    }
+    summary:hover { background: #f8fafc; }
+    .advisor-content {
+      padding: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.6;
+      background: #fafafa;
+    }
+
+    .footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="badge badge-danger">Council Verdict: Blocked</span>
+    <span class="badge badge-primary">Karpathy LLM Council Framework</span>
+    <h1>Laporan Sidang Dewan Keamanan (LLM Council)</h1>
+    <div class="meta">
+      <strong>Target:</strong> Web DLH Kota Samarinda (TROPIS) &bull; 
+      <strong>Tanggal:</strong> 1 November 2026 &bull; 
+      <strong>Peserta:</strong> 5 Penasihat Independen + Chairman
+    </div>
+  </div>
+
+  <div class="question-box">
+    <h3>Pertanyaan yang Disidangkan</h3>
+    <p>"Apakah masih ada celah keamanan, blind spot arsitektur, edge cases, atau risiko eksploitasi tersembunyi pada aplikasi web TROPIS DLH Samarinda yang belum tertangani sebelum di-push ke GitHub dan dideploy ke produksi? Lakukan audit radikal, bongkar semua asumsi, dan temukan celah tersembunyi yang masih luput!"</p>
+  </div>
+
+  <div class="verdict-section">
+    <div class="verdict-banner">
+      <div class="verdict-banner-icon">🛑</div>
+      <div>
+        <h2>STATUS: JANGAN PUSH KE REPO PUBLIK SEKARANG</h2>
+        <p>Dewan menemukan 5 celah kritis tersembunyi yang meruntuhkan postur keamanan jika di-push ke GitHub. Semua penasihat bulat menuntut Gate 1 Patch sebelum rilis.</p>
+      </div>
+    </div>
+
+    <div class="content-block">
+      <h3>1. Konsensus Bulat Dewan (Where the Council Agrees)</h3>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Celah / Blind Spot</th>
+            <th>Dampak Jika Di-Push ke GitHub</th>
+            <th>Tingkat Risiko</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Hardcoded Fallback JWT Secret</strong> (<code>lib/auth.ts</code>)</td>
+            <td>Fallback string bocor di git publik; penyerang bisa memalsukan token admin instan jika env var kosong saat deploy.</td>
+            <td><span class="status-pill status-fatal">CRITICAL</span></td>
+          </tr>
+          <tr>
+            <td><strong>Perimeter API Middleware Bocor</strong> (<code>middleware.ts</code>)</td>
+            <td>Matcher hanya <code>/admin/:path*</code>, endpoint backend <code>/api/admin/*</code> tidak tersaring middleware.</td>
+            <td><span class="status-pill status-fatal">CRITICAL</span></td>
+          </tr>
+          <tr>
+            <td><strong>In-Memory Rate Limiting Sia-sia</strong> (<code>login/route.ts</code>)</td>
+            <td>State memori lokal reset di arsitektur cloud/serverless; <code>register</code> & <code>laporan</code> tanpa rate limit membuka banjir DoS.</td>
+            <td><span class="status-pill status-fatal">HIGH</span></td>
+          </tr>
+          <tr>
+            <td><strong>Logout Palsu / Zombie Session</strong> (<code>logout/route.ts</code>)</td>
+            <td>Delete cookie tanpa deklarasi eksplisit <code>path: '/'</code> diabaikan banyak browser; sesi tetap aktif.</td>
+            <td><span class="status-pill status-fatal">HIGH</span></td>
+          </tr>
+          <tr>
+            <td><strong>Absennya Validasi Geospasial & Enum</strong></td>
+            <td>Koordinat TPS mentah tanpa bounds dan kecamatan bebas memicu Leaflet client-side crash dan polusi DB.</td>
+            <td><span class="status-pill status-fatal">MEDIUM</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-block">
+      <h3>2. Perdebatan & Friksi Antar Penasihat (Where the Council Clashes)</h3>
+      <ul>
+        <li><strong>Base64 7MB di MySQL vs Object Storage:</strong> The Expansionist & First Principles menuntut migrasi arsitektur ke S3/GCS seketika karena MySQL LongText akan mencekik InnoDB buffer pool. The Executor & Contrarian berpendapat migrasi S3 memakan waktu; langkah taktis sebelum push adalah memangkas ukuran payload maksimal ke 2MB dan menerapkan cooldown/rate limit.</li>
+        <li><strong>Autentikasi Bearer Token:</strong> Usulan mendukung header Authorization untuk integrasi mobile ditolak mayoritas penasihat sebagai *scope creep* yang memperlebar attack surface saat ini.</li>
+      </ul>
+    </div>
+
+    <div class="content-block">
+      <h3>3. Rencana Aksi Langsung (Immediate Gate 1 Action Plan)</h3>
+      <div class="action-grid">
+        <div class="action-card">
+          <h4>1. Fail-Closed JWT Secret (<code>lib/auth.ts</code>)</h4>
+          <p>Hapus fallback string publik. Paksa aplikasi gagal boot (<code>throw new Error</code>) di production jika <code>JWT_SECRET</code> belum disetel di environment.</p>
+        </div>
+        <div class="action-card">
+          <h4>2. Perluas Matcher Middleware (<code>middleware.ts</code>)</h4>
+          <p>Ubah matcher menjadi <code>matcher: ['/admin/:path*', '/api/admin/:path*']</code> agar seluruh API administratif terlindungi.</p>
+        </div>
+        <div class="action-card">
+          <h4>3. Perbaiki Pembersihan Cookie (<code>app/api/auth/logout/route.ts</code>)</h4>
+          <p>Setel cookie dengan atribut <code>maxAge: 0, path: '/', httpOnly: true</code> untuk memastikan sesi bersih di semua browser.</p>
+        </div>
+        <div class="action-card">
+          <h4>4. Rate Limiting Registrasi & Laporan</h4>
+          <p>Tambahkan pembatasan frekuensi pada <code>POST /api/auth/register</code> dan cooldown anti-duplikasi pada <code>POST /api/laporan</code>.</p>
+        </div>
+        <div class="action-card">
+          <h4>5. Bounding Box & Validasi Input Ketat</h4>
+          <p>Batasi koordinat TPS dalam batas wajar Samarinda/Kaltim (-2.5 s/d 2.5, 113.5 s/d 119.0), validasi enum <code>kecamatan</code>, dan regex jam operasional <code>/^([01]\d|2[0-3]):[0-5]\d$/</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1e293b;">Analisis Lengkap Kelima Penasihat Independen</h3>
+
+    <details>
+      <summary><span>1. The Contrarian (Red-Team Adversarial Lens)</span> <span>▾</span></summary>
+      <div class="advisor-content">
+        <p>Patch keamanan ini memberikan rasa aman palsu (<em>security theater</em>). Fallback secret <code>dlh-samarinda-secret-jwt-key-2026</code> adalah bom waktu. Jika environment variable gagal dimuat, seluruh proteksi runtuh—siapa pun bisa memalsukan token admin secara instan.</p>
+        <p>Matcher hanya mengunci <code>/admin/:path*</code>, rute backend kritis <code>/api/admin/*</code> sama sekali tidak tersentuh middleware. Rate limit di memori pada serverless Next.js tidak berguna karena counter reset tiap instance baru. Menerima 7MB base64 tanpa batasan frekuensi adalah resep OOM crash dan disk bloat.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span>2. The First Principles Thinker (Fundamental Architecture Lens)</span> <span>▾</span></summary>
+      <div class="advisor-content">
+        <p>Arsitektur TROPIS berasumsi bahwa rute halaman adalah pelindung API, memori lokal adalah state global, dan database relasional adalah tempat penampungan biner. Ketiga asumsi ini cacat secara fundamental.</p>
+        <p>Mengizinkan upload Base64 hingga 7MB langsung ke kolom <code>LongText</code> MySQL tanpa throttling akan mencekik InnoDB buffer pool, memicu saturasi IOPS, dan berujung memory exhaustion (OOM). Solusi first-principles: Fail-closed JWT secret, guard auth terpusat di data layer, dan alihkan file ke Object Storage.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span>3. The Expansionist (Scalability & Civic Load Lens)</span> <span>▾</span></summary>
+      <div class="advisor-content">
+        <p>Menyimpan payload base64 7MB pada kolom LongText MySQL adalah bom waktu skalabilitas sipil. Ketika ribuan warga Samarinda serentak melaporkan tumpukan sampah pasca-banjir, ukuran tabel akan meledak ratusan gigabyte dalam hitungan minggu, memicu kegagalan backup dan <code>max_allowed_packet</code> error.</p>
+        <p>Bulk update TPS tanpa <code>prisma.$transaction</code> dan tanpa validasi format waktu menciptakan risiko korupsi data laten yang merusak jadwal logistik armada truk sampah di lapangan.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span>4. The Outsider (Fresh Eyes & Production Traps Lens)</span> <span>▾</span></summary>
+      <div class="advisor-content">
+        <p>Adanya fallback string <code>dlh-samarinda-secret-jwt-key-2026</code> adalah dosa arsitektur terburuk. Begitu repo di-push ke GitHub publik, token admin dapat dipalsukan siapa saja secara instan. Hapus total default string tersebut—paksa runtime melempar fatal exception saat startup.</p>
+        <p>Menghapus cookie <code>session_token</code> tanpa parameter eksplisit <code>path: '/'</code> kerap diabaikan browser. Koordinat TPS mentah tanpa batas ketat menjamin Leaflet client-side crash seketika saat menerima data korup atau typo ekstrem.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span>5. The Executor (Immediate Practical Patch List)</span> <span>▾</span></summary>
+      <div class="advisor-content">
+        <p>Jangan push ke GitHub sekarang. Deployment ini masih bocor. Terapkan daftar 5 patch konkret: Fail-closed JWT_SECRET, perbaiki matcher middleware untuk mengikutsertakan <code>/api/admin/:path*</code>, koreksi pembersihan cookie logout, terapkan validasi Zod/enum pada kecamatan dan koordinat TPS, serta pasang proteksi rate limiting/cooldown pada registrasi dan pelaporan.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="footer">
+    Dokumen ini diproduksi oleh <strong>LLM Council</strong> pada 1 November 2026 &bull; Sesi Audit Keamanan Web DLH Kota Samarinda.
+  </div>
+</div>
+
+</body>
+</html>

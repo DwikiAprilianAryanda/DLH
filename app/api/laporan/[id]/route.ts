@@ -1,31 +1,75 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getCurrentUserFromToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
+
+const VALID_STATUSES = [
+  'Menunggu Persetujuan',
+  'Belum Ditangani',
+  'Proses',
+  'Ditangani',
+  'Ditolak',
+] as const;
 
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json();
-    const existing = await prisma.laporanSampah.findUnique({ where: { id: params.id } });
+    // 1. Verifikasi Keamanan: Hanya admin yang berhak memperbarui status laporan
+    const currentUser = getCurrentUserFromToken();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Akses ditolak. Tindakan ini hanya dapat dilakukan oleh staf admin DLH.' },
+        { status: 403 }
+      );
+    }
 
-    // Update status ke "Proses" (armada dikirim) atau "Ditangani" (selesai) adalah
-    // tindakan pengawasan — wajib disertai foto bukti & deskripsi dari petugas.
+    const body = await request.json();
+
+    // 2. Validasi status laporan
+    if (!body.status || !VALID_STATUSES.includes(body.status)) {
+      return NextResponse.json(
+        { error: 'Status laporan tidak valid.' },
+        { status: 400 }
+      );
+    }
+
+    const existing = await prisma.laporanSampah.findUnique({ where: { id: params.id } });
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Laporan tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
+
+    // 3. Update status ke "Proses" (armada dikirim) atau "Ditangani" (selesai) wajib bukti & catatan
     const requiresBukti = body.status === 'Proses' || body.status === 'Ditangani';
     if (requiresBukti && (!body.catatan_petugas || !body.foto_bukti_petugas)) {
       return NextResponse.json(
-        { error: 'Foto bukti dan deskripsi wajib diisi untuk memperbarui status ini' },
+        { error: 'Foto bukti dan catatan petugas wajib diisi untuk status ini.' },
         { status: 400 }
       );
+    }
+
+    // 4. Validasi format foto bukti jika ada
+    if (body.foto_bukti_petugas) {
+      const isDataImg = typeof body.foto_bukti_petugas === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(body.foto_bukti_petugas);
+      const isHttpImg = typeof body.foto_bukti_petugas === 'string' && /^https:\/\//.test(body.foto_bukti_petugas);
+      if (!isDataImg && !isHttpImg) {
+        return NextResponse.json(
+          { error: 'Format foto bukti harus berupa gambar (JPG, PNG, atau WEBP).' },
+          { status: 400 }
+        );
+      }
     }
 
     const updated = await prisma.laporanSampah.update({
       where: { id: params.id },
       data: {
         status: body.status,
-        catatan_petugas: body.catatan_petugas,
+        catatan_petugas: typeof body.catatan_petugas === 'string' ? body.catatan_petugas.trim() : null,
         foto_bukti_petugas: body.foto_bukti_petugas || null,
       },
     });

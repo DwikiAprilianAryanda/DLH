@@ -9,15 +9,15 @@ export async function GET() {
   try {
     const currentUser = getCurrentUserFromToken();
     if (!currentUser) {
-      return NextResponse.json(INITIAL_NOTIFIKASI);
+      return NextResponse.json([]);
     }
     const notifikasi = await prisma.notifikasi.findMany({
       where: { user_id: currentUser.id },
       orderBy: { created_at: 'desc' },
     });
-    return NextResponse.json(notifikasi && notifikasi.length > 0 ? notifikasi : INITIAL_NOTIFIKASI);
+    return NextResponse.json(notifikasi);
   } catch (error) {
-    console.error('Gagal ambil notifikasi (database offline), fallback ke INITIAL_NOTIFIKASI:', error);
-    return NextResponse.json(INITIAL_NOTIFIKASI);
+    console.error('Gagal ambil notifikasi (database offline):', error);
+    return NextResponse.json([]);
   }
 }
