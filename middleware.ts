@@ -105,9 +105,36 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // 3. Lindungi API pengawas (/api/pengawas/*) — hanya role pengawas
+  if (pathname.startsWith('/api/pengawas')) {
+    const token = request.cookies.get('session_token')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Akses ditolak. Autentikasi pengawas diperlukan.' },
+        { status: 401 }
+      );
+    }
+    const user = await verifyJwtEdge(token);
+    if (!user || user.role !== 'pengawas') {
+      return NextResponse.json(
+        { error: 'Akses terlarang. Diperlukan akun pengawas.' },
+        { status: 403 }
+      );
+    }
+  }
+
+  // 4. Lindungi halaman pengawas (/pengawas/*) — belum login / bukan pengawas -> ke halaman login
+  if (pathname.startsWith('/pengawas')) {
+    const token = request.cookies.get('session_token')?.value;
+    const user = token ? await verifyJwtEdge(token) : null;
+    if (!user || user.role !== 'pengawas') {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*', '/pengawas/:path*', '/api/pengawas/:path*'],
 };

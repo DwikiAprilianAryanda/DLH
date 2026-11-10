@@ -79,6 +79,17 @@ export default function Header() {
                   </Link>
                 )}
 
+                {user.role === 'pengawas' && (
+                  <Link
+                    href="/pengawas"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700 hover:scale-105 active:scale-95 transition-all"
+                    title="Buka Panel Pengawas"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">fact_check</span>
+                    <span className="hidden sm:inline">Panel Pengawas</span>
+                  </Link>
+                )}
+
                 <Link
                   href="/profil"
                   className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-85 transition-opacity text-on-primary shadow-xs"

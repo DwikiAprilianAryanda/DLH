@@ -1,3 +1,5 @@
+import { buildArmadaSeed } from '@/lib/armada-seed-data';
+
 export interface ReportItem {
   id: string;
   user_id?: string;
@@ -32,6 +34,13 @@ export interface ArmadaItem {
   telepon: string;
   status: 'Tersedia' | 'Bertugas' | 'Perawatan';
   kecamatan_tugas: string;
+  // Rincian armada (revisi DLH 2026). '-' = belum ada datanya.
+  jenis_armada?: string;
+  bagian_pekerjaan?: string;
+  tahun?: string;
+  // Ritase = jumlah perjalanan pulang-pergi. Diisi oleh GET /api/armada.
+  ritase_hari_ini?: number;
+  ritase_bulan_ini?: number;
 }
 
 export interface NotificationItem {
@@ -127,38 +136,9 @@ export const INITIAL_REPORTS: ReportItem[] = [
   }
 ];
 
-export const INITIAL_ARMADA: ArmadaItem[] = [
-  { id: "arm-01", nama_armada: "Truk Compactor DLH 01", plat_nomor: "KT 8123 BA", nama_petugas: "Pak Supriadi", telepon: "0812-5544-3321", status: "Bertugas", kecamatan_tugas: "Samarinda Ulu" },
-  { id: "arm-02", nama_armada: "Truk Compactor DLH 02", plat_nomor: "KT 8124 BA", nama_petugas: "Pak Agus Hermawan", telepon: "0812-5544-3322", status: "Bertugas", kecamatan_tugas: "Samarinda Ulu" },
-  { id: "arm-03", nama_armada: "Truk Compactor DLH 03", plat_nomor: "KT 8125 BA", nama_petugas: "Pak Wahyu Hidayat", telepon: "0812-5544-3323", status: "Tersedia", kecamatan_tugas: "Samarinda Ilir" },
-  { id: "arm-04", nama_armada: "Truk Compactor DLH 04", plat_nomor: "KT 8456 BA", nama_petugas: "Pak Bambang Hermanto", telepon: "0813-4422-9900", status: "Bertugas", kecamatan_tugas: "Samarinda Ilir" },
-  { id: "arm-05", nama_armada: "Truk Compactor DLH 05", plat_nomor: "KT 8457 BA", nama_petugas: "Pak Dedi Setiawan", telepon: "0813-4422-9901", status: "Bertugas", kecamatan_tugas: "Sungai Pinang" },
-  { id: "arm-06", nama_armada: "Truk Compactor DLH 06", plat_nomor: "KT 8458 BA", nama_petugas: "Pak Hendra Wijaya", telepon: "0813-4422-9902", status: "Tersedia", kecamatan_tugas: "Sungai Pinang" },
-  { id: "arm-07", nama_armada: "Truk Compactor DLH 07", plat_nomor: "KT 8459 BA", nama_petugas: "Pak Arif Rahman", telepon: "0813-4422-9903", status: "Bertugas", kecamatan_tugas: "Samarinda Utara" },
-  { id: "arm-08", nama_armada: "Truk Compactor DLH 08", plat_nomor: "KT 8460 BA", nama_petugas: "Pak Eko Prasetyo", telepon: "0813-4422-9904", status: "Bertugas", kecamatan_tugas: "Samarinda Utara" },
-  { id: "arm-09", nama_armada: "Truk Compactor DLH 09", plat_nomor: "KT 8461 BA", nama_petugas: "Pak Surya Dinata", telepon: "0813-4422-9905", status: "Tersedia", kecamatan_tugas: "Samarinda Kota" },
-  { id: "arm-10", nama_armada: "Truk Compactor DLH 10", plat_nomor: "KT 8462 BA", nama_petugas: "Pak Rudi Hartono", telepon: "0813-4422-9906", status: "Bertugas", kecamatan_tugas: "Samarinda Kota" },
-  { id: "arm-11", nama_armada: "Truk Compactor DLH 11", plat_nomor: "KT 8463 BA", nama_petugas: "Pak Samsul Bahri", telepon: "0813-4422-9907", status: "Bertugas", kecamatan_tugas: "Sungai Kunjang" },
-  { id: "arm-12", nama_armada: "Truk Compactor DLH 12", plat_nomor: "KT 8464 BA", nama_petugas: "Pak Ilham Saputra", telepon: "0813-4422-9908", status: "Bertugas", kecamatan_tugas: "Sungai Kunjang" },
-  { id: "arm-13", nama_armada: "Truk Compactor DLH 13", plat_nomor: "KT 8465 BA", nama_petugas: "Pak Anton Sujarwo", telepon: "0813-4422-9909", status: "Tersedia", kecamatan_tugas: "Sambutan" },
-  { id: "arm-14", nama_armada: "Truk Compactor DLH 14", plat_nomor: "KT 8466 BA", nama_petugas: "Pak Firman Utina", telepon: "0813-4422-9910", status: "Bertugas", kecamatan_tugas: "Palaran" },
-  { id: "arm-15", nama_armada: "Truk Dump DLH 15", plat_nomor: "KT 8001 AA", nama_petugas: "Pak Joko Susilo", telepon: "0852-1122-3344", status: "Bertugas", kecamatan_tugas: "Samarinda Seberang" },
-  { id: "arm-16", nama_armada: "Truk Dump DLH 16", plat_nomor: "KT 8002 AA", nama_petugas: "Pak Mansyur", telepon: "0852-1122-3345", status: "Tersedia", kecamatan_tugas: "Samarinda Seberang" },
-  { id: "arm-17", nama_armada: "Truk Dump DLH 17", plat_nomor: "KT 8003 AA", nama_petugas: "Pak Ruslan Efendi", telepon: "0852-1122-3346", status: "Bertugas", kecamatan_tugas: "Loa Janan Ilir" },
-  { id: "arm-18", nama_armada: "Truk Dump DLH 18", plat_nomor: "KT 8004 AA", nama_petugas: "Pak Yudi Pratama", telepon: "0852-1122-3347", status: "Bertugas", kecamatan_tugas: "Loa Janan Ilir" },
-  { id: "arm-19", nama_armada: "Truk Dump DLH 19", plat_nomor: "KT 8005 AA", nama_petugas: "Pak Gunawan", telepon: "0852-1122-3348", status: "Perawatan", kecamatan_tugas: "Palaran" },
-  { id: "arm-20", nama_armada: "Truk Dump DLH 20", plat_nomor: "KT 8006 AA", nama_petugas: "Pak Hariyanto", telepon: "0852-1122-3349", status: "Bertugas", kecamatan_tugas: "Sambutan" },
-  { id: "arm-21", nama_armada: "Truk Dump DLH 21", plat_nomor: "KT 8007 AA", nama_petugas: "Pak Syahril", telepon: "0852-1122-3350", status: "Bertugas", kecamatan_tugas: "Sungai Pinang" },
-  { id: "arm-22", nama_armada: "Truk Dump DLH 22", plat_nomor: "KT 8008 AA", nama_petugas: "Pak Deni Kurniawan", telepon: "0852-1122-3351", status: "Tersedia", kecamatan_tugas: "Samarinda Ulu" },
-  { id: "arm-23", nama_armada: "Truk Dump DLH 23", plat_nomor: "KT 8009 AA", nama_petugas: "Pak Ridwan Hakim", telepon: "0852-1122-3352", status: "Bertugas", kecamatan_tugas: "Samarinda Ilir" },
-  { id: "arm-24", nama_armada: "Truk Dump DLH 24", plat_nomor: "KT 8010 AA", nama_petugas: "Pak Taufik Hidayat", telepon: "0852-1122-3353", status: "Perawatan", kecamatan_tugas: "Samarinda Utara" },
-  { id: "arm-25", nama_armada: "Pick-up Reaksi Cepat DLH 25", plat_nomor: "KT 8789 CA", nama_petugas: "Mas Rian", telepon: "0821-9988-7766", status: "Bertugas", kecamatan_tugas: "Samarinda Kota" },
-  { id: "arm-26", nama_armada: "Pick-up Reaksi Cepat DLH 26", plat_nomor: "KT 8790 CA", nama_petugas: "Mas Bagus", telepon: "0821-9988-7767", status: "Bertugas", kecamatan_tugas: "Samarinda Ulu" },
-  { id: "arm-27", nama_armada: "Pick-up Reaksi Cepat DLH 27", plat_nomor: "KT 8791 CA", nama_petugas: "Mas Dimas", telepon: "0821-9988-7768", status: "Tersedia", kecamatan_tugas: "Sungai Kunjang" },
-  { id: "arm-28", nama_armada: "Pick-up Reaksi Cepat DLH 28", plat_nomor: "KT 8792 CA", nama_petugas: "Mas Andre", telepon: "0821-9988-7769", status: "Bertugas", kecamatan_tugas: "Sungai Pinang" },
-  { id: "arm-29", nama_armada: "Pick-up Reaksi Cepat DLH 29", plat_nomor: "KT 8793 CA", nama_petugas: "Mas Rizky", telepon: "0821-9988-7770", status: "Tersedia", kecamatan_tugas: "Samarinda Seberang" },
-  { id: "arm-30", nama_armada: "Pick-up Reaksi Cepat DLH 30", plat_nomor: "KT 8794 CA", nama_petugas: "Mas Ferry", telepon: "0821-9988-7771", status: "Bertugas", kecamatan_tugas: "Sambutan" }
-];
+// 96 unit dari SARANA_PRASARANA_2026.pdf (lihat prisma/armada-seed.json).
+// Hanya dipakai sebagai cadangan kalau database tidak bisa dihubungi.
+export const INITIAL_ARMADA: ArmadaItem[] = buildArmadaSeed();
 
 export const INITIAL_NOTIFIKASI: NotificationItem[] = [
   {

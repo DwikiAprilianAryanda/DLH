@@ -72,10 +72,17 @@ export default function ProfilPage() {
           </div>
           <h1 className="text-base font-bold text-on-surface">{user.full_name}</h1>
           <p className="text-xs text-on-surface-variant">{user.email}</p>
-          {user.kecamatan && (
-            <span className="inline-block mt-2 text-[10px] px-3 py-1 bg-primary-container text-on-primary-container font-bold rounded-full">
-              {user.kecamatan}
+          {user.role === 'pengawas' ? (
+            <span className="inline-flex items-center gap-1 mt-2 text-[10px] px-3 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full">
+              <span className="material-symbols-outlined text-[14px]">fact_check</span>
+              Pengawas{user.kecamatan ? ` · Kecamatan ${user.kecamatan}` : ''}
             </span>
+          ) : (
+            user.kecamatan && (
+              <span className="inline-block mt-2 text-[10px] px-3 py-1 bg-primary-container text-on-primary-container font-bold rounded-full">
+                {user.kecamatan}
+              </span>
+            )
           )}
 
           <Link
@@ -123,6 +130,18 @@ export default function ProfilPage() {
             </div>
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </Link>
+          {user?.role === 'pengawas' && (
+            <Link
+              href="/pengawas"
+              className="flex items-center justify-between p-3 hover:bg-surface-container-low rounded-xl transition-colors text-xs font-semibold text-emerald-700 bg-emerald-50"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[20px]">fact_check</span>
+                Panel Pengawas
+              </div>
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </Link>
+          )}
           {user?.role === 'admin' && (
             <Link
               href="/admin"
@@ -174,11 +193,11 @@ export default function ProfilPage() {
                 <div className="flex items-center gap-1.5">
                   <p className="text-xs font-semibold text-on-surface">Web Cartrack Armada DLH</p>
                   <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container">
-                    30 Unit Realtime
+                    Armada Realtime
                   </span>
                 </div>
                 <p className="text-[10px] text-on-surface-variant mt-0.5">
-                  Sistem monitoring GPS pelacakan 30 unit truk sampah & compactor secara langsung
+                  Sistem monitoring GPS pelacakan armada pengangkut sampah DLH secara langsung
                 </p>
               </div>
             </div>

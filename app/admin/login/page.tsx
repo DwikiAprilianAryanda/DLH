@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLoginPage() {
-  const { login, logout } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,14 +19,9 @@ export default function AdminLoginPage() {
     try {
       const loggedInUser = await login(email, password);
 
-      if (loggedInUser.role !== 'admin') {
-        await logout();
-        setErrorMsg('Akun ini bukan akun admin. Silakan login lewat portal warga.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      window.location.href = '/admin';
+      // Semua jenis akun boleh masuk dari halaman ini; tujuan mengikuti peran akun.
+      window.location.href =
+        loggedInUser.role === 'admin' ? '/admin' : loggedInUser.role === 'pengawas' ? '/pengawas' : '/';
     } catch (err: any) {
       setErrorMsg(err.message || 'Email atau password salah.');
       setIsSubmitting(false);

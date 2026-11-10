@@ -21,6 +21,8 @@ interface ReportContextType {
   deleteReport: (id: string) => Promise<{ success: boolean; error?: string }>;
   getReportById: (id: string) => ReportItem | undefined;
   markAllNotificationsRead: () => void;
+  /** Ambil ulang daftar armada (setelah admin tambah/edit/hapus armada atau catat ritase). */
+  refreshArmada: () => Promise<void>;
 }
 
 const ReportContext = createContext<ReportContextType | undefined>(undefined);
@@ -189,6 +191,7 @@ export function ReportProvider({ children }: { children: ReactNode }) {
         deleteReport,
         getReportById,
         markAllNotificationsRead,
+        refreshArmada: fetchArmada,
       }}
     >
       {children}

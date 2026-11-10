@@ -96,3 +96,6 @@ $RECYCLE.BIN/
 
 # 11. Platform Deployment & Cloud CLI
 .vercel
+
+# 12. Kredensial akun pengawas hasil seed (JANGAN di-commit; bagikan lalu hapus)
+pengawas-kredensial*.csv

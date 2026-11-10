@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import type { TpsItem } from '@/components/map/TpsMap';
+import { awalHariWita, formatWaktuWita } from '@/lib/waktu';
 
 const LocationPickerMap = dynamic(() => import('@/components/map/LocationPickerMap'), {
   ssr: false,
@@ -64,8 +65,22 @@ export default function AdminTpsPage() {
     }
   };
 
+  // Status kebersihan dari laporan pengawas (tps_id -> waktu ISO terakhir dibersihkan)
+  const [kebersihan, setKebersihan] = useState<Record<string, string>>({});
+  const awalHari = awalHariWita();
+
   useEffect(() => {
     fetchTps();
+    fetch('/api/tps/kebersihan')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const peta: Record<string, string> = {};
+          for (const r of data as { tps_id: string; waktu: string }[]) peta[r.tps_id] = r.waktu;
+          setKebersihan(peta);
+        }
+      })
+      .catch((error) => console.error('Gagal ambil status kebersihan TPS:', error));
   }, []);
 
   const kecamatanList = [
@@ -276,19 +291,20 @@ export default function AdminTpsPage() {
                 <th className="py-3.5 px-4">Kecamatan</th>
                 <th className="py-3.5 px-4">Detail</th>
                 <th className="py-3.5 px-4">Jam Operasional</th>
+                <th className="py-3.5 px-4">Kebersihan</th>
                 <th className="py-3.5 px-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/20 font-medium text-on-surface">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-on-surface-variant">
+                  <td colSpan={6} className="py-8 text-center text-on-surface-variant">
                     Memuat data...
                   </td>
                 </tr>
               ) : filteredTps.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-on-surface-variant">
+                  <td colSpan={6} className="py-8 text-center text-on-surface-variant">
                     Tidak ada TPS ditemukan.
                   </td>
                 </tr>
@@ -320,6 +336,24 @@ export default function AdminTpsPage() {
                         <span className="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-bold">
                           Belum diatur
                         </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      {kebersihan[tps.id] ? (
+                        <span
+                          className={`text-[11px] font-bold ${
+                            new Date(kebersihan[tps.id]) >= awalHari
+                              ? 'text-emerald-700'
+                              : 'text-on-surface-variant'
+                          }`}
+                        >
+                          {new Date(kebersihan[tps.id]) >= awalHari ? 'Bersih hari ini' : 'Terakhir'}
+                          <span className="block font-medium text-on-surface-variant">
+                            {formatWaktuWita(kebersihan[tps.id])}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-on-surface-variant">Belum ada laporan</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">

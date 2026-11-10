@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { awalHariWita, formatWaktuWita } from '@/lib/waktu';
 
 export interface TpsItem {
   id: string;
@@ -25,6 +26,22 @@ const tpsIcon = L.divIcon({
         <span class="material-symbols-outlined text-[16px]">delete</span>
       </div>
       <div class="absolute w-2.5 h-2.5 bg-tertiary-container rotate-45 -bottom-1 z-0 shadow-sm border border-white"></div>
+    </div>
+  `,
+  className: 'custom-leaflet-marker',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28],
+});
+
+// TPS yang sudah dilaporkan pengawas dibersihkan hari ini (WITA): hijau + tanda centang.
+const cleanedIcon = L.divIcon({
+  html: `
+    <div class="relative flex items-center justify-center cursor-pointer drop-shadow-md hover:scale-110 transition-transform">
+      <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center border-2 border-white shadow-md z-10">
+        <span class="material-symbols-outlined text-[16px]">check_circle</span>
+      </div>
+      <div class="absolute w-2.5 h-2.5 bg-emerald-600 rotate-45 -bottom-1 z-0 shadow-sm border border-white"></div>
     </div>
   `,
   className: 'custom-leaflet-marker',
@@ -88,6 +105,8 @@ interface TpsMapProps {
   /** Daftar id TPS terdekat terurut dari yang paling dekat. Item [0] = TPS terdekat #1, [1..4] = 4 TPS terdekat lainnya. */
   nearestTpsIds?: string[];
   center?: [number, number];
+  /** tps_id -> waktu (ISO) terakhir dilaporkan pengawas sudah dibersihkan. Dari GET /api/tps/kebersihan. */
+  kebersihan?: Record<string, string>;
 }
 
 export default function TpsMap({
@@ -96,9 +115,11 @@ export default function TpsMap({
   nearestTpsId,
   nearestTpsIds,
   center = [-0.5021, 117.1536],
+  kebersihan,
 }: TpsMapProps) {
   const nearIds = nearestTpsIds ?? (nearestTpsId ? [nearestTpsId] : []);
   const mapCenter = userLocation || center;
+  const awalHari = awalHariWita();
 
   const validTpsList = (tpsList || []).filter(
     (t) =>
@@ -134,7 +155,16 @@ export default function TpsMap({
 
         {validTpsList.map((tps) => {
           const rank = nearIds.indexOf(tps.id);
-          const icon = rank === 0 ? nearestIcon : rank > 0 ? nearbyIcon : tpsIcon;
+          const waktuBersih = kebersihan?.[tps.id];
+          const bersihHariIni = !!waktuBersih && new Date(waktuBersih) >= awalHari;
+          const icon =
+            rank === 0
+              ? nearestIcon
+              : rank > 0
+              ? nearbyIcon
+              : bersihHariIni
+              ? cleanedIcon
+              : tpsIcon;
           return (
           <Marker
             key={tps.id}
@@ -161,6 +191,23 @@ export default function TpsMap({
                   <p className="text-[11px] text-on-surface-variant mt-1.5">
                     Jam Operasional: {tps.jam_buka || '-'} - {tps.jam_tutup || '-'}
                   </p>
+                )}
+                {kebersihan && (
+                  waktuBersih ? (
+                    <p
+                      className={`text-[11px] font-semibold mt-1.5 ${
+                        bersihHariIni ? 'text-emerald-700' : 'text-on-surface-variant'
+                      }`}
+                    >
+                      {bersihHariIni ? 'Sudah dibersihkan' : 'Terakhir dibersihkan'}
+                      <br />
+                      {formatWaktuWita(waktuBersih)}
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-on-surface-variant mt-1.5">
+                      Belum ada laporan pembersihan
+                    </p>
+                  )
                 )}
               </div>
             </Popup>

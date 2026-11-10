@@ -153,12 +153,13 @@ export default function EditProfilPage() {
 
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                Domisili Kecamatan *
+                {user?.role === 'pengawas' ? 'Kecamatan Tugas' : 'Domisili Kecamatan *'}
               </label>
               <select
                 value={kecamatan}
                 onChange={(e) => setKecamatan(e.target.value)}
-                className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
+                disabled={user?.role === 'pengawas'}
+                className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {KECAMATAN_SAMARINDA.map((k) => (
                   <option key={k} value={k}>
@@ -166,6 +167,11 @@ export default function EditProfilPage() {
                   </option>
                 ))}
               </select>
+              {user?.role === 'pengawas' && (
+                <p className="text-[10px] text-on-surface-variant mt-1">
+                  Kecamatan tugas ditetapkan admin DLH dan tidak bisa diubah sendiri.
+                </p>
+              )}
             </div>
           </div>
 

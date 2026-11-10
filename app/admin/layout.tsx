@@ -43,7 +43,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname === '/admin') return 'Dashboard Analitik DLH Kota Samarinda';
     if (pathname === '/admin/laporan') return 'Manajemen Laporan & Disposisi Pengaduan';
     if (pathname === '/admin/tps') return 'Kelola Data & Titik Lokasi TPS';
-    if (pathname === '/admin/armada') return 'Monitoring Armada Sampah (Cartrack IoT)';
+    if (pathname === '/admin/pembersihan-tps') return 'Laporan Pembersihan TPS dari Pengawas';
+    if (pathname === '/admin/armada') return 'Data, Ritase & Monitoring Armada Sampah';
     return 'Panel Staf Admin DLH Samarinda';
   };
 

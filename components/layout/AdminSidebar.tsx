@@ -17,6 +17,7 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
     { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
     { href: '/admin/laporan', label: 'Laporan Pengaduan', icon: 'assignment' },
     { href: '/admin/tps', label: 'Kelola TPS', icon: 'schedule' },
+    { href: '/admin/pembersihan-tps', label: 'Laporan Pengawas', icon: 'fact_check' },
     { href: '/admin/armada', label: 'Armada Sampah', icon: 'local_shipping' },
     { href: '/', label: 'Portal Warga', icon: 'map' },
   ];

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed-armada": "node prisma/seed-armada.mjs",
+    "db:seed-pengawas": "node prisma/seed-pengawas.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -15,6 +17,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.5",
+    "exceljs": "^4.4.0",
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",

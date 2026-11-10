@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { KECAMATAN_SAMARINDA, ReportItem } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
+import ArmadaPicker from '@/components/admin/ArmadaPicker';
 
 export default function ManajemenLaporanAdminPage() {
   const { reports, armada, updateReportStatus, deleteReport } = useReports();
@@ -11,7 +12,7 @@ export default function ManajemenLaporanAdminPage() {
   const [selectedJenis, setSelectedJenis] = useState('Semua');
 
   const [activeReport, setActiveReport] = useState<ReportItem | null>(null);
-  const [selectedArmadaId, setSelectedArmadaId] = useState(armada[0]?.id || 'arm-01');
+  const [selectedArmadaId, setSelectedArmadaId] = useState('');
   const [catatan, setCatatan] = useState('');
   const [buktiFoto, setBuktiFoto] = useState<string | null>(null);
   const [buktiError, setBuktiError] = useState<string | null>(null);
@@ -403,17 +404,11 @@ export default function ManajemenLaporanAdminPage() {
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
                 Pilih Armada Siaga DLH
               </label>
-              <select
+              <ArmadaPicker
+                armada={armada}
                 value={selectedArmadaId}
-                onChange={(e) => setSelectedArmadaId(e.target.value)}
-                className="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {armada.map((arm) => (
-                  <option key={arm.id} value={arm.id}>
-                    {arm.nama_armada} - {arm.nama_petugas} ({arm.kecamatan_tugas})
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedArmadaId}
+              />
             </div>
 
             <div>

@@ -8,6 +8,7 @@ import SurveyRecapChart, { type SurveiItem } from './SurveyRecapChart';
 import WasteCompositionChart from './WasteCompositionChart';
 import CriticalTpsList from './CriticalTpsList';
 import CartrackFleetMonitoring from './CartrackFleetMonitoring';
+import ExportExcelButton from './ExportExcelButton';
 
 interface RekapTabsProps {
   reports: ReportItem[];
@@ -31,28 +32,31 @@ export default function RekapTabs({
   const tabs: { key: TabKey; label: string; icon: string }[] = [
     { key: 'volume', label: 'Volume & Segmen Sampah', icon: 'pie_chart' },
     { key: 'tps_kritis', label: 'TPS Kritis', icon: 'warning' },
-    { key: 'cartrack', label: 'Monitoring Armada Cartrack (30 Unit)', icon: 'satellite_alt' },
+    { key: 'cartrack', label: `Monitoring Armada Cartrack (${armadaList.length} Unit)`, icon: 'satellite_alt' },
     { key: 'laporan', label: 'Rekap Laporan Bulanan', icon: 'bar_chart' },
     { key: 'survey', label: 'Rekap Survey Kepuasan', icon: 'reviews' },
   ];
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-5">
-      <div className="flex items-center gap-2 mb-5 border-b border-outline-variant/30 pb-1 overflow-x-auto scrollbar-none">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 whitespace-nowrap ${
-              tab === t.key
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+      <div className="flex items-center gap-3 mb-5 border-b border-outline-variant/30 pb-1">
+        <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto scrollbar-none">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 whitespace-nowrap ${
+                tab === t.key
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <ExportExcelButton kecamatan={selectedKecamatan} />
       </div>
 
       {tab === 'volume' && (

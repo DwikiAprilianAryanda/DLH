@@ -3,6 +3,18 @@
 import { useMemo, useState } from 'react';
 import type { ArmadaItem } from '@/lib/mock-data';
 
+// Ikon per jenis armada (nama harus valid di Material Symbols agar tidak bocor jadi teks)
+const IKON_JENIS: Record<string, string> = {
+  'Arm Roll': 'local_shipping',
+  'Dump Truck': 'delivery_truck_speed',
+  'Truk Engkel': 'local_shipping',
+  'Truck Tangki': 'water_drop',
+  'Pick Up': 'airport_shuttle',
+  'Speed Boat': 'directions_boat',
+  'Kapal Karisma': 'directions_boat',
+  'Mobil Sweeper': 'cleaning_services',
+};
+
 interface CartrackFleetMonitoringProps {
   armadaList: ArmadaItem[];
   selectedKecamatan?: string;
@@ -27,14 +39,9 @@ export default function CartrackFleetMonitoring({
         return false;
       }
 
-      // Filter jenis kendaraan
-      if (filterType !== 'semua') {
-        if (filterType === 'compactor' && !unit.nama_armada.toLowerCase().includes('compactor'))
-          return false;
-        if (filterType === 'dump' && !unit.nama_armada.toLowerCase().includes('dump'))
-          return false;
-        if (filterType === 'pickup' && !unit.nama_armada.toLowerCase().includes('pick-up'))
-          return false;
+      // Filter jenis armada (sesuai data jenis_armada)
+      if (filterType !== 'semua' && (unit.jenis_armada ?? '-') !== filterType) {
+        return false;
       }
 
       // Filter status
@@ -49,7 +56,8 @@ export default function CartrackFleetMonitoring({
         const matchPlate = unit.plat_nomor.toLowerCase().includes(query);
         const matchPetugas = unit.nama_petugas.toLowerCase().includes(query);
         const matchKecamatan = unit.kecamatan_tugas.toLowerCase().includes(query);
-        if (!matchName && !matchPlate && !matchPetugas && !matchKecamatan) {
+        const matchJenis = (unit.jenis_armada ?? '').toLowerCase().includes(query);
+        if (!matchName && !matchPlate && !matchPetugas && !matchKecamatan && !matchJenis) {
           return false;
         }
       }
@@ -57,6 +65,16 @@ export default function CartrackFleetMonitoring({
       return true;
     });
   }, [armadaList, selectedKecamatan, filterType, filterStatus, searchQuery]);
+
+  // Daftar jenis armada yang ada + jumlah unitnya (dinamis, bukan angka tetap)
+  const jenisOptions = useMemo(() => {
+    const hitung = new Map<string, number>();
+    for (const unit of armadaList) {
+      const jenis = unit.jenis_armada ?? '-';
+      hitung.set(jenis, (hitung.get(jenis) ?? 0) + 1);
+    }
+    return Array.from(hitung.entries()).sort((a, b) => b[1] - a[1]);
+  }, [armadaList]);
 
   // Statistik Cartrack
   const totalUnits = armadaList.length;
@@ -73,21 +91,10 @@ export default function CartrackFleetMonitoring({
     const odo = 28000 + (hash * 37) % 65000;
     const lastPingMinutes = (hash % 7) + 1;
 
-    let type = 'Compactor';
-    let icon = 'local_shipping';
-    let badgeColor = 'bg-primary/10 text-primary border-primary/20';
+    const jenis = unit.jenis_armada ?? '-';
+    const icon = IKON_JENIS[jenis] ?? 'local_shipping';
 
-    if (unit.nama_armada.toLowerCase().includes('dump')) {
-      type = 'Dump Truck';
-      icon = 'delivery_truck_speed';
-      badgeColor = 'bg-amber-500/10 text-amber-700 border-amber-500/20';
-    } else if (unit.nama_armada.toLowerCase().includes('pick-up')) {
-      type = 'Pick-up Reaksi Cepat';
-      icon = 'airport_shuttle';
-      badgeColor = 'bg-blue-500/10 text-blue-700 border-blue-500/20';
-    }
-
-    return { speed, fuelLevel, odo, lastPingMinutes, type, icon, badgeColor };
+    return { speed, fuelLevel, odo, lastPingMinutes, type: jenis, icon };
   };
 
   return (
@@ -103,14 +110,14 @@ export default function CartrackFleetMonitoring({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 Cartrack IoT Telemetry Active
               </span>
-              <span className="text-xs text-slate-300 font-medium">30 Unit Samarinda</span>
+              <span className="text-xs text-slate-300 font-medium">{totalUnits} Unit Samarinda</span>
             </div>
             <h3 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
               <span className="material-symbols-outlined text-emerald-400">satellite_alt</span>
               Monitoring Armada Sampah Real-Time
             </h3>
             <p className="text-xs text-slate-300 max-w-xl">
-              Terintegrasi langsung dengan GPS Tracker Cartrack Indonesia. Memantau ritase pengangkutan, posisi koordinat armada, kecepatan laju, dan status operasional armada kebersihan di 10 kecamatan.
+              Terintegrasi langsung dengan GPS Tracker Cartrack Indonesia. Memantau posisi koordinat armada, kecepatan laju, dan status operasional armada kebersihan di 10 kecamatan.
             </p>
           </div>
 
@@ -158,7 +165,7 @@ export default function CartrackFleetMonitoring({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant/30 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* Filter Jenis */}
-          <div className="flex items-center gap-1 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/30">
+          <div className="flex flex-wrap items-center gap-1 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/30">
             <button
               onClick={() => setFilterType('semua')}
               className={`px-2.5 py-1 rounded-md font-bold transition-all ${
@@ -169,36 +176,19 @@ export default function CartrackFleetMonitoring({
             >
               Semua Tipe
             </button>
-            <button
-              onClick={() => setFilterType('compactor')}
-              className={`px-2.5 py-1 rounded-md font-bold transition-all ${
-                filterType === 'compactor'
-                  ? 'bg-primary text-on-primary shadow-xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              }`}
-            >
-              Compactor (14)
-            </button>
-            <button
-              onClick={() => setFilterType('dump')}
-              className={`px-2.5 py-1 rounded-md font-bold transition-all ${
-                filterType === 'dump'
-                  ? 'bg-primary text-on-primary shadow-xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              }`}
-            >
-              Dump Truck (10)
-            </button>
-            <button
-              onClick={() => setFilterType('pickup')}
-              className={`px-2.5 py-1 rounded-md font-bold transition-all ${
-                filterType === 'pickup'
-                  ? 'bg-primary text-on-primary shadow-xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              }`}
-            >
-              Pick-up (6)
-            </button>
+            {jenisOptions.map(([jenis, jumlah]) => (
+              <button
+                key={jenis}
+                onClick={() => setFilterType(jenis)}
+                className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                  filterType === jenis
+                    ? 'bg-primary text-on-primary shadow-xs'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                {jenis === '-' ? 'Jenis belum diisi' : jenis} ({jumlah})
+              </button>
+            ))}
           </div>
 
           {/* Filter Status */}
@@ -229,7 +219,7 @@ export default function CartrackFleetMonitoring({
         </div>
       </div>
 
-      {/* Grid of 30 Fleet Units */}
+      {/* Grid unit armada */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {filteredArmada.map((unit) => {
           const telemetry = getTelemetryData(unit);
