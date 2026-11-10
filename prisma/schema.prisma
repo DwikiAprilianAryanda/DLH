@@ -59,9 +59,55 @@ model Armada {
   telepon         String
   status          String   @default("Tersedia")
   kecamatan_tugas String
+  // Data rincian armada (Revisi DLH 2026). "-" = belum ada datanya, menunggu dari DLH.
+  jenis_armada    String   @default("-")
+  bagian_pekerjaan String  @default("-")
+  tahun           String   @default("-")
   created_at      DateTime @default(now())
 
   @@map("armada")
+}
+
+// Ritase = jumlah perjalanan pulang-pergi armada. Satu baris per armada per hari.
+// Tidak pakai relasi (sama seperti tabel lain di proyek ini); penghapusan armada
+// membersihkan ritasenya lewat API.
+model RitaseArmada {
+  id           String   @id @default(uuid())
+  armada_id    String
+  tanggal      DateTime @db.Date
+  jumlah_trip  Int
+  catatan      String?
+  dicatat_oleh String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+
+  @@unique([armada_id, tanggal])
+  @@index([tanggal])
+  @@map("ritase_armada")
+}
+
+// Laporan pengawas: "TPS ini sudah dibersihkan" + foto bukti.
+// created_at diisi server, bukan dari HP pengawas.
+model LaporanPembersihanTps {
+  id            String   @id @default(uuid())
+  tps_id        String
+  tps_nama      String
+  kecamatan     String
+  pengawas_id   String
+  pengawas_nama String
+  foto_url      String   @db.LongText
+  catatan       String?  @db.Text
+  latitude      Float?
+  longitude     Float?
+  jarak_meter   Float?
+  // Kalau pengawas menindaklanjuti laporan warga: id laporan_sampah-nya (tanpa FK; laporan boleh dihapus admin).
+  laporan_id    String?
+  created_at    DateTime @default(now())
+
+  @@index([tps_id, created_at])
+  @@index([kecamatan, created_at])
+  @@index([laporan_id])
+  @@map("laporan_pembersihan_tps")
 }
 
 model Notifikasi {

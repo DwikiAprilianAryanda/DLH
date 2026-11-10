@@ -37,6 +37,20 @@ export async function PATCH(request: Request) {
       if (kec && !(KECAMATAN_SAMARINDA as readonly string[]).includes(kec)) {
         return NextResponse.json({ error: 'Pilihan kecamatan tidak valid' }, { status: 400 });
       }
+
+      // Kecamatan tugas pengawas ditetapkan admin. Kalau pengawas bisa menggantinya sendiri,
+      // pembatasan "hanya TPS di kecamatannya" tidak ada artinya. Role dibaca dari database.
+      const profilSaatIni = await prisma.profile.findUnique({
+        where: { id: currentUser.id },
+        select: { role: true, kecamatan: true },
+      });
+      if (profilSaatIni?.role === 'pengawas' && (kec || null) !== profilSaatIni.kecamatan) {
+        return NextResponse.json(
+          { error: 'Kecamatan tugas pengawas hanya bisa diubah oleh admin DLH.' },
+          { status: 403 }
+        );
+      }
+
       data.kecamatan = kec || null;
     }
 

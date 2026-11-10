@@ -1,0 +1,17 @@
+{
+  "sumber": "SARANA_PRASARANA_2026.pdf - Bagian Sarana Prasarana Pengelolaan Sampah, DLH Kota Samarinda Tahun 2026",
+  "catatan": "Penulisan sudah dirapikan dari PDF (ARM ROOL -> Arm Roll, SPEDD BOAT -> Speed Boat, PENYEMPROTAL -> Penyemprot, KORDINATOR -> Koordinator). Nomor urut PDF loncat dari 7 ke 9; belum dikonfirmasi ke DLH apakah ada baris yang hilang. Plat KT, tahun, wilayah kerja, petugas, dan telepon belum ada di PDF sehingga diisi '-'.",
+  "rows": [
+    { "bagian": "Angkutan Kontainer (Arm Roll)", "jenis": "Arm Roll", "jumlah": 30 },
+    { "bagian": "Angkutan Sampah (Dump Truck)", "jenis": "Dump Truck", "jumlah": 36 },
+    { "bagian": "Angkutan Hasil Pekerja Pembersih Parit", "jenis": "Dump Truck", "jumlah": 6 },
+    { "bagian": "Angkutan Pembersih Jalan (Hasil Sapuan)", "jenis": "Dump Truck", "jumlah": 6 },
+    { "bagian": "Angkutan Pekerja Pembersih Parit", "jenis": "Truk Engkel", "jumlah": 2 },
+    { "bagian": "Pekerja Penyemprot Kramik Median Tengah, dll", "jenis": "Truck Tangki", "jumlah": 2 },
+    { "bagian": "Tangki Pekerja Penyemprot TPS", "jenis": "Pick Up", "jumlah": 1 },
+    { "bagian": "Armada Sarana Koordinator Lapangan (Korlap)", "jenis": "Pick Up", "jumlah": 7 },
+    { "bagian": "Motoris Kapal Pengambil Sampah Sungai", "jenis": "Speed Boat", "jumlah": 3 },
+    { "bagian": "Pekerja Kapal Pengambil Sampah Sungai", "jenis": "Kapal Karisma", "jumlah": 2 },
+    { "bagian": "Mobil Sweeper", "jenis": "Mobil Sweeper", "jumlah": 1 }
+  ]
+}

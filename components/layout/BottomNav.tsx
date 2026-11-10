@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Hide BottomNav on admin pages
-  if (pathname?.startsWith('/admin')) {
+  // Hide BottomNav on admin & pengawas pages (punya navigasi sendiri)
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/pengawas')) {
     return null;
   }
 

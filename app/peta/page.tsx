@@ -14,6 +14,7 @@ export default function PetaTpsPage() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>('idle');
   const [selectedKecamatan, setSelectedKecamatan] = useState('Semua');
+  const [kebersihan, setKebersihan] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchTps = async () => {
@@ -29,7 +30,22 @@ export default function PetaTpsPage() {
         setLoading(false);
       }
     };
+    // Status pembersihan dari laporan pengawas; kalau gagal, peta tetap tampil tanpa status.
+    const fetchKebersihan = async () => {
+      try {
+        const res = await fetch('/api/tps/kebersihan');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const peta: Record<string, string> = {};
+          for (const r of data as { tps_id: string; waktu: string }[]) peta[r.tps_id] = r.waktu;
+          setKebersihan(peta);
+        }
+      } catch (error) {
+        console.error('Gagal ambil status kebersihan TPS:', error);
+      }
+    };
     fetchTps();
+    fetchKebersihan();
   }, []);
 
   const handleFindNearest = () => {
@@ -160,9 +176,19 @@ export default function PetaTpsPage() {
           </div>
         ) : (
           <div className="h-[400px] rounded-2xl overflow-hidden shadow-sm border border-outline-variant/30">
-            <TpsMap tpsList={filteredTps} userLocation={userLocation} nearestTpsIds={nearestTpsIds} />
+            <TpsMap
+              tpsList={filteredTps}
+              userLocation={userLocation}
+              nearestTpsIds={nearestTpsIds}
+              kebersihan={kebersihan}
+            />
           </div>
         )}
+
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-on-surface-variant">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
+          Hijau = sudah dibersihkan hari ini (klik titik untuk lihat jam dan tanggalnya)
+        </div>
 
         {nearestTpsIds.length > 0 && (
           <div className="flex items-center justify-center gap-4 text-[10px] text-on-surface-variant">

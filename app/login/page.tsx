@@ -20,8 +20,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
-      router.push('/');
+      const loggedInUser = await login(email, password);
+      router.push(
+        loggedInUser.role === 'admin' ? '/admin' : loggedInUser.role === 'pengawas' ? '/pengawas' : '/'
+      );
     } catch (err: any) {
       setError(err.message || 'Gagal login');
     } finally {
