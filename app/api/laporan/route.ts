@@ -31,7 +31,20 @@ export async function GET() {
       orderBy: { created_at: 'desc' },
     });
     const data = laporan && laporan.length > 0 ? laporan : INITIAL_REPORTS;
-    const sanitized = data.map((item) => {
+
+    const isStaff = currentUser && (currentUser.role === 'admin' || currentUser.role === 'pengawas');
+
+    // Saring laporan agar laporan 'Menunggu Persetujuan' dan 'Ditolak' tidak tampil ke publik
+    const filtered = data.filter((item) => {
+      // Staf admin dan pengawas dapat memantau seluruh status laporan
+      if (isStaff) return true;
+      // Pemilik laporan dapat melihat laporannya sendiri di riwayatnya
+      if (currentUser && item.user_id === currentUser.id) return true;
+      // Publik umum hanya dapat melihat laporan yang SUDAH di-ACC / disetujui admin
+      return item.status !== 'Menunggu Persetujuan' && item.status !== 'Ditolak';
+    });
+
+    const sanitized = filtered.map((item) => {
       const isOwner = currentUser && item.user_id === currentUser.id;
       const isAdmin = currentUser && currentUser.role === 'admin';
       // Minimalkan data publik: sembunyikan lampiran surat resmi (PDF base64) jika bukan admin atau pemilik laporan
@@ -43,7 +56,9 @@ export async function GET() {
     return NextResponse.json(sanitized);
   } catch (error) {
     console.error('Gagal ambil data laporan (database offline), fallback ke INITIAL_REPORTS:', error);
-    return NextResponse.json(INITIAL_REPORTS);
+    return NextResponse.json(
+      INITIAL_REPORTS.filter((item) => item.status !== 'Menunggu Persetujuan' && item.status !== 'Ditolak')
+    );
   }
 }
 
@@ -116,21 +131,41 @@ export async function POST(request: Request) {
         nama_pemohon: d.nama_pemohon,
         institusi: d.institusi,
         surat_permohonan_url: d.surat_permohonan_url,
-        status: isGotongRoyong ? 'Menunggu Persetujuan' : 'Belum Ditangani',
+        status: 'Menunggu Persetujuan',
       },
     });
 
     const notifPesan = isGotongRoyong
       ? `Permohonan gotong royong "${laporan.title}" telah diajukan dan menunggu persetujuan DLH.`
-      : `Laporan "${laporan.title}" di ${laporan.kecamatan} telah terdaftar dan menunggu verifikasi petugas DLH.`;
+      : `Laporan pengaduan "${laporan.title}" berhasil diajukan dan sedang menunggu verifikasi/ACC dari admin DLH sebelum diterbitkan.`;
 
     await prisma.notifikasi.create({
       data: {
         user_id: profile.id,
-        judul: isGotongRoyong ? 'Permohonan Gotong Royong Terkirim' : 'Laporan Berhasil Dibuat',
+        judul: isGotongRoyong ? 'Permohonan Gotong Royong Terkirim' : 'Laporan Berhasil Diajukan',
         pesan: notifPesan,
       },
     });
+
+    // Notifikasi otomatis ke seluruh akun admin saat ada laporan masuk dari warga
+    try {
+      const admins = await prisma.profile.findMany({
+        where: { role: 'admin' },
+        select: { id: true },
+      });
+      if (admins.length > 0) {
+        await prisma.notifikasi.createMany({
+          data: admins.map((adm) => ({
+            user_id: adm.id,
+            judul: `Laporan Baru Masuk: ${laporan.title}`,
+            pesan: `Warga (${profile.full_name}) mengajukan laporan ${d.jenis_laporan} di ${laporan.kecamatan} (${laporan.kelurahan}) dengan urgensi ${laporan.urgensi}. Menunggu ACC/verifikasi admin.`,
+            dibaca: false,
+          })),
+        });
+      }
+    } catch (notifErr) {
+      console.error('Gagal mengirim notifikasi ke admin:', notifErr);
+    }
 
     return NextResponse.json(laporan);
   } catch (error) {

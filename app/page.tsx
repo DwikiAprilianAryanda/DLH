@@ -56,12 +56,16 @@ export default function Home() {
     nearestTpsList = withDistance.slice(0, 5);
   }
 
-  const activeReportsCount = reports.filter(
+  // Hanya tampilkan laporan yang sudah di-ACC/disetujui admin ke beranda publik
+  const approvedReports = reports.filter(
+    (r) => r.status !== 'Menunggu Persetujuan' && r.status !== 'Ditolak'
+  );
+  const activeReportsCount = approvedReports.filter(
     (r) => r.status === 'Belum Ditangani' || r.status === 'Proses'
   ).length;
-  const cleanedCount = reports.filter((r) => r.status === 'Ditangani').length;
+  const cleanedCount = approvedReports.filter((r) => r.status === 'Ditangani').length;
 
-  const recentReports = reports.slice(0, 5);
+  const recentReports = approvedReports.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background pb-24">

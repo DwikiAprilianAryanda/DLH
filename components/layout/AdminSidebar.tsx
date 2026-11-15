@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useReports } from '@/context/ReportContext';
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -12,10 +13,13 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { reports } = useReports();
+
+  const pendingReportsCount = reports.filter((r) => r.status === 'Menunggu Persetujuan').length;
 
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
-    { href: '/admin/laporan', label: 'Laporan Pengaduan', icon: 'assignment' },
+    { href: '/admin/laporan', label: 'Laporan Pengaduan', icon: 'assignment', badge: pendingReportsCount },
     { href: '/admin/tps', label: 'Kelola TPS', icon: 'schedule' },
     { href: '/admin/pembersihan-tps', label: 'Laporan Pengawas', icon: 'fact_check' },
     { href: '/admin/armada', label: 'Armada Sampah', icon: 'local_shipping' },
@@ -82,7 +86,12 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
               <span className="material-symbols-outlined text-[20px]">
                 {item.icon}
               </span>
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {Boolean(item.badge && item.badge > 0) && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-error text-on-error shadow-xs">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}

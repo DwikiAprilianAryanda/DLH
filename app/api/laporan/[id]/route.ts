@@ -44,11 +44,18 @@ export async function PATCH(
       );
     }
 
-    // 3. Update status ke "Proses" (armada dikirim) atau "Ditangani" (selesai) wajib bukti & catatan
-    const requiresBukti = body.status === 'Proses' || body.status === 'Ditangani';
-    if (requiresBukti && (!body.catatan_petugas || !body.foto_bukti_petugas)) {
+    // 3. Validasi foto bukti & catatan petugas
+    // Catatan wajib diisi saat armada dikirim (Proses)
+    if (body.status === 'Proses' && !body.catatan_petugas) {
       return NextResponse.json(
-        { error: 'Foto bukti dan catatan petugas wajib diisi untuk status ini.' },
+        { error: 'Catatan petugas disposisi wajib diisi.' },
+        { status: 400 }
+      );
+    }
+    // Foto bukti dan catatan penyelesaian HANYA wajib saat penyelesaian penanganan (Ditangani)
+    if (body.status === 'Ditangani' && (!body.catatan_petugas || !body.foto_bukti_petugas)) {
+      return NextResponse.json(
+        { error: 'Foto bukti dan catatan penyelesaian wajib diisi untuk menyelesaikan laporan.' },
         { status: 400 }
       );
     }
@@ -80,16 +87,20 @@ export async function PATCH(
         body.catatan_petugas ||
         `Status laporan "${updated.title}" telah diperbarui menjadi "${body.status}".`;
 
+      const isGotongRoyong = updated.jenis_laporan === 'Gotong Royong';
+
       if (existing?.status === 'Menunggu Persetujuan' && body.status === 'Belum Ditangani') {
-        notifTitle = 'Permohonan Gotong Royong Disetujui!';
+        notifTitle = isGotongRoyong ? 'Permohonan Gotong Royong Disetujui!' : 'Laporan Pengaduan Telah di-ACC!';
         notifPesan =
           body.catatan_petugas ||
-          `Permohonan gotong royong "${updated.title}" telah disetujui DLH dan akan segera dijadwalkan.`;
+          (isGotongRoyong
+            ? `Permohonan gotong royong "${updated.title}" telah disetujui DLH dan akan segera dijadwalkan.`
+            : `Laporan pengaduan "${updated.title}" telah diverifikasi & disetujui admin DLH dan kini diterbitkan ke publik.`);
       } else if (body.status === 'Ditolak') {
-        notifTitle = 'Permohonan Gotong Royong Ditolak';
+        notifTitle = isGotongRoyong ? 'Permohonan Gotong Royong Ditolak' : 'Laporan Pengaduan Ditolak';
         notifPesan =
           body.catatan_petugas ||
-          `Mohon maaf, permohonan gotong royong "${updated.title}" belum dapat disetujui.`;
+          `Mohon maaf, laporan "${updated.title}" belum dapat disetujui oleh admin DLH.`;
       } else if (body.status === 'Proses') {
         notifTitle = 'Armada Kebersihan Dikirim!';
       } else if (body.status === 'Ditangani') {

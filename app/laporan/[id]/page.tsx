@@ -198,12 +198,18 @@ export default function DetailLaporanPage({
             </span>
             <div>
               <p className="text-xs font-bold text-on-surface">
-                {isRejected ? 'Permohonan Ditolak' : 'Menunggu Persetujuan DLH'}
+                {isRejected
+                  ? (report.jenis_laporan === 'Gotong Royong' ? 'Permohonan Ditolak' : 'Laporan Ditolak')
+                  : (report.jenis_laporan === 'Gotong Royong' ? 'Menunggu Persetujuan DLH' : 'Menunggu Verifikasi & ACC Admin')}
               </p>
               <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
                 {isRejected
-                  ? 'Mohon maaf, permohonan gotong royong ini belum dapat disetujui petugas DLH.'
-                  : 'Petugas DLH sedang meninjau permohonan gotong royong ini sebelum dijadwalkan.'}
+                  ? (report.jenis_laporan === 'Gotong Royong'
+                      ? 'Mohon maaf, permohonan gotong royong ini belum dapat disetujui petugas DLH.'
+                      : 'Mohon maaf, laporan pengaduan ini belum dapat disetujui oleh admin DLH.')
+                  : (report.jenis_laporan === 'Gotong Royong'
+                      ? 'Petugas DLH sedang meninjau permohonan gotong royong ini sebelum dijadwalkan.'
+                      : 'Laporan Anda sedang diverifikasi oleh admin DLH sebelum diterbitkan ke publik dan ditindaklanjuti armada.')}
               </p>
               {report.catatan_petugas && (
                 <p className="text-[11px] text-on-surface mt-2 p-2 rounded-lg bg-surface-container-low">

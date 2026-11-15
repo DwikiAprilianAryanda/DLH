@@ -150,7 +150,36 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Rekapitulasi: Volume & Segmen Sampah, TPS Kritis, Armada Cartrack, Laporan Bulanan, Survey Kepuasan */}
+      {/* Portal Resmi Cartrack Fleet Management */}
+      <div className="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[24px]">satellite_alt</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-on-surface">Portal Resmi Cartrack Fleet Management</h2>
+              <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                Portal Eksternal
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              Akses sistem pelacakan GPS live, telematika sensor BBM, dan riwayat rute armada DLH Samarinda langsung di portal resmi Cartrack.
+            </p>
+          </div>
+        </div>
+        <a
+          href="https://fleetweb-id.cartrack.com/login"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 px-4 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-xs hover:bg-primary/90 transition-all flex items-center gap-2 active:scale-95"
+        >
+          <span>Buka Portal Cartrack</span>
+          <span className="material-symbols-outlined text-sm">open_in_new</span>
+        </a>
+      </div>
+
+      {/* Rekapitulasi: TPS Kritis, Laporan Bulanan, Survey Kepuasan */}
       <RekapTabs
         reports={reports}
         surveiList={surveiList}

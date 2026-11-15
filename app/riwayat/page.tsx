@@ -16,7 +16,9 @@ interface SurveiItem {
 export default function RiwayatLaporanPage() {
   const { user, loading: authLoading } = useAuth();
   const { reports } = useReports();
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Belum Ditangani' | 'Proses' | 'Ditangani'>('Semua');
+  const [activeTab, setActiveTab] = useState<
+    'Semua' | 'Menunggu Persetujuan' | 'Belum Ditangani' | 'Proses' | 'Ditangani' | 'Ditolak'
+  >('Semua');
 
   const [surveiList, setSurveiList] = useState<SurveiItem[]>([]);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; title: string } | null>(null);
@@ -129,7 +131,16 @@ export default function RiwayatLaporanPage() {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-none">
-          {(['Semua', 'Belum Ditangani', 'Proses', 'Ditangani'] as const).map((tab) => {
+          {(
+            [
+              'Semua',
+              'Menunggu Persetujuan',
+              'Belum Ditangani',
+              'Proses',
+              'Ditangani',
+              'Ditolak',
+            ] as const
+          ).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button

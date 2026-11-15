@@ -14,8 +14,6 @@ export default function ManajemenLaporanAdminPage() {
   const [activeReport, setActiveReport] = useState<ReportItem | null>(null);
   const [selectedArmadaId, setSelectedArmadaId] = useState('');
   const [catatan, setCatatan] = useState('');
-  const [buktiFoto, setBuktiFoto] = useState<string | null>(null);
-  const [buktiError, setBuktiError] = useState<string | null>(null);
 
   const [completingReport, setCompletingReport] = useState<ReportItem | null>(null);
   const [selesaiCatatan, setSelesaiCatatan] = useState('');
@@ -66,14 +64,13 @@ export default function ManajemenLaporanAdminPage() {
 
   const handleKirimArmada = async () => {
     if (!activeReport) return;
-    if (!catatan.trim() || !buktiFoto) {
-      setBuktiError(!buktiFoto ? 'Foto bukti wajib diupload.' : null);
-      if (!catatan.trim()) alert('Catatan petugas wajib diisi.');
+    if (!catatan.trim()) {
+      alert('Catatan petugas disposisi wajib diisi.');
       return;
     }
 
     setIsSubmitting(true);
-    const ok = await updateReportStatus(activeReport.id, 'Proses', catatan, buktiFoto);
+    const ok = await updateReportStatus(activeReport.id, 'Proses', catatan);
     setIsSubmitting(false);
 
     if (!ok) {
@@ -83,7 +80,6 @@ export default function ManajemenLaporanAdminPage() {
 
     setActiveReport(null);
     setCatatan('');
-    setBuktiFoto(null);
   };
 
   const handleSelesaikan = async () => {
@@ -109,10 +105,13 @@ export default function ManajemenLaporanAdminPage() {
   };
 
   const handleApprove = (report: ReportItem) => {
+    const isGotongRoyong = report.jenis_laporan === 'Gotong Royong';
     updateReportStatus(
       report.id,
       'Belum Ditangani',
-      'Permohonan gotong royong disetujui dan akan dijadwalkan oleh petugas DLH.'
+      isGotongRoyong
+        ? 'Permohonan gotong royong disetujui dan akan dijadwalkan oleh petugas DLH.'
+        : 'Laporan pengaduan warga telah diverifikasi dan disetujui (ACC) untuk ditindaklanjuti.'
     );
   };
 
@@ -325,9 +324,10 @@ export default function ManajemenLaporanAdminPage() {
                             </button>
                             <button
                               onClick={() => handleApprove(report)}
-                              className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all shadow-xs"
+                              className="px-3.5 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
                             >
-                              Setujui
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                              ACC Laporan
                             </button>
                           </>
                         ) : report.status === 'Ditolak' ? (
@@ -425,34 +425,11 @@ export default function ManajemenLaporanAdminPage() {
               ></textarea>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                Foto Bukti Lapangan *
-              </label>
-              {buktiFoto ? (
-                <div className="relative w-full h-36 rounded-xl overflow-hidden">
-                  <img src={buktiFoto} alt="Bukti" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setBuktiFoto(null)}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-error text-on-error flex items-center justify-center shadow-md"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
-                </div>
-              ) : (
-                <label className="w-full h-28 rounded-xl border-2 border-dashed border-primary/40 bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer">
-                  <span className="material-symbols-outlined text-primary text-xl">add_a_photo</span>
-                  <p className="text-[11px] font-bold text-primary">Upload Foto Bukti</p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFotoBuktiUpload(e, setBuktiFoto, setBuktiError)}
-                    className="hidden"
-                  />
-                </label>
-              )}
-              {buktiError && <p className="text-[11px] text-error mt-1.5">{buktiError}</p>}
+            <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-2.5 text-xs text-on-surface-variant">
+              <span className="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+              <p className="leading-relaxed">
+                Armada akan langsung dikirim ke lokasi titik sampah. Foto bukti penyelesaian dapat diunggah nanti saat penanganan tuntas diselesaikan.
+              </p>
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -460,8 +437,6 @@ export default function ManajemenLaporanAdminPage() {
                 onClick={() => {
                   setActiveReport(null);
                   setCatatan('');
-                  setBuktiFoto(null);
-                  setBuktiError(null);
                 }}
                 className="flex-1 py-2.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high"
               >
@@ -484,7 +459,9 @@ export default function ManajemenLaporanAdminPage() {
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 shadow-2xl space-y-4 border border-outline-variant/30">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Tolak Permohonan</h3>
+              <h3 className="text-base font-bold text-on-surface">
+                {rejectTarget.jenis_laporan === 'Gotong Royong' ? 'Tolak Permohonan' : 'Tolak Laporan Pengaduan'}
+              </h3>
               <button
                 onClick={() => setRejectTarget(null)}
                 className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high"
@@ -495,7 +472,7 @@ export default function ManajemenLaporanAdminPage() {
 
             <div className="p-3 rounded-xl bg-surface-container-low text-xs">
               <p className="font-bold text-on-surface">{rejectTarget.title}</p>
-              <p className="text-on-surface-variant">Pemohon: {rejectTarget.user_name}</p>
+              <p className="text-on-surface-variant">Pelapor: {rejectTarget.user_name}</p>
             </div>
 
             <div>
@@ -504,7 +481,7 @@ export default function ManajemenLaporanAdminPage() {
               </label>
               <textarea
                 rows={3}
-                placeholder="Jelaskan alasan permohonan ini ditolak..."
+                placeholder="Jelaskan alasan penolakan (misal: lokasi fiktif, foto tidak jelas, duplikasi laporan)..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
@@ -522,7 +499,7 @@ export default function ManajemenLaporanAdminPage() {
                 onClick={handleReject}
                 className="flex-1 py-2.5 bg-error text-on-error font-bold text-xs rounded-xl hover:opacity-90 shadow-md"
               >
-                Tolak Permohonan
+                Tolak Laporan
               </button>
             </div>
           </div>

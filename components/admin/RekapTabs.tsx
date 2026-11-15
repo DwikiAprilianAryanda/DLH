@@ -5,9 +5,7 @@ import type { ReportItem, ArmadaItem } from '@/lib/mock-data';
 import type { TpsItem } from '@/components/map/TpsMap';
 import MonthlyRecapChart from './MonthlyRecapChart';
 import SurveyRecapChart, { type SurveiItem } from './SurveyRecapChart';
-import WasteCompositionChart from './WasteCompositionChart';
 import CriticalTpsList from './CriticalTpsList';
-import CartrackFleetMonitoring from './CartrackFleetMonitoring';
 import ExportExcelButton from './ExportExcelButton';
 
 interface RekapTabsProps {
@@ -18,21 +16,18 @@ interface RekapTabsProps {
   selectedKecamatan?: string;
 }
 
-type TabKey = 'volume' | 'tps_kritis' | 'cartrack' | 'laporan' | 'survey';
+type TabKey = 'tps_kritis' | 'laporan' | 'survey';
 
 export default function RekapTabs({
   reports,
   surveiList,
   tpsList = [],
-  armadaList = [],
   selectedKecamatan = 'Semua Kecamatan',
 }: RekapTabsProps) {
-  const [tab, setTab] = useState<TabKey>('volume');
+  const [tab, setTab] = useState<TabKey>('tps_kritis');
 
   const tabs: { key: TabKey; label: string; icon: string }[] = [
-    { key: 'volume', label: 'Volume & Segmen Sampah', icon: 'pie_chart' },
     { key: 'tps_kritis', label: 'TPS Kritis', icon: 'warning' },
-    { key: 'cartrack', label: `Monitoring Armada Cartrack (${armadaList.length} Unit)`, icon: 'satellite_alt' },
     { key: 'laporan', label: 'Rekap Laporan Bulanan', icon: 'bar_chart' },
     { key: 'survey', label: 'Rekap Survey Kepuasan', icon: 'reviews' },
   ];
@@ -59,21 +54,10 @@ export default function RekapTabs({
         <ExportExcelButton kecamatan={selectedKecamatan} />
       </div>
 
-      {tab === 'volume' && (
-        <WasteCompositionChart selectedKecamatan={selectedKecamatan} />
-      )}
-
       {tab === 'tps_kritis' && (
         <CriticalTpsList
           reports={reports}
           tpsList={tpsList}
-          selectedKecamatan={selectedKecamatan}
-        />
-      )}
-
-      {tab === 'cartrack' && (
-        <CartrackFleetMonitoring
-          armadaList={armadaList}
           selectedKecamatan={selectedKecamatan}
         />
       )}
