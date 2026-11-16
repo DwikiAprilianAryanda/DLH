@@ -22,15 +22,30 @@ const FALLBACK_TPS = TPS_SEED_DATA.map((t, idx) => ({
   created_at: new Date().toISOString(),
 }));
 
+const globalForTps = globalThis as unknown as { customTpsList?: any[] };
+const customTpsList: any[] = globalForTps.customTpsList ?? [];
+if (process.env.NODE_ENV !== 'production') {
+  globalForTps.customTpsList = customTpsList;
+}
+
 export async function GET() {
   try {
     const tps = await prisma.tps.findMany({
       orderBy: { nama: 'asc' },
     });
-    return NextResponse.json(tps && tps.length > 0 ? tps : FALLBACK_TPS);
+    const baseList = tps && tps.length > 0 ? tps : FALLBACK_TPS;
+    const combined = [
+      ...customTpsList.filter((c) => !baseList.some((b) => b.id === c.id)),
+      ...baseList,
+    ];
+    return NextResponse.json(combined);
   } catch (error) {
     console.error('Gagal ambil data TPS (database offline), fallback ke seed data:', error);
-    return NextResponse.json(FALLBACK_TPS);
+    const combined = [
+      ...customTpsList.filter((c) => !FALLBACK_TPS.some((b) => b.id === c.id)),
+      ...FALLBACK_TPS,
+    ];
+    return NextResponse.json(combined);
   }
 }
 
@@ -43,8 +58,8 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    if (!body.nama || !body.kecamatan || body.latitude === undefined || body.longitude === undefined) {
-      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
+    if (!body.nama || !body.kecamatan || body.latitude === undefined || body.longitude === undefined || body.latitude === '' || body.longitude === '') {
+      return NextResponse.json({ error: 'Nama, kecamatan, latitude, dan longitude wajib diisi' }, { status: 400 });
     }
 
     if (!(KECAMATAN_SAMARINDA as readonly string[]).includes(body.kecamatan)) {
@@ -78,22 +93,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Jam buka dan jam tutup operasional TPS tidak boleh sama' }, { status: 400 });
     }
 
-    const tps = await prisma.tps.create({
-      data: {
-        nama: body.nama,
-        kecamatan: body.kecamatan,
-        latitude: lat,
-        longitude: lng,
-        bangunan: body.bangunan || null,
-        mobilitas: body.mobilitas || null,
-        jumlah_bak: body.jumlah_bak ? Number(body.jumlah_bak) : null,
-        jenis: body.jenis || null,
-        jam_buka: body.jam_buka || null,
-        jam_tutup: body.jam_tutup || null,
-      },
-    });
+    const newTpsObj = {
+      id: `tps-custom-${Date.now()}`,
+      nama: body.nama,
+      kecamatan: body.kecamatan,
+      latitude: lat,
+      longitude: lng,
+      bangunan: body.bangunan || null,
+      mobilitas: body.mobilitas || null,
+      jumlah_bak: body.jumlah_bak ? Number(body.jumlah_bak) : null,
+      jenis: body.jenis || null,
+      jam_buka: body.jam_buka || null,
+      jam_tutup: body.jam_tutup || null,
+      created_at: new Date().toISOString(),
+    };
 
-    return NextResponse.json(tps);
+    try {
+      const tps = await prisma.tps.create({
+        data: {
+          id: newTpsObj.id,
+          nama: newTpsObj.nama,
+          kecamatan: newTpsObj.kecamatan,
+          latitude: lat,
+          longitude: lng,
+          bangunan: newTpsObj.bangunan,
+          mobilitas: newTpsObj.mobilitas,
+          jumlah_bak: newTpsObj.jumlah_bak,
+          jenis: newTpsObj.jenis,
+          jam_buka: newTpsObj.jam_buka,
+          jam_tutup: newTpsObj.jam_tutup,
+        },
+      });
+      customTpsList.unshift(tps);
+      return NextResponse.json(tps, { status: 201 });
+    } catch (dbErr) {
+      console.warn('Database offline / tabel tps belum termigrasi, simpan di memori fallback:', dbErr);
+      customTpsList.unshift(newTpsObj);
+      return NextResponse.json(newTpsObj, { status: 201 });
+    }
   } catch (error) {
     console.error('Gagal tambah TPS:', error);
     return NextResponse.json({ error: 'Gagal tambah TPS' }, { status: 500 });

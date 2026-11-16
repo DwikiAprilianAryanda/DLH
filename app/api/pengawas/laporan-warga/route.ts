@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/api-auth';
+import { getPengawasById } from '@/lib/pengawas';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +17,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
     }
 
-    const profil = await prisma.profile.findUnique({
-      where: { id: user.id },
-      select: { kecamatan: true, role: true },
-    });
+    let profil = await prisma.profile
+      .findUnique({
+        where: { id: user.id },
+        select: { kecamatan: true, role: true },
+      })
+      .catch(() => null);
+
+    if (!profil || !profil.kecamatan) {
+      const p = getPengawasById(user.id);
+      if (p) {
+        profil = { kecamatan: p.kecamatan, role: 'pengawas' };
+      }
+    }
+
     if (!profil || profil.role !== 'pengawas' || !profil.kecamatan) {
       return NextResponse.json([]);
     }

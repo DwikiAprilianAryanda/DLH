@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/api-auth';
-import { fotoDataUrlValid } from '@/lib/pengawas';
+import { fotoDataUrlValid, fallbackLaporanTps } from '@/lib/pengawas';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,10 +12,18 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
     }
 
-    const row = await prisma.laporanPembersihanTps.findUnique({
-      where: { id: params.id },
-      select: { foto_url: true },
-    });
+    let row = await prisma.laporanPembersihanTps
+      .findUnique({
+        where: { id: params.id },
+        select: { foto_url: true },
+      })
+      .catch(() => null);
+
+    if (!row) {
+      const fb = fallbackLaporanTps.find((r) => r.id === params.id);
+      if (fb) row = { foto_url: fb.foto_url };
+    }
+
     if (!row) {
       return NextResponse.json({ error: 'Laporan tidak ditemukan' }, { status: 404 });
     }

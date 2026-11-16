@@ -110,3 +110,108 @@ export function validateLaporanTps(
     },
   };
 }
+
+/** 10 Akun Kredensial Resmi Pengawas Kecamatan DLH Samarinda */
+export const DAFTAR_AKUN_PENGAWAS = [
+  {
+    kecamatan: 'Samarinda Ulu',
+    email: 'pengawas.samarinda-ulu@dlh.samarindakota.go.id',
+    password: '5BwAPKKNQmzk',
+    id: 'pengawas-samarinda-ulu',
+    full_name: 'Pengawas Samarinda Ulu',
+  },
+  {
+    kecamatan: 'Samarinda Ilir',
+    email: 'pengawas.samarinda-ilir@dlh.samarindakota.go.id',
+    password: 'MSjEqyAYmUf7',
+    id: 'pengawas-samarinda-ilir',
+    full_name: 'Pengawas Samarinda Ilir',
+  },
+  {
+    kecamatan: 'Sungai Pinang',
+    email: 'pengawas.sungai-pinang@dlh.samarindakota.go.id',
+    password: 'LV4XwtybGA2N',
+    id: 'pengawas-sungai-pinang',
+    full_name: 'Pengawas Sungai Pinang',
+  },
+  {
+    kecamatan: 'Samarinda Utara',
+    email: 'pengawas.samarinda-utara@dlh.samarindakota.go.id',
+    password: 'GdjZPB7ubduv',
+    id: 'pengawas-samarinda-utara',
+    full_name: 'Pengawas Samarinda Utara',
+  },
+  {
+    kecamatan: 'Samarinda Kota',
+    email: 'pengawas.samarinda-kota@dlh.samarindakota.go.id',
+    password: 'G4LEtZQYh3tK',
+    id: 'pengawas-samarinda-kota',
+    full_name: 'Pengawas Samarinda Kota',
+  },
+  {
+    kecamatan: 'Sungai Kunjang',
+    email: 'pengawas.sungai-kunjang@dlh.samarindakota.go.id',
+    password: 'qjyJDbX9hRMw',
+    id: 'pengawas-sungai-kunjang',
+    full_name: 'Pengawas Sungai Kunjang',
+  },
+  {
+    kecamatan: 'Sambutan',
+    email: 'pengawas.sambutan@dlh.samarindakota.go.id',
+    password: '9cQfc5WdukQ4',
+    id: 'pengawas-sambutan',
+    full_name: 'Pengawas Sambutan',
+  },
+  {
+    kecamatan: 'Palaran',
+    email: 'pengawas.palaran@dlh.samarindakota.go.id',
+    password: '3uRMb3euXMCR',
+    id: 'pengawas-palaran',
+    full_name: 'Pengawas Palaran',
+  },
+  {
+    kecamatan: 'Loa Janan Ilir',
+    email: 'pengawas.loa-janan-ilir@dlh.samarindakota.go.id',
+    password: 'SAvc6c9uMrSV',
+    id: 'pengawas-loa-janan-ilir',
+    full_name: 'Pengawas Loa Janan Ilir',
+  },
+  {
+    kecamatan: 'Samarinda Seberang',
+    email: 'pengawas.samarinda-seberang@dlh.samarindakota.go.id',
+    password: 'StHmWtqNey3g',
+    id: 'pengawas-samarinda-seberang',
+    full_name: 'Pengawas Samarinda Seberang',
+  },
+] as const;
+
+export function getPengawasByEmail(email: string) {
+  const cleanEmail = email.trim().toLowerCase();
+  return DAFTAR_AKUN_PENGAWAS.find((p) => p.email.toLowerCase() === cleanEmail);
+}
+
+export function getPengawasById(id: string) {
+  return DAFTAR_AKUN_PENGAWAS.find((p) => p.id === id);
+}
+
+export interface LaporanPembersihanItem {
+  id: string;
+  tps_id: string;
+  tps_nama: string;
+  kecamatan: string;
+  pengawas_id: string;
+  pengawas_nama: string;
+  foto_url: string;
+  catatan: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  jarak_meter: number | null;
+  laporan_id: string | null;
+  created_at: string;
+}
+
+const globalForLaporanTps = globalThis as unknown as { fallbackLaporanTps?: LaporanPembersihanItem[] };
+export const fallbackLaporanTps: LaporanPembersihanItem[] = globalForLaporanTps.fallbackLaporanTps ?? [];
+if (process.env.NODE_ENV !== 'production') {
+  globalForLaporanTps.fallbackLaporanTps = fallbackLaporanTps;
+}

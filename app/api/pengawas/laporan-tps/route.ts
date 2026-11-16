@@ -6,17 +6,21 @@ import {
   JEDA_LAPORAN_ULANG_MENIT,
   PENGAWAS_MAX_JARAK_METER,
   validateLaporanTps,
+  getPengawasById,
+  fallbackLaporanTps,
+  type LaporanPembersihanItem,
 } from '@/lib/pengawas';
 
 export const dynamic = 'force-dynamic';
 
 /** Riwayat laporan milik pengawas yang sedang login (tanpa foto, supaya ringan). */
 export async function GET() {
+  const user = requireRole('pengawas');
+  if (!user) {
+    return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
+  }
+
   try {
-    const user = requireRole('pengawas');
-    if (!user) {
-      return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
-    }
 
     const rows = await prisma.laporanPembersihanTps.findMany({
       where: { pengawas_id: user.id },
@@ -36,8 +40,9 @@ export async function GET() {
 
     return NextResponse.json(rows);
   } catch (error) {
-    console.error('Gagal ambil riwayat laporan pengawas:', error);
-    return NextResponse.json({ error: 'Gagal mengambil riwayat laporan' }, { status: 500 });
+    console.warn('Gagal ambil riwayat laporan pengawas (fallback memori):', error);
+    const userReports = fallbackLaporanTps.filter((r) => r.pengawas_id === user.id);
+    return NextResponse.json(userReports);
   }
 }
 
@@ -72,10 +77,20 @@ export async function POST(request: Request) {
     }
     const d = result.data;
 
-    const profil = await prisma.profile.findUnique({
-      where: { id: user.id },
-      select: { full_name: true, kecamatan: true, role: true },
-    });
+    let profil = await prisma.profile
+      .findUnique({
+        where: { id: user.id },
+        select: { full_name: true, kecamatan: true, role: true },
+      })
+      .catch(() => null);
+
+    if (!profil) {
+      const p = getPengawasById(user.id);
+      if (p) {
+        profil = { full_name: p.full_name, kecamatan: p.kecamatan, role: 'pengawas' };
+      }
+    }
+
     if (!profil || profil.role !== 'pengawas') {
       return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
     }
@@ -134,24 +149,55 @@ export async function POST(request: Request) {
       );
     }
 
-    const saved = await prisma.laporanPembersihanTps.create({
-      data: {
-        tps_id: tps.id,
-        tps_nama: tps.nama,
-        kecamatan: tps.kecamatan,
-        pengawas_id: user.id,
-        pengawas_nama: profil.full_name,
-        foto_url: d.foto_url,
-        catatan: d.catatan,
-        latitude: d.latitude,
-        longitude: d.longitude,
-        jarak_meter: Math.round(jarakMeter * 10) / 10,
-        laporan_id: d.laporan_id,
-      },
-      select: { id: true, tps_id: true, tps_nama: true, created_at: true, jarak_meter: true },
-    });
+    const lapData: LaporanPembersihanItem = {
+      id: `lap-tps-${Date.now()}`,
+      tps_id: tps.id,
+      tps_nama: tps.nama,
+      kecamatan: tps.kecamatan,
+      pengawas_id: user.id,
+      pengawas_nama: profil.full_name,
+      foto_url: d.foto_url,
+      catatan: d.catatan,
+      latitude: d.latitude,
+      longitude: d.longitude,
+      jarak_meter: Math.round(jarakMeter * 10) / 10,
+      laporan_id: d.laporan_id,
+      created_at: new Date().toISOString(),
+    };
 
-    return NextResponse.json(saved, { status: 201 });
+    try {
+      const saved = await prisma.laporanPembersihanTps.create({
+        data: {
+          tps_id: lapData.tps_id,
+          tps_nama: lapData.tps_nama,
+          kecamatan: lapData.kecamatan,
+          pengawas_id: lapData.pengawas_id,
+          pengawas_nama: lapData.pengawas_nama,
+          foto_url: lapData.foto_url,
+          catatan: lapData.catatan,
+          latitude: lapData.latitude,
+          longitude: lapData.longitude,
+          jarak_meter: lapData.jarak_meter,
+          laporan_id: lapData.laporan_id,
+        },
+        select: { id: true, tps_id: true, tps_nama: true, created_at: true, jarak_meter: true },
+      });
+      fallbackLaporanTps.unshift({ ...lapData, id: saved.id, created_at: saved.created_at.toISOString() });
+      return NextResponse.json(saved, { status: 201 });
+    } catch (dbErr) {
+      console.warn('Database offline / tabel belum termigrasi, simpan laporan pengawas ke memori fallback:', dbErr);
+      fallbackLaporanTps.unshift(lapData);
+      return NextResponse.json(
+        {
+          id: lapData.id,
+          tps_id: lapData.tps_id,
+          tps_nama: lapData.tps_nama,
+          created_at: lapData.created_at,
+          jarak_meter: lapData.jarak_meter,
+        },
+        { status: 201 }
+      );
+    }
   } catch (error) {
     console.error('Gagal simpan laporan pembersihan TPS:', error);
     return NextResponse.json({ error: 'Gagal menyimpan laporan' }, { status: 500 });

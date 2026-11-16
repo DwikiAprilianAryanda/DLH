@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyPassword, signToken } from '@/lib/auth';
+import { verifyPassword, signToken, hashPassword } from '@/lib/auth';
+import { getPengawasByEmail } from '@/lib/pengawas';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,66 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.profile.findUnique({ where: { email: cleanEmail } });
+    // 1. Cek kredensial resmi Akun Pengawas Kecamatan (10 Akun DLH)
+    const pengawasData = getPengawasByEmail(cleanEmail);
+    if (pengawasData && password === pengawasData.password) {
+      clearRateLimit(rateLimitKey);
+      let userObj: { id: string; role: string; email: string; full_name: string; kecamatan: string } = {
+        id: pengawasData.id,
+        role: 'pengawas',
+        email: pengawasData.email,
+        full_name: pengawasData.full_name,
+        kecamatan: pengawasData.kecamatan,
+      };
+
+      try {
+        let dbUser = await prisma.profile.findUnique({ where: { email: cleanEmail } });
+        if (!dbUser) {
+          const hashed = await hashPassword(pengawasData.password);
+          dbUser = await prisma.profile.create({
+            data: {
+              id: pengawasData.id,
+              full_name: pengawasData.full_name,
+              email: pengawasData.email,
+              password: hashed,
+              kecamatan: pengawasData.kecamatan,
+              role: 'pengawas',
+            },
+          });
+        }
+        if (dbUser) {
+          userObj = {
+            id: dbUser.id,
+            role: dbUser.role,
+            email: dbUser.email,
+            full_name: dbUser.full_name,
+            kecamatan: dbUser.kecamatan || pengawasData.kecamatan,
+          };
+        }
+      } catch (dbErr) {
+        console.warn('Database offline / tidak dapat dihubungi saat login pengawas, menggunakan session pengawas lokal:', dbErr);
+      }
+
+      const token = signToken({ id: userObj.id, role: userObj.role });
+      const response = NextResponse.json(userObj);
+      response.cookies.set('session_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      return response;
+    }
+
+    // 2. Cek akun dari database (Admin atau Warga)
+    let user = null;
+    try {
+      user = await prisma.profile.findUnique({ where: { email: cleanEmail } });
+    } catch (dbErr) {
+      console.warn('Database offline saat mencari akun user:', dbErr);
+    }
+
     if (!user) {
       return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 });
     }

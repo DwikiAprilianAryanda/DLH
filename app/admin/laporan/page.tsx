@@ -331,29 +331,51 @@ export default function ManajemenLaporanAdminPage() {
                             </button>
                           </>
                         ) : report.status === 'Ditolak' ? (
-                          <span className="text-[11px] text-on-surface-variant italic mr-2">Ditolak</span>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => setActiveReport(report)}
-                              className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">
-                                local_shipping
-                              </span>
-                              Disposisi Armada
-                            </button>
-
-                            {report.status !== 'Ditangani' && (
+                          <span className="text-[11px] font-bold text-error bg-error/10 px-2.5 py-1 rounded-lg mr-2">Ditolak</span>
+                        ) : report.status === 'Belum Ditangani' ? (
+                          <button
+                            onClick={() => setActiveReport(report)}
+                            className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              local_shipping
+                            </span>
+                            Disposisi Armada
+                          </button>
+                        ) : report.status === 'Proses' ? (
+                          <button
+                            onClick={() => setCompletingReport(report)}
+                            className="px-3 py-1.5 bg-secondary-container text-on-secondary-container font-bold text-xs rounded-xl hover:opacity-90 transition-all flex items-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              task_alt
+                            </span>
+                            Selesaikan
+                          </button>
+                        ) : report.status === 'Ditangani' ? (
+                          <div className="flex items-center gap-1.5 mr-1">
+                            <span className="px-2.5 py-1 rounded-xl bg-primary-container text-on-primary-container text-xs font-bold inline-flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                              Tuntas Ditangani
+                            </span>
+                            {report.foto_bukti_petugas && (
                               <button
-                                onClick={() => setCompletingReport(report)}
-                                className="px-3 py-1.5 bg-primary-container text-on-primary-container font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                                type="button"
+                                onClick={() => {
+                                  const win = window.open('', '_blank');
+                                  if (win) {
+                                    win.document.write(`<img src="${report.foto_bukti_petugas}" style="max-width:100%;height:auto;display:block;margin:auto;" alt="Bukti Penanganan" />`);
+                                  }
+                                }}
+                                className="px-2 py-1 rounded-xl bg-surface-container-high text-on-surface-variant hover:text-on-surface text-[11px] font-bold inline-flex items-center gap-0.5"
+                                title="Lihat foto bukti penyelesaian lapangan"
                               >
-                                Selesaikan
+                                <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+                                Bukti
                               </button>
                             )}
-                          </>
-                        )}
+                          </div>
+                        ) : null}
 
                         {/* Tombol Hapus Laporan untuk Admin */}
                         <button

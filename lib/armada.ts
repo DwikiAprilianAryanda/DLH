@@ -89,6 +89,8 @@ export function validateArmada(
       errors.nama_armada = `Nama armada minimal ${ARMADA_LIMITS.nama.min} karakter.`;
     } else if (v.length > ARMADA_LIMITS.nama.max) {
       errors.nama_armada = `Nama armada maksimal ${ARMADA_LIMITS.nama.max} karakter.`;
+    } else if (!/[a-zA-Z]/.test(v)) {
+      errors.nama_armada = 'Nama armada harus mengandung huruf (tidak boleh hanya berupa angka).';
     } else data.nama_armada = v;
   }
 
@@ -206,4 +208,12 @@ export function validateRitase(
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, data: { tanggal, jumlah_trip: n as number, catatan: catatan || null } };
+}
+
+import type { ArmadaItem } from '@/lib/mock-data';
+
+const globalForArmada = globalThis as unknown as { customArmadas?: ArmadaItem[] };
+export const customArmadas: ArmadaItem[] = globalForArmada.customArmadas ?? [];
+if (process.env.NODE_ENV !== 'production') {
+  globalForArmada.customArmadas = customArmadas;
 }

@@ -97,7 +97,12 @@ export default function AdminTpsPage() {
   const openCreate = () => {
     setFormMode('create');
     setEditId(null);
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+      kecamatan: KECAMATAN_SAMARINDA[0],
+      latitude: '-0.502100',
+      longitude: '117.153600',
+    });
     setFormError('');
   };
 

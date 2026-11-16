@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/api-auth';
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { awalHariWitaDari } from '@/lib/waktu';
+import { fallbackLaporanTps } from '@/lib/pengawas';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +90,13 @@ export async function GET(request: Request) {
       })),
     });
   } catch (error) {
-    console.error('Gagal ambil laporan pengawas (admin):', error);
-    return NextResponse.json({ error: 'Gagal mengambil laporan pengawas' }, { status: 500 });
+    console.warn('Gagal ambil laporan pengawas dari database (fallback ke memori):', error);
+    return NextResponse.json({
+      total: fallbackLaporanTps.length,
+      items: fallbackLaporanTps.map((i) => ({
+        ...i,
+        laporan_judul: null,
+      })),
+    });
   }
 }
