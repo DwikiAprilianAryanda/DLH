@@ -318,7 +318,7 @@ export default function LaporSampahPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
-              Foto {jenisLaporan === 'Gotong Royong' ? '(Opsional)' : 'Bukti Sampah *'}
+              Foto {jenisLaporan === 'Gotong Royong' ? '(Opsional)' : 'Bukti Sampah (Kamera Langsung) *'}
             </label>
             {photoPreview ? (
               <div className="relative w-full h-48 rounded-xl overflow-hidden group">
@@ -337,10 +337,10 @@ export default function LaporSampahPage() {
                   <span className="material-symbols-outlined text-2xl">photo_camera</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-primary">Ambil Foto / Upload Gambar</p>
-                  <p className="text-[11px] text-on-surface-variant mt-0.5">Dukung format JPG, PNG, WEBP (Maks 5MB)</p>
+                  <p className="text-xs font-bold text-primary">Ambil Foto Langsung dari Kamera</p>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Wajib foto langsung di lokasi (tidak bisa ambil dari galeri)</p>
                 </div>
-                <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" capture="environment" onChange={handlePhotoUpload} className="hidden" />
+                <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" />
               </label>
             )}
             {photoError && (

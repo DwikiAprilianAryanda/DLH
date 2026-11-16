@@ -353,7 +353,7 @@ export default function ArmadaManager() {
                 <th className="py-3.5 px-4">Tahun</th>
                 <th className="py-3.5 px-4">Wilayah Kerja</th>
                 <th className="py-3.5 px-4">Petugas</th>
-                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
                 <th className="py-3.5 px-4 text-center">Ritase (hari ini / bulan ini)</th>
                 <th className="py-3.5 px-4 text-right">Aksi</th>
               </tr>
@@ -386,8 +386,8 @@ export default function ArmadaManager() {
                         <span className="text-[10px] text-on-surface-variant block">{a.telepon}</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${statusClass(a.status)}`}>
+                    <td className="py-3 px-4 whitespace-nowrap text-center">
+                      <span className={`inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-xs ${statusClass(a.status)}`}>
                         {a.status}
                       </span>
                     </td>

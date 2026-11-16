@@ -256,6 +256,42 @@ export default function DetailLaporanPage({
           </div>
         )}
 
+        {/* Foto Bukti Penyelesaian Lapangan (Ditampilkan kepada Pelapor) */}
+        {report.status === 'Ditangani' && report.foto_bukti_petugas && (
+          <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-emerald-500/30 bg-emerald-50/20 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-600 text-xl">verified</span>
+                <h3 className="text-sm font-bold text-on-surface">
+                  Bukti Penanganan Selesai DLH
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                Tuntas Ditangani
+              </span>
+            </div>
+
+            <div className="relative rounded-xl overflow-hidden border border-outline-variant/30 h-56 bg-surface-container-low">
+              <img
+                src={report.foto_bukti_petugas}
+                alt="Foto Bukti Penanganan Selesai"
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/70 text-white text-[10px] font-semibold backdrop-blur-xs flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px]">photo_camera</span>
+                Foto Dokumentasi Lapangan Petugas
+              </span>
+            </div>
+
+            {report.catatan_petugas && (
+              <div className="p-3 rounded-xl bg-surface-container-low text-xs border border-outline-variant/20">
+                <p className="font-bold text-on-surface mb-0.5">Catatan Penyelesaian DLH:</p>
+                <p className="text-on-surface-variant leading-relaxed">{report.catatan_petugas}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Map Preview */}
         <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-2">
           <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">

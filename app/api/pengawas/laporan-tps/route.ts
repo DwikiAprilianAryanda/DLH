@@ -127,15 +127,8 @@ export async function POST(request: Request) {
     }
 
     const jarakMeter = haversineDistance(d.latitude, d.longitude, tps.latitude, tps.longitude) * 1000;
-    if (jarakMeter > PENGAWAS_MAX_JARAK_METER) {
-      return NextResponse.json(
-        {
-          error: `Kamu berjarak sekitar ${Math.round(jarakMeter)} m dari titik TPS. Laporan hanya bisa dikirim dari jarak maksimal ${PENGAWAS_MAX_JARAK_METER} m.`,
-          jarak_meter: Math.round(jarakMeter),
-        },
-        { status: 400 }
-      );
-    }
+    // Catatan: Pembatasan jarak maksimal supervisor dihapus sesuai instruksi revisi
+    // Jarak tetap dihitung dan dicatat untuk keperluan audit/log.
 
     const batas = new Date(Date.now() - JEDA_LAPORAN_ULANG_MENIT * 60 * 1000);
     const baruSaja = await prisma.laporanPembersihanTps.findFirst({

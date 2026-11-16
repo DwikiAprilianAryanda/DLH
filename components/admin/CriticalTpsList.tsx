@@ -120,14 +120,14 @@ export default function CriticalTpsList({
               warning
             </span>
             <h2 className="text-base font-bold text-on-surface">
-              Peringkat TPS Kritis
+              Peringkat Area Kritis
             </h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">
               Periode {monthName}
             </span>
           </div>
           <p className="text-xs text-on-surface-variant mt-0.5">
-            Daftar titik TPS dengan akumulasi laporan keluhan warga terbanyak (otomatis direset per bulan)
+            Daftar titik area dengan akumulasi laporan keluhan warga terbanyak (otomatis direset per bulan)
           </p>
         </div>
 
@@ -141,10 +141,10 @@ export default function CriticalTpsList({
         <div className="p-8 text-center rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-2">
           <span className="material-symbols-outlined text-4xl text-primary">verified</span>
           <p className="text-sm font-bold text-on-surface">
-            Tidak Ada Titik TPS Kritis Bulan Ini
+            Tidak Ada Titik Area Kritis Bulan Ini
           </p>
           <p className="text-xs text-on-surface-variant max-w-md mx-auto">
-            Semua TPS di wilayah {selectedKecamatan} terpantau bersih dan belum mencatat lonjakan laporan keluhan warga pada periode {monthName}.
+            Semua area di wilayah {selectedKecamatan} terpantau bersih dan belum mencatat lonjakan laporan keluhan warga pada periode {monthName}.
           </p>
         </div>
       ) : (

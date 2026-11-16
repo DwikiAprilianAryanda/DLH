@@ -6,7 +6,7 @@ import { useReports } from '@/context/ReportContext';
 import ArmadaPicker from '@/components/admin/ArmadaPicker';
 
 export default function ManajemenLaporanAdminPage() {
-  const { reports, armada, updateReportStatus, deleteReport } = useReports();
+  const { reports, armada, updateReportStatus, deleteReport, refreshArmada } = useReports();
   const [selectedKecamatan, setSelectedKecamatan] = useState('Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
   const [selectedJenis, setSelectedJenis] = useState('Semua');
@@ -70,16 +70,33 @@ export default function ManajemenLaporanAdminPage() {
     }
 
     setIsSubmitting(true);
-    const ok = await updateReportStatus(activeReport.id, 'Proses', catatan);
-    setIsSubmitting(false);
+    const chosenArmada = armada.find((a) => a.id === selectedArmadaId);
+    const noteToSend = chosenArmada
+      ? `${catatan.trim()} [Armada: ${chosenArmada.nama_armada} (${chosenArmada.plat_nomor}) | ID:${chosenArmada.id}]`
+      : catatan.trim();
 
-    if (!ok) {
+    const ok = await updateReportStatus(activeReport.id, 'Proses', noteToSend);
+    if (ok) {
+      // Otomatis ubah status armada yang ditugaskan menjadi 'Bertugas' tanpa perlu admin ubah manual
+      if (chosenArmada) {
+        try {
+          await fetch(`/api/armada/${chosenArmada.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Bertugas' }),
+          });
+          await refreshArmada();
+        } catch (e) {
+          console.error('Gagal update status armada bertugas:', e);
+        }
+      }
+      setActiveReport(null);
+      setSelectedArmadaId('');
+      setCatatan('');
+    } else {
       alert('Gagal mengirim armada, coba lagi.');
-      return;
     }
-
-    setActiveReport(null);
-    setCatatan('');
+    setIsSubmitting(false);
   };
 
   const handleSelesaikan = async () => {
@@ -92,16 +109,44 @@ export default function ManajemenLaporanAdminPage() {
 
     setIsSubmitting(true);
     const ok = await updateReportStatus(completingReport.id, 'Ditangani', selesaiCatatan, selesaiFoto);
-    setIsSubmitting(false);
-
-    if (!ok) {
+    if (ok) {
+      // Otomatis kembalikan status armada menjadi 'Tersedia' setelah tugas selesai
+      const matchedArmadaId = completingReport.catatan_petugas?.match(/ID:([a-zA-Z0-9_-]+)\]/)?.[1];
+      if (matchedArmadaId) {
+        try {
+          await fetch(`/api/armada/${matchedArmadaId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Tersedia' }),
+          });
+          await refreshArmada();
+        } catch (e) {
+          console.error('Gagal kembalikan status armada ke Tersedia:', e);
+        }
+      } else {
+        const matchedArmada = armada.find(
+          (a) => completingReport.catatan_petugas && completingReport.catatan_petugas.includes(a.nama_armada)
+        );
+        if (matchedArmada && matchedArmada.status === 'Bertugas') {
+          try {
+            await fetch(`/api/armada/${matchedArmada.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'Tersedia' }),
+            });
+            await refreshArmada();
+          } catch (e) {
+            console.error('Gagal kembalikan status armada ke Tersedia:', e);
+          }
+        }
+      }
+      setCompletingReport(null);
+      setSelesaiCatatan('');
+      setSelesaiFoto(null);
+    } else {
       alert('Gagal menyelesaikan laporan, coba lagi.');
-      return;
     }
-
-    setCompletingReport(null);
-    setSelesaiCatatan('');
-    setSelesaiFoto(null);
+    setIsSubmitting(false);
   };
 
   const handleApprove = (report: ReportItem) => {
@@ -126,6 +171,23 @@ export default function ManajemenLaporanAdminPage() {
     if (!deleteTarget) return;
     setIsDeleting(true);
     setDeleteError(null);
+
+    // Jika laporan berstatus 'Proses' dan ada armada bertugas, kembalikan ke Tersedia
+    if (deleteTarget.status === 'Proses') {
+      const matchedArmadaId = deleteTarget.catatan_petugas?.match(/ID:([a-zA-Z0-9_-]+)\]/)?.[1];
+      if (matchedArmadaId) {
+        try {
+          await fetch(`/api/armada/${matchedArmadaId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Tersedia' }),
+          });
+          await refreshArmada();
+        } catch (e) {
+          console.error('Gagal restore status armada:', e);
+        }
+      }
+    }
 
     const result = await deleteReport(deleteTarget.id);
     setIsDeleting(false);
@@ -334,7 +396,11 @@ export default function ManajemenLaporanAdminPage() {
                           <span className="text-[11px] font-bold text-error bg-error/10 px-2.5 py-1 rounded-lg mr-2">Ditolak</span>
                         ) : report.status === 'Belum Ditangani' ? (
                           <button
-                            onClick={() => setActiveReport(report)}
+                            onClick={() => {
+                              setActiveReport(report);
+                              setSelectedArmadaId('');
+                              setCatatan('');
+                            }}
                             className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs"
                           >
                             <span className="material-symbols-outlined text-[16px]">

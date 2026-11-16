@@ -81,11 +81,11 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* TPS Kritis (Sesuai catatan: per bulan direset & dihitung dari TPS terbanyak dilaporkan) */}
+        {/* Area Kritis (Sesuai catatan: per bulan direset & dihitung dari area terbanyak dilaporkan) */}
         <div className="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/30 hover:-translate-y-0.5 transition-transform">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-              TPS Kritis
+              Area Kritis
             </span>
             <span className="material-symbols-outlined text-error bg-error-container/20 p-2 rounded-xl">
               warning

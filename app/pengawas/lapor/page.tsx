@@ -125,7 +125,8 @@ function LaporTpsIsi() {
     selected && gps.status === 'ok'
       ? haversineDistance(gps.lat, gps.lng, selected.latitude, selected.longitude) * 1000
       : null;
-  const dalamRadius = jarakMeter !== null && jarakMeter <= PENGAWAS_MAX_JARAK_METER;
+  // Pembatasan jarak dihapus sesuai revisi (pengawas tidak dibatasi jarak)
+  const dalamRadius = true;
 
   const mulaiGps = () => {
     if (!navigator.geolocation) {
@@ -395,7 +396,7 @@ function LaporTpsIsi() {
             {/* Lokasi GPS */}
             <div
               className={`rounded-xl p-3 text-xs font-semibold flex items-start gap-2 ${
-                gps.status === 'ok' && dalamRadius
+                gps.status === 'ok'
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                   : gps.status === 'loading' || gps.status === 'idle'
                   ? 'bg-surface-container-low text-on-surface-variant'
@@ -403,20 +404,18 @@ function LaporTpsIsi() {
               }`}
             >
               <span className="material-symbols-outlined text-[18px] shrink-0">
-                {gps.status === 'loading' ? 'progress_activity' : gps.status === 'ok' && dalamRadius ? 'my_location' : 'location_off'}
+                {gps.status === 'loading' ? 'progress_activity' : gps.status === 'ok' ? 'my_location' : 'location_off'}
               </span>
               <div className="min-w-0 flex-1">
                 {gps.status === 'loading' && <p>Mendeteksi lokasi kamu...</p>}
                 {gps.status === 'error' && <p>{gps.pesan}</p>}
-                {gps.status === 'ok' && jarakMeter !== null && (
+                {gps.status === 'ok' && (
                   <p>
-                    {dalamRadius
-                      ? `Lokasi sesuai: sekitar ${Math.round(jarakMeter)} m dari titik TPS.`
-                      : `Kamu sekitar ${Math.round(jarakMeter)} m dari titik TPS. Dekati TPS sampai maksimal ${PENGAWAS_MAX_JARAK_METER} m, lalu cek lokasi ulang.`}
+                    Lokasi GPS terdeteksi {jarakMeter !== null ? `(± ${Math.round(jarakMeter)} m dari titik koordinat TPS)` : ''}.
                   </p>
                 )}
               </div>
-              {(gps.status === 'error' || (gps.status === 'ok' && !dalamRadius)) && (
+              {gps.status === 'error' && (
                 <button
                   onClick={mulaiGps}
                   className="shrink-0 underline font-bold"
@@ -429,13 +428,12 @@ function LaporTpsIsi() {
             {/* Foto */}
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
-                Foto TPS setelah dibersihkan *
+                Foto TPS setelah dibersihkan (Kamera / Galeri) *
               </label>
               <input
                 ref={fileRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFile}
                 className="hidden"
               />
@@ -447,7 +445,7 @@ function LaporTpsIsi() {
                     onClick={() => fileRef.current?.click()}
                     className="absolute bottom-2 right-2 px-3 py-1.5 rounded-full bg-black/60 text-white text-[11px] font-bold"
                   >
-                    Foto ulang
+                    Ganti foto
                   </button>
                 </div>
               ) : (
@@ -460,7 +458,7 @@ function LaporTpsIsi() {
                     {fotoMemproses ? 'progress_activity' : 'photo_camera'}
                   </span>
                   <span className="text-xs font-semibold">
-                    {fotoMemproses ? 'Memproses foto...' : 'Ambil foto TPS'}
+                    {fotoMemproses ? 'Memproses foto...' : 'Ambil foto atau pilih dari galeri'}
                   </span>
                 </button>
               )}
@@ -505,7 +503,7 @@ function LaporTpsIsi() {
               </button>
               <button
                 onClick={kirim}
-                disabled={submitting || !foto || !dalamRadius}
+                disabled={submitting || !foto}
                 className="flex-1 py-3 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 shadow-md disabled:opacity-50"
               >
                 {submitting ? 'Mengirim...' : 'Kirim Laporan'}

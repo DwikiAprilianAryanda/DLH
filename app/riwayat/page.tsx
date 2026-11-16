@@ -251,7 +251,22 @@ export default function RiwayatLaporanPage() {
                   </Link>
 
                   {isSelesai && (
-                    <div className="mt-3 pt-3 border-t border-outline-variant/20">
+                    <div className="mt-3 pt-3 border-t border-outline-variant/20 space-y-2">
+                      {report.foto_bukti_petugas && (
+                        <div className="flex items-center justify-between pb-1">
+                          <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px]">task_alt</span>
+                            Foto bukti selesai tersedia
+                          </span>
+                          <Link
+                            href={`/laporan/${report.id}`}
+                            className="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5"
+                          >
+                            Lihat Bukti
+                            <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                          </Link>
+                        </div>
+                      )}
                       {survei ? (
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-0.5">

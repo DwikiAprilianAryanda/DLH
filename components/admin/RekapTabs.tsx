@@ -27,7 +27,7 @@ export default function RekapTabs({
   const [tab, setTab] = useState<TabKey>('tps_kritis');
 
   const tabs: { key: TabKey; label: string; icon: string }[] = [
-    { key: 'tps_kritis', label: 'TPS Kritis', icon: 'warning' },
+    { key: 'tps_kritis', label: 'Area Kritis', icon: 'warning' },
     { key: 'laporan', label: 'Rekap Laporan Bulanan', icon: 'bar_chart' },
     { key: 'survey', label: 'Rekap Survey Kepuasan', icon: 'reviews' },
   ];
