@@ -18,7 +18,7 @@ export default function AdminArmadaPage() {
             </h1>
           </div>
           <p className="text-xs text-on-surface-variant">
-            {armada.length} unit armada DLH Samarinda. Kelola spesifikasi armada, perbarui data teknis, dan catat ritase harian per unit.
+            {armada.length} unit armada DLH Samarinda. Kelola spesifikasi armada dan perbarui status operasional per unit.
           </p>
         </div>
       </div>

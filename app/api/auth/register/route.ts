@@ -40,6 +40,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nama, email, dan password wajib diisi' }, { status: 400 });
     }
 
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return NextResponse.json({ error: 'Format email tidak valid (contoh: nama@domain.com).' }, { status: 400 });
+    }
+
     if (trimmedName.length < 3 || trimmedName.length > 50) {
       return NextResponse.json({ error: 'Nama lengkap harus antara 3 - 50 karakter' }, { status: 400 });
     }

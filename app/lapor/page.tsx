@@ -25,6 +25,7 @@ export default function LaporSampahPage() {
   const [longitude, setLongitude] = useState<number | ''>(117.1536);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [namaTamu, setNamaTamu] = useState('');
   const [isDetectingGps, setIsDetectingGps] = useState(false);
   const [gpsDetected, setGpsDetected] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,7 +138,6 @@ export default function LaporSampahPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-    if (!user) return;
 
     setFormError(null);
 
@@ -145,9 +145,11 @@ export default function LaporSampahPage() {
       photoPreview ||
       'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
 
+    const finalUserName = user ? user.full_name : (namaTamu.trim() || namaPemohon.trim() || 'Warga Samarinda');
+
     const payload = {
-      user_id: user.id,
-      user_name: user.full_name,
+      user_id: user?.id,
+      user_name: finalUserName,
       jenis_laporan: jenisLaporan,
       title,
       description,
@@ -193,52 +195,6 @@ export default function LaporSampahPage() {
       router.push(`/laporan/${created.id}`);
     }, 1000);
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background pb-24">
-        <Header />
-        <main className="pt-20 px-4 max-w-lg mx-auto">
-          <p className="text-xs text-on-surface-variant text-center">Memuat...</p>
-        </main>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background pb-24">
-        <Header />
-        <main className="pt-20 px-4 max-w-lg mx-auto">
-          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl">lock</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-on-surface">Login Diperlukan</h1>
-              <p className="text-xs text-on-surface-variant mt-1">
-                Untuk membuat laporan sampah, silakan login atau daftar akun terlebih dahulu.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              <button
-                onClick={() => router.push('/login')}
-                className="w-full py-3 bg-primary text-on-primary font-bold text-sm rounded-2xl shadow-md hover:bg-primary/90 transition-all"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => router.push('/daftar')}
-                className="w-full py-3 bg-surface-container text-on-surface font-bold text-sm rounded-2xl hover:bg-surface-container-high transition-all"
-              >
-                Daftar Akun Baru
-              </button>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -316,6 +272,30 @@ export default function LaporSampahPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {!user && (
+            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                  Nama Pelapor (Opsional)
+                </label>
+                <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
+                  Melapor Tanpa Login
+                </span>
+              </div>
+              <input
+                type="text"
+                placeholder="Nama kamu (bisa dikosongkan untuk anonim)"
+                value={namaTamu}
+                onChange={(e) => setNamaTamu(e.target.value)}
+                maxLength={50}
+                className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <p className="text-[10px] text-on-surface-variant">
+                Kamu dapat langsung mengirim laporan tanpa harus membuat akun / login.
+              </p>
+            </div>
+          )}
+
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/30">
             <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
               Foto {jenisLaporan === 'Gotong Royong' ? '(Opsional)' : 'Bukti Sampah (Kamera Langsung) *'}

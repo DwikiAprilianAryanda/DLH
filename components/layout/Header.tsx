@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useReports } from '@/context/ReportContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Header() {
   const router = useRouter();
@@ -40,6 +41,8 @@ export default function Header() {
 
           {/* Action Controls */}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+
             {/* Notifications Link */}
             <Link
               href="/notifikasi"

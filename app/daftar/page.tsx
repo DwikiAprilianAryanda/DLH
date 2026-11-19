@@ -32,6 +32,12 @@ export default function DaftarPage() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Format email tidak valid. Gunakan format yang benar (contoh: nama@domain.com).');
+      return;
+    }
+
     if (phone.trim() && (phone.trim().length < 10 || phone.trim().length > 15)) {
       setError('Nomor HP harus berupa angka 10 - 15 digit (contoh: 081234567890)');
       return;

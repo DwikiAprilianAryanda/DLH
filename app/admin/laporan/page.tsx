@@ -69,8 +69,17 @@ export default function ManajemenLaporanAdminPage() {
       return;
     }
 
-    setIsSubmitting(true);
     const chosenArmada = armada.find((a) => a.id === selectedArmadaId);
+    if (chosenArmada && chosenArmada.status === 'Bertugas') {
+      alert('Armada ini sedang bertugas di lokasi lain. Silakan pilih unit armada yang berstatus Tersedia.');
+      return;
+    }
+    if (chosenArmada && chosenArmada.status === 'Perawatan') {
+      alert('Armada ini sedang dalam perawatan teknis. Silakan pilih unit armada yang Tersedia.');
+      return;
+    }
+
+    setIsSubmitting(true);
     const noteToSend = chosenArmada
       ? `${catatan.trim()} [Armada: ${chosenArmada.nama_armada} (${chosenArmada.plat_nomor}) | ID:${chosenArmada.id}]`
       : catatan.trim();

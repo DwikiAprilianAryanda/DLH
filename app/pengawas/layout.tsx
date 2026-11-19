@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const MENU = [
   { href: '/pengawas', label: 'Dashboard', icon: 'dashboard' },
@@ -54,6 +55,7 @@ export default function PengawasLayout({ children }: { children: React.ReactNode
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <ThemeToggle />
             <Link
               href="/"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"

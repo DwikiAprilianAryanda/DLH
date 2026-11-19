@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AdminSidebar from '@/components/layout/AdminSidebar';
 import { useAuth } from '@/context/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname === '/admin/laporan') return 'Manajemen Laporan & Disposisi Pengaduan';
     if (pathname === '/admin/tps') return 'Kelola Data & Titik Lokasi TPS';
     if (pathname === '/admin/pembersihan-tps') return 'Laporan Pembersihan TPS dari Pengawas';
-    if (pathname === '/admin/armada') return 'Data, Ritase & Monitoring Armada Sampah';
+    if (pathname === '/admin/armada') return 'Data & Status Operasional Armada DLH';
     return 'Panel Staf Admin DLH Samarinda';
   };
 
@@ -80,6 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <ThemeToggle />
             <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-[11px] font-bold">
               <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
               Sistem Aktif Realtime

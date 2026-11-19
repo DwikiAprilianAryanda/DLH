@@ -1,6 +1,8 @@
 import { KECAMATAN_SAMARINDA } from '@/lib/mock-data';
 import { hariIniWita, parseTanggal } from '@/lib/waktu';
 
+export const DUMMY_KECAMATAN_TUGAS = KECAMATAN_SAMARINDA;
+
 /**
  * Aturan data armada. Dipakai di browser (form admin) dan server (API) —
  * ubah di sini saja kalau DLH menambah jenis armada atau minta batas lain.
@@ -26,7 +28,9 @@ export const KOSONG = '-';
 
 export const ARMADA_LIMITS = {
   nama: { min: 3, max: 80 },
+  jenis: { max: 50 },
   bagian: { max: 100 },
+  bagianPekerjaan: { max: 100 },
   plat: { min: 3, max: 20 },
   petugas: { max: 60 },
   telepon: { min: 6, max: 20 },
@@ -157,6 +161,12 @@ export function validateArmada(
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, data };
+}
+
+export function validateArmadaForm(
+  form: unknown
+): { ok: true; data: Partial<ArmadaInput> } | { ok: false; errors: FieldErrors } {
+  return validateArmada(form, 'create');
 }
 
 export interface RitaseInput {

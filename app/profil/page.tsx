@@ -177,32 +177,6 @@ export default function ProfilPage() {
             </div>
             <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
           </a>
-
-          {/* Link Web Pelacakan Realtime Cartrack */}
-          <a
-            href="https://fleet.cartrack.co.id"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3.5 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-xs font-semibold text-on-surface">Web Cartrack Armada DLH</p>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container">
-                    Armada Realtime
-                  </span>
-                </div>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">
-                  Sistem monitoring GPS pelacakan armada pengangkut sampah DLH secara langsung
-                </p>
-              </div>
-            </div>
-            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_new</span>
-          </a>
         </div>
       </main>
     </div>

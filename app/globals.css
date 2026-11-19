@@ -17,6 +17,7 @@
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+  --color-surface: #ffffff;
   --color-surface-container-lowest: #ffffff;
   --color-surface-container-low: #eff4ff;
   --color-surface-container: #e5eeff;
@@ -27,14 +28,43 @@
   --color-outline-variant: #bdcaba;
 }
 
+/* Dukungan Mode Gelap (Dark Mode) */
+.dark {
+  --color-background: #0b1320;
+  --color-on-surface: #e2e8f0;
+  --color-primary: #10b981;
+  --color-primary-container: #059669;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #ecfdf5;
+  --color-secondary: #059669;
+  --color-secondary-container: #047857;
+  --color-on-secondary-container: #d1fae5;
+  --color-tertiary: #f59e0b;
+  --color-tertiary-container: #d97706;
+  --color-on-tertiary-container: #fffbeb;
+  --color-error: #ef4444;
+  --color-error-container: #7f1d1d;
+  --color-on-error-container: #fef2f2;
+  --color-surface: #121c2d;
+  --color-surface-container-lowest: #121c2d;
+  --color-surface-container-low: #182438;
+  --color-surface-container: #1e2c43;
+  --color-surface-container-high: #273752;
+  --color-surface-variant: #1a2538;
+  --color-on-surface-variant: #94a3b8;
+  --color-outline: #475569;
+  --color-outline-variant: #334155;
+  color-scheme: dark;
+}
+
 @layer base {
   body {
     background-color: var(--color-background);
     color: var(--color-on-surface);
     -webkit-tap-highlight-color: transparent;
     font-family: 'Inter', sans-serif;
-    /* Teks tanpa spasi (judul/deskripsi panjang) dipotong ke baris baru, tidak meluber dari kartu/modal */
     overflow-wrap: anywhere;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   .pb-safe {
@@ -75,6 +105,17 @@
   border-radius: 12px;
   padding: 4px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.dark .leaflet-tile {
+  filter: brightness(0.7) invert(1) contrast(2.2) hue-rotate(190deg) saturate(0.35) brightness(0.75);
+}
+
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  background: #121c2d;
+  color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 @keyframes bounce-subtle {

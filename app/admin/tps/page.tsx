@@ -220,7 +220,7 @@ export default function AdminTpsPage() {
         body: JSON.stringify({
           jam_buka: bulkJamBuka,
           jam_tutup: bulkJamTutup,
-          kecamatan: bulkScope === 'filter' ? selectedKecamatan : undefined,
+          kecamatan: bulkScope === 'filter' && selectedKecamatan !== 'Semua' ? selectedKecamatan : undefined,
           onlyEmpty: bulkOnlyEmpty,
         }),
       });
@@ -695,19 +695,25 @@ export default function AdminTpsPage() {
                 <label className="flex items-center gap-2 text-xs text-on-surface font-medium cursor-pointer">
                   <input
                     type="radio"
-                    checked={bulkScope === 'semua'}
+                    checked={bulkScope === 'semua' || selectedKecamatan === 'Semua'}
                     onChange={() => setBulkScope('semua')}
                   />
-                  Semua TPS ({tpsList.length} titik)
+                  Semua TPS se-Kota Samarinda ({tpsList.length} titik)
                 </label>
-                <label className="flex items-center gap-2 text-xs text-on-surface font-medium cursor-pointer">
-                  <input
-                    type="radio"
-                    checked={bulkScope === 'filter'}
-                    onChange={() => setBulkScope('filter')}
-                  />
-                  Hanya Kecamatan {selectedKecamatan} ({filteredTps.length} titik)
-                </label>
+                {selectedKecamatan !== 'Semua' ? (
+                  <label className="flex items-center gap-2 text-xs text-on-surface font-medium cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={bulkScope === 'filter'}
+                      onChange={() => setBulkScope('filter')}
+                    />
+                    Hanya Kecamatan {selectedKecamatan} ({filteredTps.length} titik)
+                  </label>
+                ) : (
+                  <p className="text-[11px] text-on-surface-variant pl-5">
+                    (Filter kecamatan sedang &quot;Semua&quot;. Pilih kecamatan di tabel jika ingin membatasi ke wilayah tertentu).
+                  </p>
+                )}
               </div>
             </div>
 

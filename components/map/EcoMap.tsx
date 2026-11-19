@@ -1,26 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { ReportItem } from '@/lib/mock-data';
 
 // Custom Map Marker Icons using Leaflet divIcon
 const createCustomMarker = (status: ReportItem['status'], urgensi: ReportItem['urgensi']) => {
-  let colorClass = 'bg-primary text-on-primary';
+  let colorClass = 'bg-emerald-600 text-white';
   let iconName = 'check_circle';
 
-  if (status === 'Belum Ditangani') {
+  if (status === 'Menunggu Persetujuan') {
+    colorClass = 'bg-amber-500 text-white';
+    iconName = 'hourglass_top';
+  } else if (status === 'Belum Ditangani') {
     if (urgensi === 'Kritis') {
-      colorClass = 'bg-error text-on-error';
+      colorClass = 'bg-rose-600 text-white';
       iconName = 'warning';
     } else {
-      colorClass = 'bg-tertiary-container text-on-tertiary-container';
+      colorClass = 'bg-amber-600 text-white';
       iconName = 'delete';
     }
   } else if (status === 'Proses') {
-    colorClass = 'bg-secondary text-on-secondary';
+    colorClass = 'bg-sky-600 text-white';
     iconName = 'local_shipping';
+  } else if (status === 'Ditangani') {
+    colorClass = 'bg-emerald-600 text-white';
+    iconName = 'check_circle';
   }
 
   const html = `
@@ -78,17 +84,69 @@ export default function EcoMap({
     }
   };
 
-  const validReports = (reports || []).filter(
-    (r) =>
-      typeof r?.latitude === 'number' &&
-      typeof r?.longitude === 'number' &&
-      !isNaN(r.latitude) &&
-      !isNaN(r.longitude) &&
-      r.latitude >= -90 &&
-      r.latitude <= 90 &&
-      r.longitude >= -180 &&
-      r.longitude <= 180
-  );
+  // Filter: hanya koordinat valid & LAPORAN DITOLAK TIDAK DITAMPILKAN DI PETA
+  const validReports = useMemo(() => {
+    return (reports || []).filter(
+      (r) =>
+        r &&
+        r.status !== 'Ditolak' &&
+        typeof r.latitude === 'number' &&
+        typeof r.longitude === 'number' &&
+        !isNaN(r.latitude) &&
+        !isNaN(r.longitude) &&
+        r.latitude >= -90 &&
+        r.latitude <= 90 &&
+        r.longitude >= -180 &&
+        r.longitude <= 180
+    );
+  }, [reports]);
+
+  // Deteksi laporan di titik koordinat yang sangat berdekatan (< 20 meter) agar tidak menumpuk
+  const positionedReports = useMemo(() => {
+    const clusters: ReportItem[][] = [];
+    const threshold = 0.00018; // ~20 meter
+
+    for (const r of validReports) {
+      const matchedCluster = clusters.find((cluster) => {
+        const first = cluster[0];
+        const dLat = Math.abs(first.latitude - r.latitude);
+        const dLng = Math.abs(first.longitude - r.longitude);
+        return dLat < threshold && dLng < threshold;
+      });
+
+      if (matchedCluster) {
+        matchedCluster.push(r);
+      } else {
+        clusters.push([r]);
+      }
+    }
+
+    // Hitung posisi visual (offset radial melingkar jika dalam satu cluster > 1)
+    const result: { report: ReportItem; position: [number, number]; clusterSize: number }[] = [];
+    for (const cluster of clusters) {
+      const count = cluster.length;
+      if (count === 1) {
+        result.push({
+          report: cluster[0],
+          position: [cluster[0].latitude, cluster[0].longitude],
+          clusterSize: 1,
+        });
+      } else {
+        const radius = 0.00022; // ~24 meter radius sebaran
+        cluster.forEach((rep, idx) => {
+          const angle = (2 * Math.PI * idx) / count;
+          const latOffset = radius * Math.sin(angle);
+          const lngOffset = (radius / Math.cos((rep.latitude * Math.PI) / 180)) * Math.cos(angle);
+          result.push({
+            report: rep,
+            position: [rep.latitude + latOffset, rep.longitude + lngOffset],
+            clusterSize: count,
+          });
+        });
+      }
+    }
+    return result;
+  }, [validReports]);
 
   return (
     <div className="relative w-full h-full min-h-[400px]">
@@ -105,10 +163,10 @@ export default function EcoMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {validReports.map((report) => (
+        {positionedReports.map(({ report, position, clusterSize }) => (
           <Marker
             key={report.id}
-            position={[report.latitude, report.longitude]}
+            position={position}
             icon={createCustomMarker(report.status, report.urgensi)}
             eventHandlers={{
               click: () => onReportSelect?.(report),
@@ -138,6 +196,11 @@ export default function EcoMap({
                 <p className="text-xs text-on-surface-variant line-clamp-2 mb-2">
                   {report.description}
                 </p>
+                {clusterSize > 1 && (
+                  <p className="text-[10px] text-primary font-semibold mb-1.5 bg-primary/10 px-1.5 py-0.5 rounded">
+                    Titik bersama ({clusterSize} laporan berdekatan)
+                  </p>
+                )}
                 <div className="flex items-center justify-between pt-1 border-t border-outline-variant/30">
                   <span className="text-[11px] font-semibold text-primary">
                     Status: {report.status}

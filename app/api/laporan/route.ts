@@ -64,11 +64,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // 1. Harus login — identitas pelapor diambil dari token, BUKAN dari body
+    // 1. Identitas pelapor: jika login gunakan akun pengguna; jika tidak, izinkan sebagai tamu warga
     const currentUser = getCurrentUserFromToken();
-    if (!currentUser) {
-      return NextResponse.json({ error: 'Silakan login terlebih dahulu untuk mengirim laporan.' }, { status: 401 });
-    }
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : 'local';
+    const rateLimitKey = currentUser ? currentUser.id : `guest:${clientIp}`;
 
     // 2. Body harus JSON valid
     let body: unknown;
@@ -87,15 +87,15 @@ export async function POST(request: Request) {
     const d = result.data;
     const isGotongRoyong = d.jenis_laporan === 'Gotong Royong';
 
-    // 4. Proteksi Rate Limiting & Anti-Duplikasi per user
-    if (checkReportRateLimit(currentUser.id)) {
+    // 4. Proteksi Rate Limiting & Anti-Duplikasi per user / IP
+    if (checkReportRateLimit(rateLimitKey)) {
       return NextResponse.json(
         { error: 'Terlalu banyak laporan dikirim dalam waktu singkat. Mohon tunggu 1 menit.' },
         { status: 429 }
       );
     }
 
-    const lastSub = recentSubmissions.get(currentUser.id);
+    const lastSub = recentSubmissions.get(rateLimitKey);
     const now = Date.now();
     if (lastSub && lastSub.title === d.title && now - lastSub.timestamp < 15_000) {
       return NextResponse.json(
@@ -103,20 +103,29 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-    recentSubmissions.set(currentUser.id, { title: d.title, timestamp: now });
+    recentSubmissions.set(rateLimitKey, { title: d.title, timestamp: now });
 
-    const profile = await prisma.profile.findUnique({
-      where: { id: currentUser.id },
-      select: { id: true, full_name: true },
-    });
-    if (!profile) {
-      return NextResponse.json({ error: 'Akun tidak ditemukan, silakan login ulang.' }, { status: 401 });
+    let userId: string | null = null;
+    let userName = 'Warga';
+
+    if (currentUser) {
+      const profile = await prisma.profile.findUnique({
+        where: { id: currentUser.id },
+        select: { id: true, full_name: true },
+      });
+      if (profile) {
+        userId = profile.id;
+        userName = profile.full_name;
+      }
+    } else {
+      const reqBody = body && typeof body === 'object' ? (body as Record<string, any>) : {};
+      userName = (reqBody.user_name || reqBody.nama_pemohon || d.nama_pemohon || 'Warga (Tamu)').trim();
     }
 
     const laporan = await prisma.laporanSampah.create({
       data: {
-        user_id: profile.id,
-        user_name: profile.full_name,
+        user_id: userId,
+        user_name: userName,
         jenis_laporan: d.jenis_laporan,
         title: d.title,
         description: d.description,
@@ -139,13 +148,15 @@ export async function POST(request: Request) {
       ? `Permohonan gotong royong "${laporan.title}" telah diajukan dan menunggu persetujuan DLH.`
       : `Laporan pengaduan "${laporan.title}" berhasil diajukan dan sedang menunggu verifikasi/ACC dari admin DLH sebelum diterbitkan.`;
 
-    await prisma.notifikasi.create({
-      data: {
-        user_id: profile.id,
-        judul: isGotongRoyong ? 'Permohonan Gotong Royong Terkirim' : 'Laporan Berhasil Diajukan',
-        pesan: notifPesan,
-      },
-    });
+    if (userId) {
+      await prisma.notifikasi.create({
+        data: {
+          user_id: userId,
+          judul: isGotongRoyong ? 'Permohonan Gotong Royong Terkirim' : 'Laporan Berhasil Diajukan',
+          pesan: notifPesan,
+        },
+      });
+    }
 
     // Notifikasi otomatis ke seluruh akun admin saat ada laporan masuk dari warga
     try {
@@ -158,7 +169,7 @@ export async function POST(request: Request) {
           data: admins.map((adm) => ({
             user_id: adm.id,
             judul: `Laporan Baru Masuk: ${laporan.title}`,
-            pesan: `Warga (${profile.full_name}) mengajukan laporan ${d.jenis_laporan} di ${laporan.kecamatan} (${laporan.kelurahan}) dengan urgensi ${laporan.urgensi}. Menunggu ACC/verifikasi admin.`,
+            pesan: `Warga (${userName}) mengajukan laporan ${d.jenis_laporan} di ${laporan.kecamatan} (${laporan.kelurahan}) dengan urgensi ${laporan.urgensi}. Menunggu ACC/verifikasi admin.`,
             dibaca: false,
           })),
         });

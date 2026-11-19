@@ -87,13 +87,15 @@ export default function ArmadaPicker({ armada, value, onChange }: ArmadaPickerPr
         ) : (
           tersaring.map((a) => {
             const aktif = a.id === value;
+            const bertugas = a.status === 'Bertugas';
             const perawatan = a.status === 'Perawatan';
+            const tidakBisaDipilih = bertugas || perawatan;
             const detail = rincian(a);
             return (
               <button
                 key={a.id}
                 type="button"
-                disabled={perawatan}
+                disabled={tidakBisaDipilih}
                 onClick={() => onChange(a.id)}
                 className={`w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   aktif ? 'bg-primary/10' : 'hover:bg-surface-container'
@@ -112,13 +114,13 @@ export default function ArmadaPicker({ armada, value, onChange }: ArmadaPickerPr
                     <span className="block text-[10px] text-on-surface-variant truncate">{detail}</span>
                   )}
                 </span>
-                {a.status === 'Bertugas' && (
-                  <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                    Sedang bertugas
+                {bertugas && (
+                  <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                    Sedang bertugas (Terkunci)
                   </span>
                 )}
                 {perawatan && (
-                  <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
+                  <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/30">
                     Perawatan
                   </span>
                 )}

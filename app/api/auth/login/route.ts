@@ -38,6 +38,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email dan password wajib diisi' }, { status: 400 });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return NextResponse.json({ error: 'Format email tidak valid (contoh: nama@domain.com).' }, { status: 400 });
+    }
+
     // Ambil IP address atau gunakan email sebagai kunci pembatasan
     const forwardedFor = request.headers.get('x-forwarded-for');
     const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : 'local';

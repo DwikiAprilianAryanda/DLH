@@ -1,19 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { ArmadaItem } from '@/lib/mock-data';
 import { useReports } from '@/context/ReportContext';
-import { KECAMATAN_SAMARINDA, type ArmadaItem } from '@/lib/mock-data';
 import {
   ARMADA_LIMITS,
+  armadaBelumLengkap,
+  DUMMY_KECAMATAN_TUGAS,
   JENIS_ARMADA,
   KOSONG,
   STATUS_ARMADA,
-  armadaBelumLengkap,
+  validateArmadaForm,
 } from '@/lib/armada';
 
 const emptyForm = {
   nama_armada: '',
-  jenis_armada: JENIS_ARMADA[0] as string,
+  jenis_armada: '',
   bagian_pekerjaan: '',
   plat_nomor: '',
   tahun: '',
@@ -25,40 +27,9 @@ const emptyForm = {
 
 type FormState = typeof emptyForm;
 
-interface RitaseItem {
-  id: string;
-  tanggal: string;
-  jumlah_trip: number;
-  catatan: string | null;
-}
-
 const inputClass =
   'w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30';
 const labelClass = 'block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5';
-
-function hariIniWitaClient(): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Makassar' });
-}
-
-/** Nilai '-' ditandai kuning supaya kelihatan masih butuh data dari DLH. */
-function Nilai({ v }: { v?: string | null }) {
-  if (!v || v === KOSONG) {
-    return (
-      <span
-        className="inline-block px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 text-[10px] font-bold"
-        title="Belum ada data (menunggu dari DLH)"
-      >
-        -
-      </span>
-    );
-  }
-  return <span>{v}</span>;
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-[11px] text-error font-semibold mt-1">{message}</p>;
-}
 
 export default function ArmadaManager() {
   const { armada, refreshArmada } = useReports();
@@ -67,26 +38,17 @@ export default function ArmadaManager() {
   const [filterJenis, setFilterJenis] = useState('semua');
   const [filterData, setFilterData] = useState<'semua' | 'belum'>('semua');
 
-  const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
+  // Modal create/edit
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Modal hapus
   const [deleteTarget, setDeleteTarget] = useState<ArmadaItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const [ritaseTarget, setRitaseTarget] = useState<ArmadaItem | null>(null);
-  const [ritaseBulan, setRitaseBulan] = useState(hariIniWitaClient().slice(0, 7));
-  const [ritaseTanggal, setRitaseTanggal] = useState(hariIniWitaClient());
-  const [ritaseTrip, setRitaseTrip] = useState('');
-  const [ritaseCatatan, setRitaseCatatan] = useState('');
-  const [ritaseItems, setRitaseItems] = useState<RitaseItem[]>([]);
-  const [ritaseTotal, setRitaseTotal] = useState(0);
-  const [ritaseError, setRitaseError] = useState('');
-  const [ritaseLoading, setRitaseLoading] = useState(false);
-  const [ritaseSaving, setRitaseSaving] = useState(false);
 
   const jenisOptions = useMemo(() => {
     const hitung = new Map<string, number>();
@@ -97,16 +59,16 @@ export default function ArmadaManager() {
     return Array.from(hitung.entries()).sort((x, y) => y[1] - x[1]);
   }, [armada]);
 
-  const belumLengkap = useMemo(
-    () => armada.filter((a) => armadaBelumLengkap(a)).length,
+  const jumlahTersedia = useMemo(
+    () => armada.filter((a) => a.status === 'Tersedia').length,
     [armada]
   );
-  const ritaseHariIni = useMemo(
-    () => armada.reduce((sum, a) => sum + (a.ritase_hari_ini ?? 0), 0),
+  const jumlahBertugas = useMemo(
+    () => armada.filter((a) => a.status === 'Bertugas').length,
     [armada]
   );
-  const ritaseBulanIni = useMemo(
-    () => armada.reduce((sum, a) => sum + (a.ritase_bulan_ini ?? 0), 0),
+  const jumlahPerawatan = useMemo(
+    () => armada.filter((a) => a.status === 'Perawatan').length,
     [armada]
   );
 
@@ -115,65 +77,82 @@ export default function ArmadaManager() {
     return armada.filter((a) => {
       if (filterJenis !== 'semua' && (a.jenis_armada ?? KOSONG) !== filterJenis) return false;
       if (filterData === 'belum' && !armadaBelumLengkap(a)) return false;
-      if (q) {
-        const haystack = [a.nama_armada, a.jenis_armada, a.bagian_pekerjaan, a.plat_nomor, a.nama_petugas, a.kecamatan_tugas]
-          .map((x) => (x ?? '').toLowerCase())
-          .join(' | ');
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
+      if (!q) return true;
+      const haystack = [
+        a.nama_armada,
+        a.jenis_armada,
+        a.bagian_pekerjaan,
+        a.plat_nomor,
+        a.kecamatan_tugas,
+        a.nama_petugas,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
     });
   }, [armada, search, filterJenis, filterData]);
 
-  // ---------- Tambah / Edit ----------
+  // ---------- Form Create / Edit ----------
   const openCreate = () => {
-    setFormMode('create');
-    setEditId(null);
+    setEditingId(null);
     setForm(emptyForm);
     setFieldErrors({});
     setFormError('');
+    setModalOpen(true);
   };
 
   const openEdit = (a: ArmadaItem) => {
-    const kosongJadiStrip = (v?: string) => (!v || v === KOSONG ? '' : v);
-    setFormMode('edit');
-    setEditId(a.id);
+    setEditingId(a.id);
     setForm({
       nama_armada: a.nama_armada,
-      jenis_armada: a.jenis_armada && a.jenis_armada !== KOSONG ? a.jenis_armada : JENIS_ARMADA[0],
-      bagian_pekerjaan: kosongJadiStrip(a.bagian_pekerjaan),
-      plat_nomor: kosongJadiStrip(a.plat_nomor),
-      tahun: kosongJadiStrip(a.tahun),
-      kecamatan_tugas: kosongJadiStrip(a.kecamatan_tugas),
-      nama_petugas: kosongJadiStrip(a.nama_petugas),
-      telepon: kosongJadiStrip(a.telepon),
+      jenis_armada: a.jenis_armada && a.jenis_armada !== KOSONG ? a.jenis_armada : '',
+      bagian_pekerjaan: a.bagian_pekerjaan && a.bagian_pekerjaan !== KOSONG ? a.bagian_pekerjaan : '',
+      plat_nomor: a.plat_nomor && a.plat_nomor !== KOSONG ? a.plat_nomor : '',
+      tahun: a.tahun && a.tahun !== KOSONG ? a.tahun : '',
+      kecamatan_tugas: a.kecamatan_tugas && a.kecamatan_tugas !== KOSONG ? a.kecamatan_tugas : '',
+      nama_petugas: a.nama_petugas && a.nama_petugas !== KOSONG ? a.nama_petugas : '',
+      telepon: a.telepon && a.telepon !== KOSONG ? a.telepon : '',
       status: a.status,
     });
     setFieldErrors({});
     setFormError('');
+    setModalOpen(true);
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    setFieldErrors({});
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     setFormError('');
+
+    const validation = validateArmadaForm(form);
+    if (!validation.ok) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+    setFieldErrors({});
+    setIsSaving(true);
+
     try {
-      const res = await fetch(formMode === 'create' ? '/api/armada' : `/api/armada/${editId}`, {
-        method: formMode === 'create' ? 'POST' : 'PATCH',
+      const url = editingId ? `/api/armada/${editingId}` : '/api/armada';
+      const method = editingId ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(validation.data),
       });
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setFieldErrors(data.fields ?? {});
+        if (data.fields) setFieldErrors(data.fields);
         setFormError(data.error || 'Gagal menyimpan armada.');
         return;
       }
+
+      setModalOpen(false);
       await refreshArmada();
-      setFormMode(null);
     } catch (error) {
       console.error('Gagal simpan armada:', error);
-      setFormError('Tidak dapat terhubung ke server.');
+      setFormError('Tidak dapat terhubung ke server. Periksa koneksi.');
     } finally {
       setIsSaving(false);
     }
@@ -185,84 +164,18 @@ export default function ArmadaManager() {
     setIsDeleting(true);
     try {
       const res = await fetch(`/api/armada/${deleteTarget.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Gagal hapus');
-      await refreshArmada();
-      setDeleteTarget(null);
-    } catch (error) {
-      console.error('Gagal hapus armada:', error);
-      alert('Gagal menghapus armada, coba lagi.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // ---------- Ritase ----------
-  const loadRitase = useCallback(async (armadaId: string, bulan: string) => {
-    setRitaseLoading(true);
-    try {
-      const res = await fetch(`/api/armada/${armadaId}/ritase?bulan=${bulan}`);
-      const data = await res.json();
-      if (res.ok) {
-        setRitaseItems(data.items ?? []);
-        setRitaseTotal(data.total ?? 0);
-      } else {
-        setRitaseItems([]);
-        setRitaseTotal(0);
-      }
-    } catch (error) {
-      console.error('Gagal ambil ritase:', error);
-    } finally {
-      setRitaseLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (ritaseTarget) loadRitase(ritaseTarget.id, ritaseBulan);
-  }, [ritaseTarget, ritaseBulan, loadRitase]);
-
-  const openRitase = (a: ArmadaItem) => {
-    const hariIni = hariIniWitaClient();
-    setRitaseTarget(a);
-    setRitaseBulan(hariIni.slice(0, 7));
-    setRitaseTanggal(hariIni);
-    setRitaseTrip('');
-    setRitaseCatatan('');
-    setRitaseError('');
-  };
-
-  const handleSaveRitase = async () => {
-    if (!ritaseTarget) return;
-    setRitaseError('');
-    if (ritaseTrip === '' || !Number.isInteger(Number(ritaseTrip))) {
-      setRitaseError('Isi jumlah ritase dengan bilangan bulat.');
-      return;
-    }
-    setRitaseSaving(true);
-    try {
-      const res = await fetch(`/api/armada/${ritaseTarget.id}/ritase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tanggal: ritaseTanggal,
-          jumlah_trip: Number(ritaseTrip),
-          catatan: ritaseCatatan,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const first = data.fields ? Object.values(data.fields as Record<string, string>)[0] : null;
-        setRitaseError(first || data.error || 'Gagal menyimpan ritase.');
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Gagal menghapus armada.');
         return;
       }
-      setRitaseTrip('');
-      setRitaseCatatan('');
-      setRitaseBulan(ritaseTanggal.slice(0, 7));
-      await Promise.all([loadRitase(ritaseTarget.id, ritaseTanggal.slice(0, 7)), refreshArmada()]);
+      setDeleteTarget(null);
+      await refreshArmada();
     } catch (error) {
-      console.error('Gagal simpan ritase:', error);
-      setRitaseError('Tidak dapat terhubung ke server.');
+      console.error('Gagal hapus armada:', error);
+      alert('Tidak dapat terhubung ke server.');
     } finally {
-      setRitaseSaving(false);
+      setIsDeleting(false);
     }
   };
 
@@ -275,27 +188,27 @@ export default function ArmadaManager() {
 
   return (
     <div className="space-y-5">
-      {/* Ringkasan */}
+      {/* Ringkasan Status Armada DLH */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-xs">
           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Total Armada</span>
           <span className="text-2xl font-bold text-on-surface">{armada.length}</span>
-          <span className="text-xs text-on-surface-variant"> unit</span>
+          <span className="text-xs text-on-surface-variant"> unit armada DLH</span>
+        </div>
+        <div className="bg-surface-container-lowest p-4 rounded-2xl border border-blue-500/30 shadow-xs">
+          <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Tersedia (Siaga)</span>
+          <span className="text-2xl font-bold text-blue-700">{jumlahTersedia}</span>
+          <span className="text-xs text-on-surface-variant"> unit siap kirim</span>
+        </div>
+        <div className="bg-surface-container-lowest p-4 rounded-2xl border border-emerald-500/30 shadow-xs">
+          <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Sedang Bertugas</span>
+          <span className="text-2xl font-bold text-emerald-700">{jumlahBertugas}</span>
+          <span className="text-xs text-on-surface-variant"> unit di lapangan</span>
         </div>
         <div className="bg-surface-container-lowest p-4 rounded-2xl border border-amber-500/30 shadow-xs">
-          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Data Belum Lengkap</span>
-          <span className="text-2xl font-bold text-amber-700">{belumLengkap}</span>
-          <span className="text-xs text-on-surface-variant"> unit (ada kolom &quot;-&quot;)</span>
-        </div>
-        <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-xs">
-          <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Ritase Hari Ini</span>
-          <span className="text-2xl font-bold text-primary">{ritaseHariIni}</span>
-          <span className="text-xs text-on-surface-variant"> perjalanan</span>
-        </div>
-        <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-xs">
-          <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Ritase Bulan Ini</span>
-          <span className="text-2xl font-bold text-primary">{ritaseBulanIni}</span>
-          <span className="text-xs text-on-surface-variant"> perjalanan</span>
+          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Dalam Perawatan</span>
+          <span className="text-2xl font-bold text-amber-700">{jumlahPerawatan}</span>
+          <span className="text-xs text-on-surface-variant"> unit perbaikan teknis</span>
         </div>
       </div>
 
@@ -341,7 +254,7 @@ export default function ArmadaManager() {
         </button>
       </div>
 
-      {/* Tabel */}
+      {/* Tabel Armada (8 Kolom Tanpa Ritase) */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
         <div className="overflow-x-auto max-h-[640px] overflow-y-auto">
           <table className="w-full text-left text-xs">
@@ -354,16 +267,15 @@ export default function ArmadaManager() {
                 <th className="py-3.5 px-4">Wilayah Kerja</th>
                 <th className="py-3.5 px-4">Petugas</th>
                 <th className="py-3.5 px-4 text-center">Status</th>
-                <th className="py-3.5 px-4 text-center">Ritase (hari ini / bulan ini)</th>
                 <th className="py-3.5 px-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/20 font-medium text-on-surface">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-on-surface-variant">
+                  <td colSpan={8} className="py-8 text-center text-on-surface-variant">
                     {armada.length === 0
-                      ? 'Belum ada armada. Jalankan seed armada atau klik Tambah Armada.'
+                      ? 'Belum ada armada. Klik Tambah Armada.'
                       : 'Tidak ada armada dengan filter tersebut.'}
                   </td>
                 </tr>
@@ -391,20 +303,8 @@ export default function ArmadaManager() {
                         {a.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <span className="font-bold text-primary">{a.ritase_hari_ini ?? 0}</span>
-                      <span className="text-on-surface-variant"> / </span>
-                      <span className="font-bold">{a.ritase_bulan_ini ?? 0}</span>
-                    </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => openRitase(a)}
-                          className="w-8 h-8 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center hover:opacity-80 transition-opacity"
-                          title="Catat ritase"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">sync_alt</span>
-                        </button>
                         <button
                           onClick={() => openEdit(a)}
                           className="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center hover:bg-primary/90 transition-all"
@@ -429,21 +329,16 @@ export default function ArmadaManager() {
         </div>
       </div>
 
-      {/* Modal Tambah/Edit */}
-      {formMode && (
+      {/* Modal Tambah / Edit */}
+      {modalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="w-full max-w-xl bg-surface-container-lowest rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 border border-outline-variant/30 max-h-[92vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-surface-container-lowest rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 border border-outline-variant/30 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-on-surface">
-                  {formMode === 'create' ? 'Tambah Armada Baru' : 'Edit Data Armada'}
-                </h3>
-                <p className="text-[11px] text-on-surface-variant">
-                  Kolom yang dikosongkan disimpan sebagai &quot;-&quot; (menunggu data dari DLH)
-                </p>
-              </div>
+              <h3 className="text-base font-bold text-on-surface">
+                {editingId ? 'Edit Data Armada' : 'Tambah Armada Baru'}
+              </h3>
               <button
-                onClick={() => setFormMode(null)}
+                onClick={() => setModalOpen(false)}
                 className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
                 aria-label="Tutup"
               >
@@ -458,145 +353,158 @@ export default function ArmadaManager() {
               </p>
             )}
 
-            <div>
-              <label className={labelClass}>Nama Unit *</label>
-              <input
-                type="text"
-                value={form.nama_armada}
-                maxLength={ARMADA_LIMITS.nama.max}
-                placeholder="Contoh: Dump Truck 07"
-                onChange={(e) => setForm({ ...form, nama_armada: e.target.value })}
-                className={inputClass}
-              />
-              <FieldError message={fieldErrors.nama_armada} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSave} className="space-y-3.5">
               <div>
-                <label className={labelClass}>Jenis Armada *</label>
+                <label className={labelClass}>Nama / Unit Armada *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Dump Truck 01 (DLH-01)"
+                  maxLength={ARMADA_LIMITS.nama.max}
+                  value={form.nama_armada}
+                  onChange={(e) => setForm({ ...form, nama_armada: e.target.value })}
+                  className={inputClass}
+                />
+                <FieldError message={fieldErrors.nama_armada} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Jenis Armada</label>
+                  <input
+                    type="text"
+                    list="jenis-armada-list"
+                    placeholder="Pilih atau ketik jenis"
+                    maxLength={ARMADA_LIMITS.jenis.max}
+                    value={form.jenis_armada}
+                    onChange={(e) => setForm({ ...form, jenis_armada: e.target.value })}
+                    className={inputClass}
+                  />
+                  <datalist id="jenis-armada-list">
+                    {JENIS_ARMADA.map((j) => (
+                      <option key={j} value={j} />
+                    ))}
+                  </datalist>
+                  <FieldError message={fieldErrors.jenis_armada} />
+                </div>
+                <div>
+                  <label className={labelClass}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    className={inputClass}
+                  >
+                    {STATUS_ARMADA.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError message={fieldErrors.status} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Plat Nomor KT</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: KT 8123 B"
+                    maxLength={ARMADA_LIMITS.plat.max}
+                    value={form.plat_nomor}
+                    onChange={(e) => setForm({ ...form, plat_nomor: e.target.value.toUpperCase() })}
+                    className={inputClass}
+                  />
+                  <FieldError message={fieldErrors.plat_nomor} />
+                </div>
+                <div>
+                  <label className={labelClass}>Tahun Pembuatan</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 2018"
+                    maxLength={4}
+                    value={form.tahun}
+                    onChange={(e) => setForm({ ...form, tahun: e.target.value })}
+                    className={inputClass}
+                  />
+                  <FieldError message={fieldErrors.tahun} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Bagian Pekerjaan</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Pengangkutan Sampah Pasar / Jalur Protokol"
+                  maxLength={ARMADA_LIMITS.bagianPekerjaan.max}
+                  value={form.bagian_pekerjaan}
+                  onChange={(e) => setForm({ ...form, bagian_pekerjaan: e.target.value })}
+                  className={inputClass}
+                />
+                <FieldError message={fieldErrors.bagian_pekerjaan} />
+              </div>
+
+              <div>
+                <label className={labelClass}>Wilayah Kecamatan Tugas</label>
                 <select
-                  value={form.jenis_armada}
-                  onChange={(e) => setForm({ ...form, jenis_armada: e.target.value })}
+                  value={form.kecamatan_tugas}
+                  onChange={(e) => setForm({ ...form, kecamatan_tugas: e.target.value })}
                   className={inputClass}
                 >
-                  {JENIS_ARMADA.map((j) => (
-                    <option key={j} value={j}>{j}</option>
+                  <option value="">Belum ditentukan</option>
+                  {DUMMY_KECAMATAN_TUGAS.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
                   ))}
                 </select>
-                <FieldError message={fieldErrors.jenis_armada} />
+                <FieldError message={fieldErrors.kecamatan_tugas} />
               </div>
-              <div>
-                <label className={labelClass}>Status</label>
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className={inputClass}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Nama Petugas / Sopir</label>
+                  <input
+                    type="text"
+                    placeholder="Nama lengkap petugas"
+                    maxLength={ARMADA_LIMITS.petugas.max}
+                    value={form.nama_petugas}
+                    onChange={(e) => setForm({ ...form, nama_petugas: e.target.value })}
+                    className={inputClass}
+                  />
+                  <FieldError message={fieldErrors.nama_petugas} />
+                </div>
+                <div>
+                  <label className={labelClass}>No. Telepon</label>
+                  <input
+                    type="tel"
+                    placeholder="Contoh: 08123456789"
+                    maxLength={ARMADA_LIMITS.telepon.max}
+                    value={form.telepon}
+                    onChange={(e) => setForm({ ...form, telepon: e.target.value })}
+                    className={inputClass}
+                  />
+                  <FieldError message={fieldErrors.telepon} />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="flex-1 py-2.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high"
                 >
-                  {STATUS_ARMADA.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                <FieldError message={fieldErrors.status} />
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 shadow-md disabled:opacity-50"
+                >
+                  {isSaving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Tambah Armada'}
+                </button>
               </div>
-            </div>
-
-            <div>
-              <label className={labelClass}>Bagian Pekerjaan</label>
-              <input
-                type="text"
-                value={form.bagian_pekerjaan}
-                maxLength={ARMADA_LIMITS.bagian.max}
-                placeholder="Contoh: Angkutan Sampah (Dump Truck)"
-                onChange={(e) => setForm({ ...form, bagian_pekerjaan: e.target.value })}
-                className={inputClass}
-              />
-              <FieldError message={fieldErrors.bagian_pekerjaan} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>Plat Nomor (KT)</label>
-                <input
-                  type="text"
-                  value={form.plat_nomor}
-                  maxLength={ARMADA_LIMITS.plat.max}
-                  placeholder="KT 1234 AB"
-                  onChange={(e) => setForm({ ...form, plat_nomor: e.target.value })}
-                  className={`${inputClass} font-mono uppercase`}
-                />
-                <FieldError message={fieldErrors.plat_nomor} />
-              </div>
-              <div>
-                <label className={labelClass}>Tahun</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={form.tahun}
-                  maxLength={4}
-                  placeholder="2020"
-                  onChange={(e) => setForm({ ...form, tahun: e.target.value.replace(/\D/g, '') })}
-                  className={inputClass}
-                />
-                <FieldError message={fieldErrors.tahun} />
-              </div>
-            </div>
-
-            <div>
-              <label className={labelClass}>Wilayah Kerja</label>
-              <select
-                value={form.kecamatan_tugas}
-                onChange={(e) => setForm({ ...form, kecamatan_tugas: e.target.value })}
-                className={inputClass}
-              >
-                <option value="">Belum diisi (-)</option>
-                {KECAMATAN_SAMARINDA.map((k) => (
-                  <option key={k} value={k}>{k}</option>
-                ))}
-              </select>
-              <FieldError message={fieldErrors.kecamatan_tugas} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>Nama Petugas</label>
-                <input
-                  type="text"
-                  value={form.nama_petugas}
-                  maxLength={ARMADA_LIMITS.petugas.max}
-                  onChange={(e) => setForm({ ...form, nama_petugas: e.target.value })}
-                  className={inputClass}
-                />
-                <FieldError message={fieldErrors.nama_petugas} />
-              </div>
-              <div>
-                <label className={labelClass}>Telepon</label>
-                <input
-                  type="tel"
-                  value={form.telepon}
-                  maxLength={ARMADA_LIMITS.telepon.max}
-                  placeholder="0812-0000-0000"
-                  onChange={(e) => setForm({ ...form, telepon: e.target.value })}
-                  className={inputClass}
-                />
-                <FieldError message={fieldErrors.telepon} />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                onClick={() => setFormMode(null)}
-                className="flex-1 py-2.5 bg-surface-container text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container-high"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="flex-1 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 shadow-md disabled:opacity-50"
-              >
-                {isSaving ? 'Menyimpan...' : formMode === 'create' ? 'Tambah Armada' : 'Simpan Perubahan'}
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}
@@ -611,8 +519,7 @@ export default function ArmadaManager() {
             <div>
               <h3 className="text-base font-bold text-on-surface">Hapus Armada Ini?</h3>
               <p className="text-xs text-on-surface-variant mt-1">
-                <span className="font-bold">{deleteTarget.nama_armada}</span> beserta seluruh catatan
-                ritasenya akan dihapus permanen.
+                <span className="font-bold">{deleteTarget.nama_armada}</span> akan dihapus permanen dari daftar armada dinas.
               </p>
             </div>
             <div className="flex items-center gap-2 pt-2">
@@ -633,123 +540,18 @@ export default function ArmadaManager() {
           </div>
         </div>
       )}
-
-      {/* Modal Ritase */}
-      {ritaseTarget && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 border border-outline-variant/30 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="text-base font-bold text-on-surface">Catat Ritase</h3>
-                <p className="text-[11px] text-on-surface-variant">
-                  {ritaseTarget.nama_armada} &middot; ritase = jumlah perjalanan pulang-pergi
-                </p>
-              </div>
-              <button
-                onClick={() => setRitaseTarget(null)}
-                className="w-8 h-8 shrink-0 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
-                aria-label="Tutup"
-              >
-                <span className="material-symbols-outlined text-sm">close</span>
-              </button>
-            </div>
-
-            {ritaseError && (
-              <p className="text-xs text-error font-semibold bg-error-container/30 p-2.5 rounded-xl flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px]">error</span>
-                {ritaseError}
-              </p>
-            )}
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>Tanggal</label>
-                <input
-                  type="date"
-                  value={ritaseTanggal}
-                  max={hariIniWitaClient()}
-                  onChange={(e) => setRitaseTanggal(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Jumlah Ritase</label>
-                <input
-                  type="number"
-                  min={ARMADA_LIMITS.ritase.min}
-                  max={ARMADA_LIMITS.ritase.max}
-                  step={1}
-                  value={ritaseTrip}
-                  placeholder="0 - 50"
-                  onChange={(e) => setRitaseTrip(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Catatan (opsional)</label>
-              <input
-                type="text"
-                value={ritaseCatatan}
-                maxLength={ARMADA_LIMITS.ritaseCatatan.max}
-                onChange={(e) => setRitaseCatatan(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <p className="text-[10px] text-on-surface-variant">
-              Satu armada satu angka per hari. Mengisi tanggal yang sama lagi akan menimpa angka sebelumnya.
-            </p>
-            <button
-              onClick={handleSaveRitase}
-              disabled={ritaseSaving}
-              className="w-full py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 shadow-md disabled:opacity-50"
-            >
-              {ritaseSaving ? 'Menyimpan...' : 'Simpan Ritase'}
-            </button>
-
-            <div className="pt-2 border-t border-outline-variant/30 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-on-surface">Riwayat bulan</span>
-                <input
-                  type="month"
-                  value={ritaseBulan}
-                  max={hariIniWitaClient().slice(0, 7)}
-                  onChange={(e) => e.target.value && setRitaseBulan(e.target.value)}
-                  className="px-2.5 py-1.5 bg-surface-container-low border border-outline-variant/40 rounded-lg text-xs text-on-surface"
-                />
-              </div>
-              <p className="text-[11px] text-on-surface-variant">
-                Total bulan ini: <span className="font-bold text-primary">{ritaseTotal}</span> perjalanan
-              </p>
-              {ritaseLoading ? (
-                <p className="text-xs text-on-surface-variant py-2">Memuat...</p>
-              ) : ritaseItems.length === 0 ? (
-                <p className="text-xs text-on-surface-variant py-2">Belum ada catatan ritase di bulan ini.</p>
-              ) : (
-                <ul className="divide-y divide-outline-variant/20 text-xs max-h-48 overflow-y-auto">
-                  {ritaseItems.map((r) => (
-                    <li key={r.id} className="py-1.5 flex items-center justify-between gap-2">
-                      <button
-                        className="text-left hover:text-primary"
-                        onClick={() => {
-                          setRitaseTanggal(r.tanggal);
-                          setRitaseTrip(String(r.jumlah_trip));
-                          setRitaseCatatan(r.catatan ?? '');
-                        }}
-                        title="Klik untuk koreksi"
-                      >
-                        <span className="font-semibold">{r.tanggal}</span>
-                        {r.catatan && <span className="text-on-surface-variant"> &middot; {r.catatan}</span>}
-                      </button>
-                      <span className="font-bold text-primary shrink-0">{r.jumlah_trip}x</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
+}
+
+function Nilai({ v }: { v: string | undefined }) {
+  if (!v || v === KOSONG) {
+    return <span className="text-on-surface-variant/40 italic">-</span>;
+  }
+  return <span>{v}</span>;
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="text-[11px] text-error mt-1">{message}</p>;
 }

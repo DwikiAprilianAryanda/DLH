@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import { ReportProvider } from '@/context/ReportContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'TROPIS Transformasi Rantai Persampahan',
@@ -17,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -35,12 +36,14 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-on-surface antialiased min-h-screen selection:bg-primary-container selection:text-on-primary-container">
-        <AuthProvider>
-          <ReportProvider>
-            {children}
-            <BottomNav />
-          </ReportProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ReportProvider>
+              {children}
+              <BottomNav />
+            </ReportProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
